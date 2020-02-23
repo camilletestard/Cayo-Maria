@@ -1,0 +1,10 @@
+Name changes to fit trapping meta data: 
+
+I17628 -> I1762S
+I19819 -> I198I9
+I198U3 -> I198L3
+9B5 -> 9Q5
+8O5 -> 8O9
+5T5 -> 5I5
+6E4 -> 6L4
+2E4 -> 2C4
