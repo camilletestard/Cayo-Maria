@@ -1,0 +1,81 @@
+ANALYSIS AND INTERPRETATION ISSUES
+
+1. Modelling p(Acc) and p(Social):
+- Removed IDs with too few observations (20)
+
+- When looking at individual probabilities box plots, group V shows an increase in 
+p(Acc) post-hurricane (albeit smaller than KK). However when running V only models,
+isPost parameter is negative, indicating a decrease in p(Acc) post-hurricane.
+	- One potential explanation is that the p(Acc) in the boxplots are agnostic
+	to the number of observations per individual. 
+- If remove focalID as a random effect, than the isPost parameter becomes positive! 
+- In group V if I compute the probability over the entire population pre and post, there is an increase.
+	If I compute prob for each individual, there are only 5 individuals with a decrease in prob.
+	YET i still get a negative isPost parameter.
+	If I remove all individuals that show a decrease in proxiimity rates, I STILL GET A NEGATIVE
+	PARAMETER VALUE!!!  
+SOLVED: age changes with hurricane, potentially cuking up the variability. If remove age, model is showing 
+coherent values. I will set age and rank at the time of hurricane!! 
+
+- In Male only model parameter values, there is a strange bi-modal distribution 
+overlapping with zero. 
+	- When looking at the frequency of proximity occurrence, 
+	it is more than a 2.5-fold increase pre-to-post whether isPost parameter is 1.0 or <0.2
+	- However all other parameters suck up all the explanatory power. I.e., when isPost 
+	has a large value, all other parameters have a small value and vice-versa.
+	- If I remove ID as a random factor, there is no longer that bump around 0.Same if i remove 
+	age factor (after reinstating ID RF).However if I remove group, the bump around 0 remains.
+
+
+2. Computing Network Density and Equity:
+- Gini decreases with density in random networks (i.e. equity increases with network density).
+ How do I account for that?
+Possible solution: dividing observed network Gini coeff by a "null" value, which is the
+mean Gini for a random network of similar density.
+Note: in this case I am not comparing network equity pre- to post- directly, but rather comparing
+how different they are from a baseline.
+SOLVED: We decided to exclude network equity from the analysis as network equity is largely determined
+by network density
+
+
+3. Computing partner preference: 
+- Occurrence of FF, MM and cross pairs will increase with density. 
+How do I account for that?
+- Same issue with CK, DK, and U kinship relationship.
+--> How do I answer the question: the balance of FF interaction to other types of 
+interactions has changed post-hurricane?
+Possible solution: Compare observed weighted ratio to expected weighted ratio given the network
+Sex pairs: 
+	Weighted Observed ratio = [Count X pair]*sum(weights of Xpairs)
+	Weighted Expected ratio = [All possible X pair]/[All possible pairs] * sum(weights)
+Kinship pairs: 
+	Weighted Observed ratio = [Count X pair]*sum(weights of Xpairs)
+	Weighted Expected ratio = [# X pairs in the V&KK females]/[All possible Fpairs in V&KK] * sum(weights)
+Note: again, I am not comparing partner preference pre- to post- directly.
+SUGGESTION: What about using chi-square test of contigency table (Observed-Expected)^2/Expected.
+
+
+4. Computing social capital: GroomIN, GroomOut, AggIN, AggOUT, sdb.ra, vig.ra
+- When computing change in prox and groom rates, some individuals have way more observations 
+than others (although it is the same pre-/post-hurricane). Should I account for that somehow?
+- Which aggression metric should be considered?
+- Weight for aggression network. How do you consider interaction partners of the focal?
+  adlib observations?
+	There are only 70/~1200 observations that are adlib. 
+	Thus, for now, I will add them all together and divide by the # hours followed
+- There are some individuals in meta-data file (i.e. focal follow list) that do not have 
+grooming or aggression data. Is that possible?
+
+
+5. Modelling social capital impact on change in sociality rates: 
+- GroupV has a negative parameter although there is a larger increase in groupV for dpSoc 
+when plotting it!
+SOLVED: This seems to be due to the effect across years. When including year as a factor rather than int.
+- groupV 2017 has no individual with more than 20 observations! 
+- In 2017, vigilance rates and group cannot be disantangled because of high multicolinearity. So i remove group. 
+
+FURTHER ANALYSES: 
+How can I get more granular is establishing how social relationships changed post-hurricane?
+- Are individuals spending more time with established partners or creating new social bonds?
+- How has the balance of Sex partnerships and kin partnerships changed pre-to-post hurricane?
+- Aggression data?
