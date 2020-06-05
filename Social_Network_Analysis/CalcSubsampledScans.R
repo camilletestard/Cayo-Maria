@@ -15,7 +15,7 @@ calcRandomScans <- function(allScans) {
   years = sort(unique(PreScans$year), decreasing=F) #unique years in increasing order
   SubPostScans = data.frame(); SubPreScans = data.frame() #initialize dataframes
   #count = 0
-  for (y in 1:length(years)){ #for all years
+  for (y in 1:length(years)){ #for all pre scan years
     
     pre_scans = PreScans[which(PreScans$year == years[y]),] #Select pre-scans of that year
     pre_scans$subsampling_cat = paste(pre_scans$focalID,pre_scans$group,pre_scans$Q,pre_scans$timeBlock,sep=".") #create subsampling category ID/group/Q/timeBlock
@@ -41,7 +41,8 @@ calcRandomScans <- function(allScans) {
           post_scans$year = as.numeric(years[y])
         }
         
-        else { #sub-sample randomly from post-hurricane data
+        else { #if there are more observations post-hurricane in that category, in that year
+          #sub-sample randomly from post-hurricane data to match pre-hurricane data
           num_subsamples = numSamples_pre[cat,2];#round(runif(1,numSamples_pre[cat,2]-1,numSamples_pre[cat,2]+1))
           idxPost_subSample = sample(idxPost,num_subsamples, replace=F) #randomly select a sub-sample of occurences post-hurricane
           post_scans = PostScans[idxPost_subSample,] #sub-sample post-hurricane data of that category
