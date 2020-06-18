@@ -22,12 +22,10 @@ library(jtools)
 library(data.table)
 
 #load & format data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/PartnerAttributes2.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes.RData")
 PartnerAttr$groupyear = paste(PartnerAttr$group, PartnerAttr$year, sep="")
-
 PartnerAttr$isPost = as.factor(PartnerAttr$isPost)
-for (col in seq(6,19)) {
-PartnerAttr[,col] = as.numeric(PartnerAttr[,col])}
+for (col in seq(6,19)) {PartnerAttr[,col] = as.numeric(PartnerAttr[,col])}
 
 #Separate data by grooming and proximity
 data.groom = PartnerAttr[which(PartnerAttr$action=="groom"),]
@@ -36,7 +34,7 @@ data.prox = PartnerAttr[which(PartnerAttr$action=="prox"),]
 ##############################################
 #SOCIAL RANK : plot % HH/LH/HL/LL interactions
 ##############################################
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/WhoAreNewPartners") #set saving directory
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/WhoAreNewPartners") #set saving directory
 ## GROOM ##
 
 #Groom Low to High
@@ -50,7 +48,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(LowToHigh), fill=as.fa
 dev.off()
 
 data.groom$LowToHigh[data.groom$LowToHigh==0] = 0.00001 #Avoid error when running beta family model
-l2h.groom <- glmmTMB(as.numeric(LowToHigh) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+l2h.groom <- glmmTMB(as.numeric(LowToHigh) ~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(l2h.groom, digits = 3)
 # performance::check_model(l2h.groom)
 
@@ -63,31 +61,35 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(HighToLow), fill=as.fa
   facet_grid(~groupyear)
 
 data.groom$HighToLow[data.groom$HighToLow==0] = 0.00001 #Avoid error when running beta family model
-h2l.groom <- glmmTMB(as.numeric(HighToLow) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+h2l.groom <- glmmTMB(as.numeric(HighToLow) ~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(h2l.groom, digits = 3)
 # performance::check_model(h2l.groom)
 
 #Groom Low to Low
+tiff("L2L.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(LowToLow), fill=as.factor(isPost) ))+
   geom_boxplot()+
   geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
   ggtitle("Groom LowR to LowR ")+
   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of L2L interactions")+
   facet_grid(~groupyear)
+dev.off()
 
-l2l.groom <- glmmTMB(as.numeric(LowToLow) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+l2l.groom <- glmmTMB(as.numeric(LowToLow) ~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(l2l.groom, digits = 3)
 # performance::check_model(l2l.groom)
 
 #Groom High to high
+tiff("H2H.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(HighToHigh), fill=as.factor(isPost) ))+
   geom_boxplot()+
   geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
   ggtitle("Groom HighR to HighR ")+
   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of H2H interactions")+
   facet_grid(~groupyear)
+dev.off()
 
-h2h.groom <- glmmTMB(as.numeric(HighToHigh) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+h2h.groom <- glmmTMB(as.numeric(HighToHigh) ~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(h2h.groom, digits = 3)
 # performance::check_model(h2h.groom)
 
@@ -101,7 +103,7 @@ summary(h2h.groom, digits = 3)
 #   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of L2H interactions")+
 #   facet_grid(~groupyear)
 # 
-# l2h.prox <- glmmTMB(as.numeric(LowToHigh) ~ isPost + (1|groupyear), data=data.prox, family = beta_family(link="logit"))
+# l2h.prox <- glmmTMB(as.numeric(LowToHigh)~ isPost*group +(1|year), data=data.prox, family = beta_family(link="logit"))
 # summary(l2h.prox, digits = 3)
 # performance::check_model(l2h.prox)
 
@@ -120,27 +122,33 @@ summary(h2h.groom, digits = 3)
 ## GROOM #
 
 #Groom Kin
+tiff("Kin.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(Kin), fill=as.factor(isPost) ))+
   geom_boxplot()+
   geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
   ggtitle("Groom Kin")+
   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Kin interactions")+
   facet_grid(~groupyear)
+dev.off()
 
 data.groom$Kin[data.groom$Kin==0] = 0.00001 #Avoid error when running beta family model
-kin.groom <- glmmTMB(as.numeric(Kin) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+kin.groom <- glmmTMB(as.numeric(Kin) ~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(kin.groom, digits = 3)
 # performance::check_model(kin.groom)
 
 #Groom unrelated
+tiff("Unrel.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(Unrel), fill=as.factor(isPost) ))+
   geom_boxplot()+
   geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
   ggtitle("Groom Unrelated")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Kin interactions")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Unrelated interactions")+
   facet_grid(~groupyear)
+dev.off()
 
-unrel.groom <- glmmTMB(as.numeric(Unrel) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+data.groom$Unrel[data.groom$Unrel==0] = 0.00001 #Avoid error when running beta family model
+data.groom$Unrel[data.groom$Unrel==1] = 0.99999 #Avoid error when running beta family model
+unrel.groom <- glmmTMB(as.numeric(Unrel) ~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(unrel.groom, digits = 3)
 # performance::check_model(unrel.groom)
 
@@ -153,7 +161,7 @@ summary(unrel.groom, digits = 3)
 #   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Kin interactions")+
 #   facet_grid(~groupyear)
 # 
-# kin.prox <- glmmTMB(as.numeric(Kin) ~ isPost + (1|groupyear), data=data.prox, family = beta_family(link="logit"))
+# kin.prox <- glmmTMB(as.numeric(Kin)~ isPost*group +(1|year), data=data.prox, family = beta_family(link="logit"))
 # summary(kin.prox, digits = 3)
 # performance::check_model(kin.groom)
 
@@ -174,7 +182,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(SocialHomophily.shy), 
 dev.off()
 
 data.groom$SocialHomophily.shy[data.groom$SocialHomophily.shy==0] = 0.00001 #Avoid error when running beta family model
-socialHomShy.groom <- glmmTMB(as.numeric(SocialHomophily.shy) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+socialHomShy.groom <- glmmTMB(as.numeric(SocialHomophily.shy)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(socialHomShy.groom, digits = 3)
 # performance::check_model(socialHomShy.groom)
 
@@ -187,7 +195,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(SocialHomophily.greg),
   facet_grid(~groupyear)
 
 data.groom$SocialHomophily.greg[data.groom$SocialHomophily.greg==0] = 0.00001 #Avoid error when running beta family model
-socialHomGreg.groom <- glmmTMB(as.numeric(SocialHomophily.greg) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+socialHomGreg.groom <- glmmTMB(as.numeric(SocialHomophily.greg)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(socialHomGreg.groom, digits = 3)
 # performance::check_model(socialHomGreg.groom)
 
@@ -199,7 +207,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(SocialOpposite.shygreg
   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Opposite interactions")+
   facet_grid(~groupyear)
 
-socialOppShy2Greg.groom <- glmmTMB(as.numeric(SocialOpposite.shygreg) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+socialOppShy2Greg.groom <- glmmTMB(as.numeric(SocialOpposite.shygreg)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(socialOppShy2Greg.groom, digits = 3)
 # performance::check_model(socialOppShy2Greg.groom)
 
@@ -213,7 +221,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(SocialOpposite.gregshy
   facet_grid(~groupyear)
 dev.off()
 
-socialOppGreg2Shy.groom <- glmmTMB(as.numeric(SocialOpposite.gregshy) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+socialOppGreg2Shy.groom <- glmmTMB(as.numeric(SocialOpposite.gregshy)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(socialOppGreg2Shy.groom, digits = 3)
 # performance::check_model(socialOppGreg2Shy.groom)
 
@@ -226,7 +234,7 @@ summary(socialOppGreg2Shy.groom, digits = 3)
 #   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Homophilic interactions")+
 #   facet_grid(~groupyear)
 # 
-# socialHom.prox <- glmmTMB(as.numeric(SocialHomophily) ~ isPost + (1|groupyear), data=data.prox, family = beta_family(link="logit"))
+# socialHom.prox <- glmmTMB(as.numeric(SocialHomophily)~ isPost*group +(1|year), data=data.prox, family = beta_family(link="logit"))
 # summary(socialHom.prox, digits = 3)
 # performance::check_model(socialHom.prox)
 
@@ -245,7 +253,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(MM), fill=as.factor(is
   facet_grid(~groupyear)
 
 data.groom$MM[data.groom$MM==0] = 0.00001 #Avoid error when running beta family model
-MM.groom <- glmmTMB(as.numeric(MM) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+MM.groom <- glmmTMB(as.numeric(MM)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(MM.groom, digits = 3)
 # performance::check_model(MM.groom)
 
@@ -257,7 +265,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(MF), fill=as.factor(is
   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of M->F interactions")+
   facet_grid(~groupyear)
 
-MF.groom <- glmmTMB(as.numeric(MF) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+MF.groom <- glmmTMB(as.numeric(MF)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(MF.groom, digits = 3)
 # performance::check_model(MF.groom)
 
@@ -271,7 +279,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(FM), fill=as.factor(is
   facet_grid(~groupyear)
 dev.off()
 
-FM.groom <- glmmTMB(as.numeric(FM) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+FM.groom <- glmmTMB(as.numeric(FM)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(FM.groom, digits = 3)
 # performance::check_model(FM.groom)
 
@@ -283,7 +291,7 @@ ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(FF), fill=as.factor(is
   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of F->F interactions")+
   facet_grid(~groupyear)
 
-FF.groom <- glmmTMB(as.numeric(FF) ~ isPost + (1|groupyear), data=data.groom, family = beta_family(link="logit"))
+FF.groom <- glmmTMB(as.numeric(FF)~ isPost*group +(1|year), data=data.groom, family = beta_family(link="logit"))
 summary(FF.groom, digits = 3)
 # performance::check_model(FF.groom)
 
@@ -297,17 +305,17 @@ summary(FF.groom, digits = 3)
 #   labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of F->M interactions")+
 #   facet_grid(~groupyear)
 # 
-# FM.prox <- glmmTMB(as.numeric(FM) ~ isPost + (1|groupyear), data=data.prox, family = beta_family(link="logit"))
+# FM.prox <- glmmTMB(as.numeric(FM)~ isPost*group +(1|year), data=data.prox, family = beta_family(link="logit"))
 # summary(FM.groom, digits = 3)
 # performance::check_model
 
 #############################################
 #Save and export models
 
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/WhoAreNewPartners")
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/WhoAreNewPartners")
 export_summs(l2h.groom, h2l.groom, h2h.groom, l2l.groom, model.names = c("LR.HR", "HR.LR", "HR.HR", "LR.LR"),
              to.file = "docx", file.name = "Modeling.Rank.NewPartners.docx")
-export_summs(kin.groom, model.names = "Kin",to.file = "docx", file.name = "Modeling.Kin.NewPartners.docx")
+export_summs(kin.groom, unrel.groom, model.names = c("Kin","Unrel"),to.file = "docx", file.name = "Modeling.Kin.NewPartners.docx")
 export_summs(socialHomShy.groom, socialHomGreg.groom, socialOppGreg2Shy.groom, socialOppShy2Greg.groom, 
              model.names=c("shy.shy","greg.greg", "greg.shy", "shy.greg"),
              to.file = "docx", file.name = "Modeling.Social.NewPartners.docx")

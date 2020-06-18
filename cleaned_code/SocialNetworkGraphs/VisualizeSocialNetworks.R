@@ -12,14 +12,15 @@ library(stringr)
 library(ggplot2)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
-source("Social_Network_Analysis/CalcSubsampledScans.R")
-source("Social_Network_Analysis/functions_GlobalNetworkMetrics.R")
+setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
+source("Functions/CalcSubsampledScans.R")
+source("Functions/functions_GlobalNetworkMetrics.R")
 
 #Load scan data, population and dominance info
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans2019.txt")
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
+allScans = read.csv("Data All Cleaned/allScans2019.txt")
 # bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
-dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
+dominance_info =read.table("Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 
 #Set parameters
 actions = c("prox","groom") 

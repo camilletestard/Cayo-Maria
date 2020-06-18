@@ -9,7 +9,8 @@ library(matlab)
 
 #Load AllScans file
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
-source("Social_Network_Analysis/CalcSubsampledScans.R")
+source("R.Data/CalcSubsampledScans.R")
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
 allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans2019.txt")
 
 ExSubScans = calcRandomScans(allScans)

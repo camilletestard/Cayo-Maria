@@ -29,9 +29,9 @@ library(ggplot2)
 library(lubridate)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
-load("commonIDs.Rdata")
-source("Social_Network_Analysis/functions_GlobalNetworkMetrics.R")
+setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria")
+load("R.Data/commonIDs.Rdata")
+source("cleaned_code/Functions/functions_GlobalNetworkMetrics.R")
 
 #Set parameters
 network_action = "groom" #"prox" or "groom" or "
@@ -43,11 +43,11 @@ group = c("V","V","V","V","KK","KK","KK","S") #c("V","V","V","V","V","KK","KK","
 years = c(2016,2017,2018, 2019, 2015, 2017, 2018, 2019)#c(2015,2016,2017,2018, 2019, 2015, 2017, 2018, 2019)
 groupyears =c("V2016","V2017","V2018","V2019","KK2015","KK2017","KK2018","S2019") #c("V2015","V2016","V2017","V2018","V2019","KK2015","KK2017","KK2018", "S2019") 
 
-gy=1
+gy=7
 for (gy in 1:length(groupyears)){ #For each group
   
   #Load data
-  setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Behavioral_Data/Data All Cleaned") 
+  setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
   meta_data=read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt",sep=""))
   data = read.csv(paste("Group",groupyears[gy],"_AgonsiticActions.txt",sep=""))
   if (years[gy]==2018){meta_data$hrs.focalfollowed=meta_data$numObs} #if 2018, convert column #obs in #hrs to simplify coding after

@@ -25,16 +25,18 @@ library(stringr)
 library(ggplot2)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
-source("Social_Network_Analysis/CalcSubsampledScans.R")
-source("Social_Network_Analysis/functions_SocialSupport.R")
-source("Social_Network_Analysis/KinshipPedigree.R")
+setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code/functions") 
+source("CalcSubsampledScans.R")
+source("functions_SocialSupport.R")
+source("KinshipPedigree.R")
 
 #Load scan data, population and dominance info
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
+allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans2019.txt")
 dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
-load("Social_Network_Analysis/SocialCapital.RData")
+setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
+load("R.Data/SocialCapital.RData")
 
 #Compute pedigree for all IDs in this group
 allIDs= allScans$focalID[which(allScans$group == "KK"|allScans$group == "V")];
@@ -47,10 +49,12 @@ ped <- KinshipPedigree(pedigree)
 
 action = c("groom", "prox")
 num_iter = 500
-PartnerAttr = data.frame(matrix(ncol = 19, nrow = 0)); 
+PartnerAttr = data.frame(matrix(ncol = 31, nrow = 0)); 
 colnames(PartnerAttr)= c("action","iter","group","year","isPost","LowToHigh",
-                       "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF", 
-                       "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy")
+                         "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF","OO","OY","YO","YY",
+                         "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy",
+                         "SocialHomophily.lowP","SocialHomophily.highP","socialOpposite.lowPhighP","socialOpposite.highPlowP",
+                         "SocialHomophily.ecL","SocialHomophily.ecH","socialOpposite.ecLecH","socialOpposite.ecHecL")
 
 start_time <- Sys.time(); iter=1; a=1
 for (a in 1:length(action)){
@@ -60,6 +64,10 @@ for (a in 1:length(action)){
     
     # 1. Calculate random subsamples
     randomScans = calcRandomScans(allScans)
+    
+    #Create age category for later
+    age.thresh = as.numeric(quantile(randomScans$age,0.7))
+    randomScans$age.cat="Y"; randomScans$age.cat[randomScans$age >= age.thresh]="O"
     
     #For each group, each year separately: 
     group = c("V","KK")
@@ -121,7 +129,13 @@ for (a in 1:length(action)){
           # el$pairClass  <- "opp"; el$pairClass[which(el$sexGivingID == "F" & el$sexreceivingID == "F")] <- "bothFem"; el$pairClass[which(el$sexGivingID == "M" & el$sexreceivingID == "M")] <- "bothMal"
           el$SexPairClass  <- paste(el$sexGivingID,el$sexReceivingID,sep=".")
           
-          # 7. Find dominance
+          # 7. Find age category of givingID & receivingID
+          el$ageGivingID   <- rscans$age.cat[match(as.character(el$alter), as.character(rscans$focalID))]
+          el$ageReceivingID <- rscans$age.cat[match(as.character(el$ego), rscans$focalID)]
+          # el$pairClass  <- "opp"; el$pairClass[which(el$sexGivingID == "F" & el$sexreceivingID == "F")] <- "bothFem"; el$pairClass[which(el$sexGivingID == "M" & el$sexreceivingID == "M")] <- "bothMal"
+          el$AgePairClass  <- paste(el$ageGivingID,el$ageReceivingID,sep=".")
+          
+          # 8. Find dominance
           # Set high rank vs low rank
           dominance_info$ORD_RANK2 = "L"
           dominance_info$ORD_RANK2[which(dominance_info$X.DOMINATED>=70)]="H"
@@ -131,41 +145,101 @@ for (a in 1:length(action)){
           # el$pairClass  <- "opp"; el$pairClass[which(el$Rankalter == "H" & el$RankreceivingID == "H")] <- "bothH"; el$pairClass[which(el$Rankalter == "L" & el$RankreceivingID == "L")] <- "bothL"
           el$RankPairClass  <- paste(el$RankGivingID,el$RankReceivingID,sep=".")
           
-          # 8. Find PRE-HURRICANE standard Groom Strength
-          threshold=as.numeric(quantile(SocialCapital.ALL$std.DSIgroom, probs = 0.75))
           SocialCapital = SocialCapital.ALL[which(SocialCapital.ALL$group==group[g] & SocialCapital.ALL$year==year),]
+          # 9. Find PRE-HURRICANE standard Groom Strength
+          threshold=as.numeric(quantile(SocialCapital.ALL$std.DSIgroom, probs = 0.70))
           groom.strength.GiveID = SocialCapital$std.DSIgroom[match(as.character(el$alter),as.character(SocialCapital$id))]
-          el$SocialGivingID <- ifelse(groom.strength.GiveID<threshold,"shy","greg")
+          el$GroomGivingID <- ifelse(groom.strength.GiveID<threshold,"shy","greg")
           groom.strength.GetID = SocialCapital$std.DSIgroom[match(as.character(el$ego),as.character(SocialCapital$id))]
-          el$SocialReceivingID <- ifelse(groom.strength.GetID<threshold,"shy","greg")
-          el$SocialPairClass  <- paste(el$SocialGivingID,el$SocialReceivingID,sep=".")
+          el$GroomReceivingID <- ifelse(groom.strength.GetID<threshold,"shy","greg")
+          el$GroomPairClass  <- paste(el$GroomGivingID,el$GroomReceivingID,sep=".")
+          
+          # 10. Find PRE-HURRICANE standard number of Partner
+          threshold=as.numeric(quantile(SocialCapital.ALL$std.numPartnersGroom, probs = 0.70))
+          numP.strength.GiveID = SocialCapital$std.numPartnersGroom[match(as.character(el$alter),as.character(SocialCapital$id))]
+          el$numPGivingID <- ifelse(numP.strength.GiveID<threshold,"shyP","gregP")
+          numP.strength.GetID = SocialCapital$std.numPartnersGroom[match(as.character(el$ego),as.character(SocialCapital$id))]
+          el$numPReceivingID <- ifelse(numP.strength.GetID<threshold,"shyP","gregP")
+          el$numPPairClass  <- paste(el$numPGivingID,el$numPReceivingID,sep=".")
+          
+          # # 11. Find PRE-HURRICANE cluster coeff
+          # threshold=as.numeric(quantile(SocialCapital.ALL$clusterCoeff.groom, probs = 0.70))
+          # clust.strength.GiveID = SocialCapital$clusterCoeff.groom[match(as.character(el$alter),as.character(SocialCapital$id))]
+          # el$clustGivingID <- ifelse(clust.strength.GiveID<threshold,"clL","clH")
+          # clust.strength.GetID = SocialCapital$clusterCoeff.groom[match(as.character(el$ego),as.character(SocialCapital$id))]
+          # el$clustReceivingID <- ifelse(clust.strength.GetID<threshold,"clL","clH")
+          # el$clustPairClass  <- paste(el$clustGivingID,el$clustReceivingID,sep=".")
+          
+          # 12. Find PRE-HURRICANE eigenvector centrality
+          threshold=as.numeric(quantile(SocialCapital.ALL$eig.cent.groom, probs = 0.70))
+          EigCent.strength.GiveID = SocialCapital$eig.cent.groom[match(as.character(el$alter),as.character(SocialCapital$id))]
+          el$EigCentGivingID <- ifelse(EigCent.strength.GiveID<threshold,"ecL","ecH")
+          EigCent.strength.GetID = SocialCapital$eig.cent.groom[match(as.character(el$ego),as.character(SocialCapital$id))]
+          el$EigCentReceivingID <- ifelse(EigCent.strength.GetID<threshold,"ecL","ecH")
+          el$EigCentPairClass  <- paste(el$EigCentGivingID,el$EigCentReceivingID,sep=".")
+          
+          # # 13. Find PRE-HURRICANE betweenness
+          # threshold=as.numeric(quantile(SocialCapital.ALL$between.groom, probs = 0.70))
+          # between.strength.GiveID = SocialCapital$between.groom[match(as.character(el$alter),as.character(SocialCapital$id))]
+          # el$betweenGivingID <- ifelse(between.strength.GiveID<threshold,"btwL","btwH")
+          # between.strength.GetID = SocialCapital$between.groom[match(as.character(el$ego),as.character(SocialCapital$id))]
+          # el$betweenReceivingID <- ifelse(between.strength.GetID<threshold,"btwL","btwH")
+          # el$betweenPairClass  <- paste(el$betweenGivingID,el$betweenReceivingID,sep=".")
+          
+          # cor.test(SocialCapital.ALL$clusterCoeff.groom,SocialCapital.ALL$clusterCoeff.prox)
+          # cor.test(SocialCapital.ALL$between.groom,SocialCapital.ALL$between.prox)
+          # cor.test(SocialCapital.ALL$eig.cent.groom,SocialCapital.ALL$between.prox)
           
           #Compute proportion of time spent between categories of interest. Weights are indivicative of time spent.
+          #Rank category
           LowToHigh = sum(el$weight[which(el$RankPairClass == "L.H")])/sum(el$weight)#length(which(el$RankPairClass == "L.H"))/nrow(el)
           HighToLow = sum(el$weight[which(el$RankPairClass == "H.L")])/sum(el$weight)#length(which(el$RankPairClass == "H.L"))/nrow(el)
           HighToHigh = sum(el$weight[which(el$RankPairClass == "H.H")])/sum(el$weight)#length(which(el$RankPairClass == "H.H"))/nrow(el)
           LowToLow = sum(el$weight[which(el$RankPairClass == "L.L")])/sum(el$weight)#length(which(el$RankPairClass == "L.L"))/nrow(el)
+          #Kin category
           Kin = sum(el$weight[which(el$KinPairClass == "rel")])/sum(el$weight) #length(which(el$KinPairClass == "rel"))/nrow(el)
           Unrel = sum(el$weight[which(el$KinPairClass == "unrelated")])/sum(el$weight)
+          #sex category
           MM = sum(el$weight[which(el$SexPairClass == "M.M")])/sum(el$weight)#length(which(el$SexPairClass == "M.M"))/nrow(el)
           MF = sum(el$weight[which(el$SexPairClass == "M.F")])/sum(el$weight)#length(which(el$SexPairClass == "M.F"))/nrow(el)
           FM = sum(el$weight[which(el$SexPairClass == "F.M")])/sum(el$weight)#length(which(el$SexPairClass == "F.M"))/nrow(el)
           FF = sum(el$weight[which(el$SexPairClass == "F.F")])/sum(el$weight)
-          SocialHomophily.shy = sum(el$weight[which(el$SocialPairClass == "shy.shy")])/sum(el$weight)
-          SocialHomophily.greg = sum(el$weight[which(el$SocialPairClass == "greg.greg")])/sum(el$weight)#(length(which(el$SocialPairClass == "shy.shy")) + length(which(el$SocialPairClass == "greg.greg")))/nrow(el)
-          socialOpposite.shygreg = sum(el$weight[which(el$SocialPairClass == "shy.greg")])/sum(el$weight)
-          socialOpposite.gregshy = sum(el$weight[which(el$SocialPairClass == "greg.shy")])/sum(el$weight)
+          #Age category
+          OO = sum(el$weight[which(el$AgePairClass == "O.O")])/sum(el$weight)
+          OY = sum(el$weight[which(el$AgePairClass == "O.Y")])/sum(el$weight)
+          YO = sum(el$weight[which(el$AgePairClass == "Y.O")])/sum(el$weight)
+          YY = sum(el$weight[which(el$AgePairClass == "Y.Y")])/sum(el$weight)
+          #Grooming category
+          SocialHomophily.shy = sum(el$weight[which(el$GroomPairClass == "shy.shy")])/sum(el$weight)
+          SocialHomophily.greg = sum(el$weight[which(el$GroomPairClass == "greg.greg")])/sum(el$weight)#(length(which(el$SocialPairClass == "shy.shy")) + length(which(el$SocialPairClass == "greg.greg")))/nrow(el)
+          socialOpposite.shygreg = sum(el$weight[which(el$GroomPairClass == "shy.greg")])/sum(el$weight)
+          socialOpposite.gregshy = sum(el$weight[which(el$GroomPairClass == "greg.shy")])/sum(el$weight)
+          #NumP category
+          SocialHomophily.lowP = sum(el$weight[which(el$numPPairClass == "shyP.shyP")])/sum(el$weight)
+          SocialHomophily.highP = sum(el$weight[which(el$numPPairClass == "gregP.gregP")])/sum(el$weight)#(length(which(el$SocialPairClass == "shy.shy")) + length(which(el$SocialPairClass == "greg.greg")))/nrow(el)
+          socialOpposite.lowPhighP = sum(el$weight[which(el$numPPairClass == "shyP.gregP")])/sum(el$weight)
+          socialOpposite.highPlowP = sum(el$weight[which(el$numPPairClass == "gregP.shyP")])/sum(el$weight)
+          #Eigenvec. cent. category
+          SocialHomophily.ecL = sum(el$weight[which(el$EigCentPairClass == "ecL.ecL")])/sum(el$weight)
+          SocialHomophily.ecH = sum(el$weight[which(el$EigCentPairClass == "ecH.ecH")])/sum(el$weight)#(length(which(el$SocialPairClass == "shy.shy")) + length(which(el$SocialPairClass == "greg.greg")))/nrow(el)
+          socialOpposite.ecLecH = sum(el$weight[which(el$EigCentPairClass == "ecL.ecH")])/sum(el$weight)
+          socialOpposite.ecHecL = sum(el$weight[which(el$EigCentPairClass == "ecH.ecL")])/sum(el$weight)
           
-          PartnerAttrDF = data.frame(matrix(nrow=1,ncol=19)); 
+          PartnerAttrDF = data.frame(matrix(nrow=1,ncol=31)); 
           names(PartnerAttrDF)= c("action","iter","group","year","isPost","LowToHigh",
-                                  "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF", 
-                                  "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy")
+                                  "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF","OO","OY","YO","YY",
+                                  "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy",
+                                  "SocialHomophily.lowP","SocialHomophily.highP","socialOpposite.lowPhighP","socialOpposite.highPlowP",
+                                  "SocialHomophily.ecL","SocialHomophily.ecH","socialOpposite.ecLecH","socialOpposite.ecHecL")
           PartnerAttrDF[1,] <- c(action[a],iter,group[g],years[y],isPost[h],as.numeric(LowToHigh), as.numeric(HighToLow), as.numeric(HighToHigh),
                                  as.numeric(LowToLow), as.numeric(Kin),as.numeric(Unrel), as.numeric(MM), as.numeric(MF), as.numeric(FM), 
-                                 as.numeric(FF), as.numeric(SocialHomophily.shy), as.numeric(SocialHomophily.greg), as.numeric(socialOpposite.shygreg), as.numeric(socialOpposite.gregshy))
+                                 as.numeric(FF), as.numeric(OO), as.numeric(OY), as.numeric(YO), as.numeric(YY), 
+                                 as.numeric(SocialHomophily.shy), as.numeric(SocialHomophily.greg), as.numeric(socialOpposite.shygreg), as.numeric(socialOpposite.gregshy),
+                                 as.numeric(SocialHomophily.lowP), as.numeric(SocialHomophily.highP), as.numeric(socialOpposite.lowPhighP), as.numeric(socialOpposite.highPlowP),
+                                 as.numeric(SocialHomophily.ecL), as.numeric(SocialHomophily.ecH), as.numeric(socialOpposite.ecLecH), as.numeric(socialOpposite.ecHecL))
           
           PartnerAttr= rbind(PartnerAttr, PartnerAttrDF)  
-          save(list="PartnerAttr",file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/PartnerAttributes.RData")
+          save(list="PartnerAttr",file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes.RData")
           
         }
       }

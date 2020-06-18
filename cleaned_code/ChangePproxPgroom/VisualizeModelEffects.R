@@ -9,13 +9,13 @@ library(matrixStats)
 library(gridExtra) 
 library(graphics)
 
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/ModelEffectsFinal.RData")
+load("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Social_Network_Analysis/ModelEffectsFinal.RData")
 rm(list=setdiff(ls(),c("NotAlone.R.Effects", "NotAlone.A.Effects", "NotAlone.G.Effects","NotAlone.KK.Effects","NotAlone.V.Effects",
                        "NotAlone.S.Effects", "NotAlone.Q.Effects","NotAlone.PM.Effects","NotAloneEffects","Social.G.Effects",
                        "Social.KK.Effects", "Social.V.Effects","Social.S.Effects","Social.Q.Effects","Social.PM.Effects","SocialEffects",
                        "NotAlone.M.Effects","NotAlone.F.Effects","Social.M.Effects", "Social.F.Effects", "Social.R.Effects", "Social.A.Effects")))
 
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/ChangePAccPSoc/") 
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/ChangePAccPSoc/") 
 
 #1. Show the distribution of the Hurricane effect on p(Prox) and p(Groom) considering all data: 
 isPostBM<- ggplot(NotAloneEffects,aes(x=isPost))+ #set main ggplot parameters

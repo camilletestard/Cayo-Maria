@@ -1,12 +1,15 @@
 ########################################
 # Demographics of the culled animals.
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
 culledID = read.csv("Behavioral_Data/Cayo Biobank Tissue Catalog.csv"); names(culledID)[1]="id"
 data = culledID[which(culledID$group == "HH" | culledID$group == "KK"),]
+hist(data$age, breaks = 20)
 
 length(which(data$age>=6 & data$group =="HH")); length(which(data$age>=6 & data$group =="KK"))
 length(which(data$age>=6 & data$group =="HH" & data$sex=="F")); length(which(data$age>=6 & data$group =="HH" & data$sex=="M"))
 length(which(data$age>=6 & data$group =="KK" & data$sex=="F")); length(which(data$age>=6 & data$group =="KK" & data$sex=="M"))
+
+min(data$age);max(data$age)
 
 ggplot(data, aes(x=age, colour=sex))+
   geom_histogram(fill="white")+

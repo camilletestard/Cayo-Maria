@@ -2,7 +2,7 @@
 #pre-topost hurricane?
 
 #Load data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/Strength.Stable.New.Old.Partners.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Strength.Stable.New.Old.Partners.RData")
 
 ##########################################################
 #Compare strength to stable partners pre- to post- hurricane
@@ -12,7 +12,7 @@ data.stableP.prox = ID.strength.stableP.All[which(ID.strength.stableP.All$action
 
 #GROOM
 
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/New.vs.Stable.Partner.Strength") #set saving directory
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/New.vs.Stable.Partner.Strength") #set saving directory
 
 #Groom give + Groom get, for all iterations
 tiff("GroomStrength.StableP.tiff", units="in", width=7, height=6, res=300, compression = 'lzw')
@@ -21,6 +21,23 @@ hist((data.stableP.groom$strength.all[which(data.stableP.groom$isPost == 0)]), c
 hist((data.stableP.groom$strength.all[which(data.stableP.groom$isPost == 1)]), col=rgb(0,1,1,0.5), breaks=20, add = T)
 box()
 legend("topright", c("pre", "post"), fill=c("red", "cyan"))
+
+#For group V only
+tiff("GroomStrength.StableP.V.tiff", units="in", width=7, height=6, res=300, compression = 'lzw')
+hist((data.stableP.groom$strength.all[which(data.stableP.groom$isPost == 0 & data.stableP.groom$group=="V")]), col=rgb(1,0,0,0.5), breaks=20, ylim = c(0, 10000), 
+     main = "Grooming strength to existing partners pre-/post- hurricane - Group V", xlab = "Grooming Strength")
+hist((data.stableP.groom$strength.all[which(data.stableP.groom$isPost == 1& data.stableP.groom$group=="V")]), col=rgb(0,1,1,0.5), breaks=20, add = T)
+box()
+legend("topright", c("pre", "post"), fill=c("red", "cyan")); dev.off()
+
+#For group KK only
+tiff("GroomStrength.StableP.KK.tiff", units="in", width=7, height=6, res=300, compression = 'lzw')
+hist((data.stableP.groom$strength.all[which(data.stableP.groom$isPost == 0 & data.stableP.groom$group=="KK")]), col=rgb(1,0,0,0.5), breaks=20, ylim = c(0, 10000), 
+     main = "Grooming strength to existing partners pre-/post- hurricane - Group KK", xlab = "Grooming Strength")
+hist((data.stableP.groom$strength.all[which(data.stableP.groom$isPost == 1& data.stableP.groom$group=="KK")]), col=rgb(0,1,1,0.5), breaks=20, add = T)
+box()
+legend("topright", c("pre", "post"), fill=c("red", "cyan")); dev.off()
+
 # #For 1 iteration
 # hist(data.stableP.groom$strength.all[which(data.stableP.groom$isPost == 0 & data.stableP.groom$iter==1)], col=rgb(1,0,0,0.5), breaks=10, ylim = c(0, 20),
 #      main = "Grooming strength to existing partners pre-/post- hurricane", xlab = "log(Grooming Strength)")

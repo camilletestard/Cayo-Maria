@@ -15,7 +15,7 @@ library(lubridate)
 library(resample)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
 load("commonIDs.Rdata")
 source("Social_Network_Analysis/functions_GlobalNetworkMetrics.R")
 source("Social_Network_Analysis/KinshipPedigree.R")
@@ -109,4 +109,4 @@ for (gy in 1:length(groupyears)){ #For each group
   mean.weight.all=rbind(mean.weight.all,mean.weight)
 }
 
-save(density.all,mean.weight.all, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/AggNetMetrics.RData")
+save(density.all,mean.weight.all, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AggNetMetrics.RData")

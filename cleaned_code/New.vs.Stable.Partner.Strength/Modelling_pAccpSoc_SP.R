@@ -8,11 +8,12 @@ library(data.table)
 
 #Load data
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
-load("Social_Network_Analysis/Strength.Stable.New.Old.Partners.RData")
+load("R.Data/Strength.Stable.New.Old.Partners.RData")
 
 ##########################################
 #Add sex, age and rank info
 ##########################################
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
 population_info = read.csv("Behavioral_Data/SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt")
 dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 
@@ -52,14 +53,14 @@ data.prox[,"age"] <- scale(data.prox[,"age"])
 ## MODELLING
 ##########################################################
 #Note: for now I implement one model over multiple iterations.
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/New.vs.Stable.Partner.Strength") #set saving directory
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/New.vs.Stable.Partner.Strength") #set saving directory
 
 proxStableP <- glmer(strength.all~ isPost + sex + age + percentrank + group + (1|id) + (1|year), data = data.prox, family = Gamma(link=log))
 summ(proxStableP, digits = 3)
 # performance::check_model(proxStableP)
 export_summs(proxStableP, model.names = c("StableP_Prox"), digits=3, to.file = "docx", file.name = "StableP.Prox.BM.docx")
 
-groomStableP  <- lmer(strength.all~ isPost + sex + age + percentrank + group + (1|id) + (1|year), data = data.groom)
+groomStableP  <- lmer(strength.all~ isPost*group + sex + age + percentrank + (1|id) + (1|year), data = data.groom)
 summ(groomStableP, digits = 3)
 # performance::check_model(groomStableP)
 export_summs(groomStableP, model.names = c("StableP_Groom"), digits=3, to.file = "docx", file.name = "StableP.Groom.BM.docx")

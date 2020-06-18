@@ -14,7 +14,7 @@ library(schoolmath)
 ######################################################
 
 #Load proximity scans from groups and years of interest in the focal format: 
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Behavioral_Data/Data All Cleaned") 
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
 # group = c("R","R","F", "F", "F", "F", "V", "V", "V", "HH", "HH", "KK","KK")
 # years = c(2015, 2016, 2014, 2015, 2016, 2017, 2015, 2016, 2017, 2014, 2016, 2015, 2017)
 # groupyears = c("R2015", "R2016", "F2014", "F2015", "F2016", "F2017", "V2015", "V2016", "V2017", "HH2014", "HH2016", "KK2015", "KK2017")
@@ -214,7 +214,7 @@ allScans[which(allScans == "3.00E+04",arr.ind = TRUE)] = "3E4"
 ######################################################
 
 #Load dominance and demographic info 
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Behavioral_Data") 
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data") 
 population_info = read.csv("SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt")
 dominance_info =read.table("Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 
