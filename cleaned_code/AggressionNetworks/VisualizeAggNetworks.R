@@ -43,18 +43,19 @@ group = c("V","V","V","V","KK","KK","KK","S") #c("V","V","V","V","V","KK","KK","
 years = c(2016,2017,2018, 2019, 2015, 2017, 2018, 2019)#c(2015,2016,2017,2018, 2019, 2015, 2017, 2018, 2019)
 groupyears =c("V2016","V2017","V2018","V2019","KK2015","KK2017","KK2018","S2019") #c("V2015","V2016","V2017","V2018","V2019","KK2015","KK2017","KK2018", "S2019") 
 
-gy=7
+gy=2
 for (gy in 1:length(groupyears)){ #For each group
   
   #Load data
   setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
   meta_data=read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt",sep=""))
   data = read.csv(paste("Group",groupyears[gy],"_AgonsiticActions.txt",sep=""))
-  if (years[gy]==2018){meta_data$hrs.focalfollowed=meta_data$numObs} #if 2018, convert column #obs in #hrs to simplify coding after
+  # if (years[gy]==2018){meta_data$hrs.focalfollowed=meta_data$numObs} #if 2018, convert column #obs in #hrs to simplify coding after
   
   #create date of observation information: 
   data$semester = semester(data$date)
   data$quarter = quarter(data$date)
+  data$timeBlock = "AM"; data$timeBlock[data$timeblock>3]="PM"
   
   #Output the Master Edgelist of all possible pairs given the unique IDs.
   #Load unique IDs common across years. This allows to make sure we compare the same indidivuals across years.

@@ -12,7 +12,7 @@ library(dplyr)
 library(fitdistrplus)
 library(lmtest)
 
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/AllStats.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
 
 ##########################################################
 #Pooling all data together
@@ -51,7 +51,7 @@ data.prox = PooledData[PooledData$`actions[a]`=="prox",]
 ###########################################################
 
 #Testing density preferences
-densityModel <- glmmTMB(dens~ isPost + (1|groupyear), data = data.groom, beta_family(link = "logit")) #Using beta family model because density = proportion
+densityModel <- glmmTMB(dens~ isPost*group + (1|year), data = data.groom, beta_family(link = "logit")) #Using beta family model because density = proportion
 summary(densityModel) #summary of model
 performance::check_model(densityModel) #Check model assumptions visually (method 1)
 simres <- simulateResiduals(fittedModel = densityModel, n = 250) #another method to check for model assumptions (normality of residuals, outlier test)
@@ -59,7 +59,7 @@ testResiduals(simres) #statistical tests of model assumptions for method 2
 plot(effects::allEffects(densityModel)) #plot fixed effects
 sjPlot::plot_model(densityModel, type="re", vline.color = "black") # plot random effects
 
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/GlobalNetworkMetrics/Groom") 
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/Groom") 
 export_summs(densityModel, model.names = c("Groom.Density"), digits=3, #Save & export model summary into a nice format
              to.file = "docx", file.name = "Groom.DensityModel.docx")
 

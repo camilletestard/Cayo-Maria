@@ -31,11 +31,12 @@ SocialCapital.ALL$groupyear = paste(SocialCapital.ALL$group, SocialCapital.ALL$y
 
 #Compute pedigree for all IDs in this group
 allIDs= allScans$focalID[which(allScans$group == "KK"|allScans$group == "V")];
-groupIDs = as.character(unique(allIDs))
-IDmatch = match(groupIDs, as.character(bigped$ID)); discard.na = which(is.na(IDmatch))
-if(length(discard.na)!=0) 
-{pedigree = bigped[IDmatch[-discard.na],c("ID","DAM","SIRE")]
-} else {pedigree = bigped[IDmatch,c("ID","DAM","SIRE")]}
+# groupIDs = as.character(unique(allIDs))
+# IDmatch = match(groupIDs, as.character(bigped$ID)); discard.na = which(is.na(IDmatch))
+# if(length(discard.na)!=0) 
+# {pedigree = bigped[IDmatch[-discard.na],c("ID","DAM","SIRE")]
+# } else {pedigree = bigped[IDmatch,c("ID","DAM","SIRE")]}
+pedigree=bigped
 ped <- KinshipPedigree(pedigree)
 
 actions = c("groom", "prox")
@@ -128,7 +129,7 @@ for (a in 1:length(actions)) { #for both proximity and grooming
         set.vertex.attribute(net,"rank", rank)
         
         SocialCapital = SocialCapital.ALL[which(SocialCapital.ALL$groupyear==groupyears[gy]),]
-        # Set PRE-HURRICANE standard Groom Strength as vertex attrbute
+        # Set PRE-HURRICANE standard Groom Strength as vertex attribute
         groom = as.numeric(SocialCapital$std.DSIgroom[match(as.character(net %v% "vertex.names"), as.character(SocialCapital$id))])
         set.vertex.attribute(net,"groom", groom)
         

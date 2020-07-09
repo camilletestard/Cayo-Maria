@@ -22,7 +22,7 @@ library(jtools)
 library(data.table)
 
 #load & format data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes2.RData")
 PartnerAttr$groupyear = paste(PartnerAttr$group, PartnerAttr$year, sep="")
 PartnerAttr$isPost = as.factor(PartnerAttr$isPost)
 for (col in seq(6,19)) {PartnerAttr[,col] = as.numeric(PartnerAttr[,col])}
@@ -122,7 +122,7 @@ summary(h2h.groom, digits = 3)
 ## GROOM #
 
 #Groom Kin
-tiff("Kin.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
+tiff("Kin.change.125.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 ggplot(data.groom, aes(x= as.factor(isPost), y=as.numeric(Kin), fill=as.factor(isPost) ))+
   geom_boxplot()+
   geom_jitter(position = position_jitter(0.2), alpha = 0.5)+

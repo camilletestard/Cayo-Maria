@@ -1,7 +1,24 @@
 #generate Aggressive Network Metrics
-# This script plots the output from generate_AggNetworkMetrics, i.e. density and mean weights.
-# Inputs: "AggNetMetrics.RData".
-# Outputs: Boxplots of aggression network metrics separated by year and group.
+# This script computes aggression network density and mean weight to compare across years.
+# It uses all types of aggression interactions (contact/non-contact/submission etc.). Because aggression data was not
+# collected  during proximity scans in "normal data collection" years, I cannot use the sub-sampling approach we 
+# developed for affiliative behaviors (proximity and grooming). Pre-hurricane: aggression is collected during focals 
+# and rates should be computed by dividing counts by the number of hours. Post-hurricane (2018): aggression is collected 
+# during scans. Thus, to compute weights I divide counts by the number of scan observations per IDs. This approach assumes
+# a linear relationship whereby the more I observe an ID, the more counts of aggressive interactions I will get.
+# So far, I have not implemented any sub-sampling in terms of number of observations per ID. However, I only use 
+# "common IDs" across years - that is IDs that are involved in aggression throughout all years of observations (longitudinal).
+# 
+# IMPORTANT NOTE #1: aggression data post-hurricane is collected using a pseudo-systematic approach (almost ad-lib?) which
+# may have introduced biases in our observations. However, if anything, we should see an artificial INCREASE in 
+# #aggressive interactions (aggression is salient, easily observable during non-systematic sampling). However we rather 
+# see a *decrease* in aggressive interactions.
+# IMPORTANT NOTE #2: This could be simply due to the difference in feeding protocol. I should re-run the analysis only
+# with PM data (not trivial to produce!).
+# 
+# Additionally, I use a bootstrap approach to compute a distribution of density and mean weight value for each network, 
+# in each year. The bootstrap simply samples randomly, with replacement, rows from the edgelist and computes density 
+# and mean weights n_boot times.
 
 # load libraries
 library(dplyr)
@@ -15,34 +32,40 @@ library(lubridate)
 library(resample)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
-load("commonIDs.Rdata")
-source("Social_Network_Analysis/functions_GlobalNetworkMetrics.R")
-source("Social_Network_Analysis/KinshipPedigree.R")
+setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria")
+load("R.Data/commonIDs.Rdata")
+source("cleaned_code/Functions/functions_GlobalNetworkMetrics.R")
 
 #Set parameters
 network_mode = "directed" #"undirected" (if prox) or "directed" (if groom)
 network_weighted = T
+onlyPM=F
 
 #For each group, each year separately: 
-group = c("V","V","V","V","KK","KK","KK","S") #c("V","V","V","V","V","KK","KK","KK","S")
-years = c(2016,2017,2018, 2019, 2015, 2017, 2018, 2019)#c(2015,2016,2017,2018, 2019, 2015, 2017, 2018, 2019)
-groupyears =c("V2016","V2017","V2018","V2019","KK2015","KK2017","KK2018","S2019") #c("V2015","V2016","V2017","V2018","V2019","KK2015","KK2017","KK2018", "S2019") 
+group = c("V","V","V","KK","KK","KK") #c("V","V","V","V","V","KK","KK","KK","S")
+years = c(2016,2017,2018, 2015, 2017, 2018)#c(2015,2016,2017,2018, 2019, 2015, 2017, 2018, 2019)
+groupyears =c("V2016","V2017","V2018","KK2015","KK2017","KK2018") #c("V2015","V2016","V2017","V2018","V2019","KK2015","KK2017","KK2018", "S2019") 
 
 density.all = data.frame(matrix(nrow=0,ncol=4));colnames(density.all)=c("dens","groupyear","group","year"); 
-mean.weight.all = data.frame(matrix(nrow=0,ncol=4));colnames(mean.weight.all)=c("weight","groupyear","group","year"); 
-gy=1
+NetworkMetrics.all = data.frame(matrix(nrow=0,ncol=12));names(NetworkMetrics.all)=c("iter","id","deg","strength","hrs","groupyear","year","group","age","sex","percentrank","ordrank")
+gy=5
 for (gy in 1:length(groupyears)){ #For each group
   
+  print(paste("%%%%%%%%%%%%%%%%%% ",groupyears[gy], "%%%%%%%%%%%%%%%%%%"))
+  
   #Load data
-  setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Behavioral_Data/Data All Cleaned") 
+  setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
   meta_data=read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt",sep=""))
   data = read.csv(paste("Group",groupyears[gy],"_AgonsiticActions.txt",sep=""))
-  if (years[gy]==2018){meta_data$hrs.focalfollowed=meta_data$numObs} #if 2018, convert column #obs in #hrs to simplify coding after
+  # if (years[gy]==2018){meta_data$hrs.focalfollowed=meta_data$numObs} #if 2018, convert column #obs in #hrs to simplify coding after
   
   #create date of observation information: 
   data$semester = semester(data$date)
   data$quarter = quarter(data$date)
+  if (length(which(data$timeblock=="AM"))==0) {data$timeBlock = "AM"; data$timeBlock[data$timeblock>3]="PM"
+  } else {data$timeBlock=data$timeblock}
+  
+  if (onlyPM == TRUE) {data=data[data$timeBlock=="PM",]}
   
   #Output the Master Edgelist of all possible pairs given the unique IDs.
   #Load unique IDs common across years. This allows to make sure we compare the same indidivuals across years.
@@ -66,47 +89,51 @@ for (gy in 1:length(groupyears)){ #For each group
   ########################################
   #Bootstrap Procedure; Get network metrics
   ########################################
-  nboot = 1000
+  nboot = 100
   density = data.frame(matrix(NA, nrow=nboot, ncol=2)); names(density)=c("dens","groupyear")
   mean.weight = data.frame(matrix(NA, nrow=nboot, ncol=2)); names(mean.weight)=c("weight","groupyear")
   for (boot in 1:nboot) {
+    
+    print(paste("%%%%%%%%%%%%%%%%%% ",groupyears[gy]," boot# ",boot, " %%%%%%%%%%%%%%%%%%"))
+    
     idx = sample(seq(1:nrow(weightedEL)),size=nrow(weightedEL), replace=T)
     weightedEl.res = weightedEL[idx,] #resampled weightedEL
     
+    # generate density and mean weight
     density$dens[boot] = length(which(weightedEl.res$weight!=0))/nrow(weightedEl.res)
-    mean.weight$weight[boot] = mean(weightedEl.res$weight!=0)
+    # mean.weight$weight[boot] = mean(weightedEl.res$weight!=0)
     
-    # #Create adjacency matrix
-    # adjMat = dils::AdjacencyFromEdgelist(weightedEL.res)
-    # adjData = adjMat[["adjacency"]]; rownames(adjData) = adjMat[["nodelist"]]; colnames(adjData) = adjMat[["nodelist"]]
-    # 
-    # #read adjacency matrix
-    # m=as.matrix(adjData) # coerces the data set as a matrix
-    # graph=graph.adjacency(m,mode= network_mode,weighted=T) # this will create an directed 'igraph object'. Change qualifiers to make "undirected" or unweighted (null)
+    #Transform EL into matrix 
+    adjMat = dils::AdjacencyFromEdgelist(weightedEl.res)
+    data = adjMat[["adjacency"]]; rownames(data) = adjMat[["nodelist"]]; colnames(data) = adjMat[["nodelist"]]
     
-    # #Get the network measures
-    # NetworkMetrics = data.frame(matrix(NA, nrow = length(V(graph)), ncol = 7)); names(NetworkMetrics)=c("id","deg","INdeg","OUTdeg","between","eig.cent", "clusterCoeff")
-    # NetworkMetrics$id = as_ids(V(graph))
-    # #Weighted degree (Strength, undirected)
-    # NetworkMetrics$deg<-degree(graph)
-    # #weighted indegree
-    # NetworkMetrics$INdeg <-degree(graph,v=V(graph), mode = "in", loops=F)
-    # #weighted outdegree
-    # NetworkMetrics$OUTdeg <-degree(graph,v=V(graph), mode = "out", loops=F)
-    # #Weighted betweenness
-    # NetworkMetrics$between<-betweenness(graph, v=V(graph), directed=F, normalized=T)
-    # #Weighted eigenvector centrality
-    # A <-eigen_centrality(graph, directed=F, scale=T)
-    # eig.cen = as.data.frame(A["vector"])
-    # NetworkMetrics$eig.cent = eig.cen$vector
-    # #Weighted clustering coeff
-    # NetworkMetrics$clusterCoeff = transitivity(graph, type = "localundirected")
+    #read adjacency matrix
+    m=as.matrix(data) # coerces the data set as a matrix
+    am.g=graph.adjacency(m,mode="undirected",weighted=T) # this will create an directed 'igraph object'. Change qualifiers to make "undirected" or unweighted (null)
+    graph = am.g 
+    
+    #Get the network measures
+    NetworkMetrics = data.frame(matrix(NA, nrow = length(V(graph)), ncol = 8)); 
+    names(NetworkMetrics)=c("iter","id","deg","strength","hrs","groupyear","year","group")#,"INdeg","OUTdeg","between","eig.cent", "clusterCoeff")
+    NetworkMetrics$id = as_ids(V(graph))
+    #Weighted degree (Strength, undirected)
+    NetworkMetrics$deg<-igraph::degree(graph)
+    NetworkMetrics$strength<-igraph::strength(graph,vids = V(graph),mode="all")
+    NetworkMetrics$hrs<-meta_data$hrs.focalfollowed[match(NetworkMetrics$id, meta_data$id)]
+    NetworkMetrics$iter = boot
+
+    NetworkMetrics$groupyear = groupyears[gy]; NetworkMetrics$year=years[gy]; NetworkMetrics$group=group[gy]
+    NetworkMetrics[,c("age", "sex","percentrank", "ordrank")]=meta_data[match(NetworkMetrics$id, meta_data$id), c("age", "sex","percofsex.dominanted", "ordinal.rank")]
+    
+    NetworkMetrics.all=rbind(NetworkMetrics.all,NetworkMetrics)
     
   }
   density$groupyear = groupyears[gy]; density$year=years[gy]; density$group=group[gy]
-  mean.weight$groupyear = groupyears[gy]; mean.weight$year=years[gy]; mean.weight$group=group[gy]
   density.all=rbind(density.all,density)
-  mean.weight.all=rbind(mean.weight.all,mean.weight)
+
 }
 
-save(density.all,mean.weight.all, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AggNetMetrics.RData")
+if (onlyPM==T){save(density.all,NetworkMetrics.all, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AggNetMetrics.onlyPM.RData")
+} else {
+    save(density.all,NetworkMetrics.all, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AggNetMetrics.RData")}
+

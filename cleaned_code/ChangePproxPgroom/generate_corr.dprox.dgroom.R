@@ -1,3 +1,6 @@
+#generate_corr.dprox.dgroom
+#Are the individuals who spend more time in proximity also those that change their grooming 
+#freq. the most?
 
 #Load libraries
 library(ggplot2)
@@ -13,8 +16,8 @@ allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans2019.txt")
 ExSubScans = calcRandomScans(allScans)
 unqIDs = as.character(unique(ExSubScans$focalID))
 
-#Compute p(groom) for each individual:
-dpProxGroom = data.frame(matrix(NA, nrow = length(unqIDs), ncol = 6)); colnames(dpProxGroom)=c("id","dprox","dgroom","isPost","group","sex"); count = 0;
+#Compute p(groom) & p(prox) for each individual:
+dpProxGroom = data.frame(matrix(NA, nrow = length(unqIDs), ncol = 6)); colnames(dpProxGroom)=c("id","dprox","dgroom","group","sex"); count = 0;
 for (id in 1:length(unqIDs)){
   
   id.all.pre.groom = ExSubScans$isSocial[which(ExSubScans$focalID == unqIDs[id] & ExSubScans$isPost == 0)]
@@ -36,14 +39,11 @@ for (id in 1:length(unqIDs)){
   }
 }
 
-plot(dpProxGroom$dprox,dpProxGroom$dgroom, xlim=c(0,0.7), xlab="Change in Proximity", ylab="Change in Grooming",
-     main="Correlation between change in proximity and change in grooming")
-cor.test(dpProxGroom$dprox,dpProxGroom$dgroom)
-
-
+#Plot change in prox vs. change in grooming
 ggplot(dpProxGroom,aes(dprox, dgroom)) +
   geom_point(color='blue')+
-  xlim(-0.1, 0.7)+
   xlab("Change in Proximity")+ylab("Change in Grooming")+
   ggtitle("Correlation between change in proximity and change in grooming")+
   geom_smooth(method='lm', formula= y~x)
+
+cor.test(dpProxGroom$dprox,dpProxGroom$dgroom) #compute correlation

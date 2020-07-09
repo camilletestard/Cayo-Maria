@@ -102,7 +102,7 @@ for (gy in 1:length(groupyears)){ #For each group
   V(am.g)$color=gsub("0","white",V(am.g)$color) #unknown sex will be white
   
   #plot graph
-  setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/SocialNetworkGraph/ComparingScanFocal")
+  setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/ComparingScanFocal")
   tiff(paste("Focal-based Grooming Network",network_weighted,groupyears[gy],".tiff",sep="."),
        units="in", width=10, height=8, res=300, compression = 'lzw')
   if (network_weighted=="weighted") {plot.igraph(am.g,layout=layout_in_circle, vertex.label=V(am.g)$name, vertex.color=V(am.g)$color, vertex.size=13,edge.color="grey20",

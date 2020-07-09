@@ -2,7 +2,7 @@ library(stringr)
 library(lubridate)
 
 #Loading regular agonistic action file
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Behavioral_Data/") 
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
 preHurr.format = read.csv("Data All Cleaned/GroupV2017_AgonsiticActions.txt");
 
 #load scan data
@@ -17,7 +17,7 @@ for (g in 1:length(group)){
   
   #Select agonistic scan data for group[g]
   agonistic.data = allScans[which(allScans$focal.activity =="aggression" | allScans$focal.activity =="submit"
-                                  & allScans$group ==group[g] & allScans$year ==2018),];
+                                  & allScans$group ==group[g] & allScans$isPost ==1),];
   #initialize agonistic dataframe
   agonistic.actions = as.data.frame(matrix(nrow = nrow(agonistic.data), ncol = ncol(preHurr.format)))
   names(agonistic.actions)=names(preHurr.format) 
@@ -56,6 +56,9 @@ for (g in 1:length(group)){
   agonistic.actions$observer=ifelse(group[g]=="V","DP","JN")
   agonistic.actions$data.source="scan"
   
+  #Fill in timeblock
+  agonistic.actions$timeblock = agonistic.data$timeBlock
+  
   #####################################
   #ADLIB DATA
   #####################################
@@ -72,6 +75,7 @@ for (g in 1:length(group)){
   agonistic.actions.adlib$observer = adlib$Observer
   agonistic.actions.adlib$date = as.character(ymd(mdy(adlib$ï..Date..mm.dd.yy.)))
   agonistic.actions.adlib$data.source="adlib"
+  agonistic.actions.adlib$timeblock=NA
   
   #####################################
   #Merge & save

@@ -41,10 +41,11 @@ load("R.Data/SocialCapital.RData")
 #Compute pedigree for all IDs in this group
 allIDs= allScans$focalID[which(allScans$group == "KK"|allScans$group == "V")];
 groupIDs = as.character(unique(allIDs))
-IDmatch = match(groupIDs, as.character(bigped$ID)); discard.na = which(is.na(IDmatch))
-if(length(discard.na)!=0) 
-{pedigree = bigped[IDmatch[-discard.na],c("ID","DAM","SIRE")]
-} else {pedigree = bigped[IDmatch,c("ID","DAM","SIRE")]}
+# IDmatch = match(groupIDs, as.character(bigped$ID)); discard.na = which(is.na(IDmatch))
+# if(length(discard.na)!=0) 
+# {pedigree = bigped[IDmatch[-discard.na],c("ID","DAM","SIRE")]
+# } else {pedigree = bigped[IDmatch,c("ID","DAM","SIRE")]}
+pedigree = bigped[,c("ID","DAM","SIRE")]
 ped <- KinshipPedigree(pedigree)
 
 action = c("groom", "prox")
@@ -58,7 +59,7 @@ colnames(PartnerAttr)= c("action","iter","group","year","isPost","LowToHigh",
 
 start_time <- Sys.time(); iter=1; a=1
 for (a in 1:length(action)){
-  for (iter in 1:num_iter){
+  for (iter in 31:num_iter){
     
     print(paste("%%%%%%%%%%%%%%%%%% ",action[a], " iter",iter, " %%%%%%%%%%%%%%%%%%"))
     
@@ -120,8 +121,8 @@ for (a in 1:length(action)){
           }
           el$KC   <- round(KC, 4)
           el$KinPairClass <- "unrelated"
-          el$KinPairClass[which(el$KC >= .125 & el$KC < .25)] <- "dRel"
-          el$KinPairClass[which(el$KC >= .25)] <- "rel"
+          # el$KinPairClass[which(el$KC >= .125 & el$KC < .25)] <- "dRel"
+          el$KinPairClass[which(el$KC >= .125)] <- "rel"
           
           # 6. Find sex of givingID & receivingID
           el$sexGivingID   <- rscans$sex[match(as.character(el$alter), as.character(rscans$focalID))]
@@ -191,6 +192,9 @@ for (a in 1:length(action)){
           # cor.test(SocialCapital.ALL$eig.cent.groom,SocialCapital.ALL$between.prox)
           
           #Compute proportion of time spent between categories of interest. Weights are indivicative of time spent.
+          #Total pairs
+          total.pair.weights=sum(el$weight)
+          total.pairs=length(el$weight[el$weight!=0])
           #Rank category
           LowToHigh = sum(el$weight[which(el$RankPairClass == "L.H")])/sum(el$weight)#length(which(el$RankPairClass == "L.H"))/nrow(el)
           HighToLow = sum(el$weight[which(el$RankPairClass == "H.L")])/sum(el$weight)#length(which(el$RankPairClass == "H.L"))/nrow(el)
@@ -225,13 +229,13 @@ for (a in 1:length(action)){
           socialOpposite.ecLecH = sum(el$weight[which(el$EigCentPairClass == "ecL.ecH")])/sum(el$weight)
           socialOpposite.ecHecL = sum(el$weight[which(el$EigCentPairClass == "ecH.ecL")])/sum(el$weight)
           
-          PartnerAttrDF = data.frame(matrix(nrow=1,ncol=31)); 
-          names(PartnerAttrDF)= c("action","iter","group","year","isPost","LowToHigh",
+          PartnerAttrDF = data.frame(matrix(nrow=1,ncol=33)); 
+          names(PartnerAttrDF)= c("action","iter","group","year","isPost","total.pairs","total.pairs.weights","LowToHigh",
                                   "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF","OO","OY","YO","YY",
                                   "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy",
                                   "SocialHomophily.lowP","SocialHomophily.highP","socialOpposite.lowPhighP","socialOpposite.highPlowP",
                                   "SocialHomophily.ecL","SocialHomophily.ecH","socialOpposite.ecLecH","socialOpposite.ecHecL")
-          PartnerAttrDF[1,] <- c(action[a],iter,group[g],years[y],isPost[h],as.numeric(LowToHigh), as.numeric(HighToLow), as.numeric(HighToHigh),
+          PartnerAttrDF[1,] <- c(action[a],iter,group[g],years[y],isPost[h],total.pairs,total.pair.weights, as.numeric(LowToHigh), as.numeric(HighToLow), as.numeric(HighToHigh),
                                  as.numeric(LowToLow), as.numeric(Kin),as.numeric(Unrel), as.numeric(MM), as.numeric(MF), as.numeric(FM), 
                                  as.numeric(FF), as.numeric(OO), as.numeric(OY), as.numeric(YO), as.numeric(YY), 
                                  as.numeric(SocialHomophily.shy), as.numeric(SocialHomophily.greg), as.numeric(socialOpposite.shygreg), as.numeric(socialOpposite.gregshy),
@@ -239,7 +243,7 @@ for (a in 1:length(action)){
                                  as.numeric(SocialHomophily.ecL), as.numeric(SocialHomophily.ecH), as.numeric(socialOpposite.ecLecH), as.numeric(socialOpposite.ecHecL))
           
           PartnerAttr= rbind(PartnerAttr, PartnerAttrDF)  
-          save(list="PartnerAttr",file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes.RData")
+          save(list="PartnerAttr",file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes2.RData")
           
         }
       }
