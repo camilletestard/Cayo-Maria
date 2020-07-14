@@ -20,7 +20,6 @@ load("R.Data/strength.to.deceased.RData")
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
 allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans2019.txt")
 
-
 #Format data
 SocialCapital.ALL$id = as.character(SocialCapital.ALL$id); 
 SocialCapital.ALL$sex = as.factor(SocialCapital.ALL$sex); 
@@ -29,66 +28,66 @@ SocialCapital.ALL$group = as.factor(SocialCapital.ALL$group)
 SocialCapital.ALL$percentrank = as.numeric(SocialCapital.ALL$percentrank)/100
 SocialCapital.ALL$year = as.factor(SocialCapital.ALL$year)
 
-#Set parameters:
-num_iter = 1; iter =1
-only2017=F; #if only considering 2017 (year just prior hurricane). Note: there is  no V2017 valid dp(groom) & dp(prox) because they all have less than 20 obs.
-group = c("KK","KK","V", "V", "V")
-years = c(2015,2017,2015,2016,2017)
-groupyears = c("KK2015", "KK2017","V2015", "V2016", "V2017")
-
-dprob.ALL = data.frame();
-for (iter in 1:num_iter){
-
-  print(paste("%%%%%%%%%%%%%%%%%% iter",iter, "%%%%%%%%%%%%%%%%%%"))
-  #####################################################################
-  # 1. Compute change in p(Acc) and p(Social), per individual, per year
-  #####################################################################
-
-  #Calculate random subsamples
-  randomScans = calcRandomScans(allScans)
-  gy=1
-  for (gy in 1:length(groupyears)){
-
-    rscans = randomScans[which(randomScans$year == years[gy] & randomScans$group == group[gy]),]
-    #Load data
-    setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned")
-    meta_data = read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt", sep = ""))
-
-    unqIDs = as.character(meta_data$id)
-    dprob=data.frame(matrix(NA, nrow=length(unqIDs),ncol=4)); colnames(dprob)=c("id","dpAcc","dpSocial","num_obs")
-    for (id in 1:length(unqIDs)){ #For all individuals
-      isProx.pre = rscans$isProx[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
-      isProx.post = rscans$isProx[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
-      isSocial.pre = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
-      isSocial.post = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
-      dpAcc=NA; dpSocial=NA; num_obs = length(isProx.pre)
-      if (length(isProx.pre)>=20) { #If there are more than 10 observations for that individual
-        pACC.pre = sum(isProx.pre)/length(isProx.pre)
-        pACC.post = sum(isProx.post)/length(isProx.post)
-        dpAcc = pACC.post - pACC.pre
-        pSocial.pre = sum(isSocial.pre)/length(isSocial.pre)
-        pSocial.post = sum(isSocial.post)/length(isSocial.post)
-        dpSocial = pSocial.post - pSocial.pre
-      } #end of min obs clause
-      dprob[id,]=c(unqIDs[id],dpAcc,dpSocial,num_obs)
-    } #end of id for loop
-    dprob$group = group[gy]; dprob$year = years[gy]; dprob$iter=iter
-    dprob.ALL = rbind(dprob.ALL, dprob)
-  } #end of groupyear for loop
-}
-
-dprob.ALL$dpAcc=as.numeric(dprob.ALL$dpAcc)
-dprob.ALL$dpSocial=as.numeric(dprob.ALL$dpSocial)
-dprob.ALL = dprob.ALL[-which(is.na(dprob.ALL$dpAcc)),] #remove NA
-# setwd("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data")
-# save(dprob.ALL,file="ChangeP.RData")
-
-#####################################################################
-# 2. Merge dprob, social Capital and strength to dead IDs data &clean
-#####################################################################
-data.combined=merge.data.frame(dprob.ALL,strength.to.deceased, by=intersect(c("id","year"),c("id","year")))
-data=merge.data.frame(data.combined,SocialCapital.ALL,by=intersect(c("id","year"),c("id","year")))
-data$group.x=NULL; data$group.y=NULL
+# #Set parameters:
+# num_iter = 1; iter =1
+# only2017=F; #if only considering 2017 (year just prior hurricane). Note: there is  no V2017 valid dp(groom) & dp(prox) because they all have less than 20 obs.
+# group = c("KK","KK","V", "V", "V")
+# years = c(2015,2017,2015,2016,2017)
+# groupyears = c("KK2015", "KK2017","V2015", "V2016", "V2017")
+# 
+# dprob.ALL = data.frame();
+# for (iter in 1:num_iter){
+# 
+#   print(paste("%%%%%%%%%%%%%%%%%% iter",iter, "%%%%%%%%%%%%%%%%%%"))
+#   #####################################################################
+#   # 1. Compute change in p(Acc) and p(Social), per individual, per year
+#   #####################################################################
+# 
+#   #Calculate random subsamples
+#   randomScans = calcRandomScans(allScans)
+#   gy=1
+#   for (gy in 1:length(groupyears)){
+# 
+#     rscans = randomScans[which(randomScans$year == years[gy] & randomScans$group == group[gy]),]
+#     #Load data
+#     setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned")
+#     meta_data = read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt", sep = ""))
+# 
+#     unqIDs = as.character(meta_data$id)
+#     dprob=data.frame(matrix(NA, nrow=length(unqIDs),ncol=4)); colnames(dprob)=c("id","dpAcc","dpSocial","num_obs")
+#     for (id in 1:length(unqIDs)){ #For all individuals
+#       isProx.pre = rscans$isProx[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
+#       isProx.post = rscans$isProx[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
+#       isSocial.pre = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
+#       isSocial.post = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
+#       dpAcc=NA; dpSocial=NA; num_obs = length(isProx.pre)
+#       if (length(isProx.pre)>=20) { #If there are more than 10 observations for that individual
+#         pACC.pre = sum(isProx.pre)/length(isProx.pre)
+#         pACC.post = sum(isProx.post)/length(isProx.post)
+#         dpAcc = pACC.post - pACC.pre
+#         pSocial.pre = sum(isSocial.pre)/length(isSocial.pre)
+#         pSocial.post = sum(isSocial.post)/length(isSocial.post)
+#         dpSocial = pSocial.post - pSocial.pre
+#       } #end of min obs clause
+#       dprob[id,]=c(unqIDs[id],dpAcc,dpSocial,num_obs)
+#     } #end of id for loop
+#     dprob$group = group[gy]; dprob$year = years[gy]; dprob$iter=iter
+#     dprob.ALL = rbind(dprob.ALL, dprob)
+#   } #end of groupyear for loop
+# }
+# 
+# dprob.ALL$dpAcc=as.numeric(dprob.ALL$dpAcc)
+# dprob.ALL$dpSocial=as.numeric(dprob.ALL$dpSocial)
+# dprob.ALL = dprob.ALL[-which(is.na(dprob.ALL$dpAcc)),] #remove NA
+# # setwd("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data")
+# # save(dprob.ALL,file="ChangeP.RData")
+# 
+# #####################################################################
+# # 2. Merge dprob, social Capital and strength to dead IDs data &clean
+# #####################################################################
+# data.combined=merge.data.frame(dprob.ALL,strength.to.deceased, by=intersect(c("id","year"),c("id","year")))
+# data=merge.data.frame(data.combined,SocialCapital.ALL,by=intersect(c("id","year"),c("id","year")))
+# data$group.x=NULL; data$group.y=NULL
 
 # setwd("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data")
 # save(data,file="FactorsPredictChangeP.RData")
@@ -240,9 +239,10 @@ summary(dpAcc1)
 # performance::check_model(dpAcc1) #test model assumptions visually
 
 #"Need for change" model
-dpAcc2 <- lmer(dpAcc~ sex + age + group + percentrank + DSI + numPartners +  (1|year), data = data, na.action=na.omit)
+dpAcc2 <- lmer(dpAcc~ sex + age + group + percentrank + DSIprox + numPartnersProx +  (1|year), data = data, na.action=na.omit)
 summary(dpAcc2)
 # performance::check_model(dpAcc2)
+export_summs(dpAcc2, digits = 3, to.file = "docx", file.name = "ModelingChangePAccDSI.AllYears.docx")
 
 # dpAcc3 <- lmer(dpAcc~ sex + age + group + percentrank + std.vig.ra +  (1|year), data = data, na.action=na.omit)
 # summary(dpAcc3)

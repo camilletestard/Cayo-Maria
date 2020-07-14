@@ -26,7 +26,7 @@ Demographics$AgeAtDeath[Demographics$AgeAtDeath <0]=0 #Note: there are discrepan
 ####################################################
 # Find who died in V and KK post hurricane
 ####################################################
-Deaths.postHurr =  filter(Demographics,Demographics$DOD >= as.Date("2017-09-01") & Demographics$DOD < as.Date("2018-06-01"))#Find deaths before the hurricane
+Deaths.postHurr =  filter(Demographics,Demographics$DOD >= as.Date("2017-09-17") & Demographics$DOD < as.Date("2018-10-01"))#Find deaths before the hurricane
 #only onsider V and KK deaths
 Deaths.study.pop = filter(Deaths.postHurr, Deaths.postHurr$LastGroup=="V"|Deaths.postHurr$LastGroup=="KK")
 #Add old age factor:

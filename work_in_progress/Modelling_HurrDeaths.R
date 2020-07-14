@@ -83,10 +83,13 @@ for (my in 1:length(monthYears)){
   death.month.adults[my]= deaths/alive*100
 }
 # months.plot=c("oct","nov","dec","jan","fev","mar","avr","mai","jun","jul","aug","sep","oct","nov","dec","jan","fev","mar","avr","mai","jun","jul","aug","sep")
-barplot(death.month.adults,ylab="deaths per 100 adults",main="Deaths per 100 adults (age>=6)")
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Demography")
+
+tiff("Deaths_barplot.tiff",units="in", width=8, height=5, res=300, compression = 'lzw')
+barplot(death.month.adults,ylab="deaths per 100 adults",main="Deaths per 100 adults (age>=4)")
 segments(13.5,0,13.5,3,col="red",lwd=4)
-death.month.adults.6=death.month.adults
-death.month.adults.4=death.month.adults
+dev.off()
+
 
 
 ####################################################
