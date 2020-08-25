@@ -1,6 +1,22 @@
 ###############################################
 #Functions to generate networks from unique IDs
 ###############################################
+#functions_GlobalNetworkMetrics: functions to generate social networks from unique IDs + compute global network
+#metrics & partner preference indices (sex, kin, rank).
+#- calcMasterEL: output non-directional EL (for proximity)
+#- calcEdgeList: Counts edge weights in non-directional EL (just count, division by #scans 
+#happens in "Generate_GlobalNetworkMetrics"
+#- calcMasterEl_groom: output directional EL (for grooming)
+#- calcEdgeList_groom: counts edge weights in directional EL (just counts as well)
+#- createIG / createIG_groom (nondirection and directional): create igraph and tnet objects
+#- calcGenStats: calculate generic network values: density, community size, clustering coefficient for whole network,
+#female only and male only networks
+#- calcSexProps: calculate ratio of observed MM/MF/FF pairs over expected given network (weighted)
+#- calcKinProps: calculate ratio of observed ck/dk/unrel pairs over expected given network (weighted)
+#- calcRankProps: calculate ratio of observed HH/LL/HL pairs over expected given network (weighted)
+#The last 3 functions allow to estimate how much more than chance are each pair category occurring, comparing pre- 
+#and post-hurricane.
+#Note: expected is computed based on the distribution of sex/kinship/rank attributes in the network IDs.
 
 
 #1. Output the NON-DIRECTIONAL Master Edgelist of all possible pairs given the unique IDs

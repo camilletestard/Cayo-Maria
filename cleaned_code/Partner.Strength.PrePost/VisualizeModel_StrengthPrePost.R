@@ -1,55 +1,113 @@
 #Compare strength of bonds pre-to-post hurricane. Are individuals spreading their grooming investment over more 
 #weak partners or do they have fewer but stronger bonds?
-#This script visualizes and models the change in grooming and proximity bond strength post-disaster.
+#This script visualizes and tests the differene in grooming and proximity bond strength pre-to-post disaster.
 # Overlapping histograms.
 
 library(lme4)
 library(jtools)
+library(matrixStats)
+library(gridExtra) 
+library(graphics)
+library(fitdistrplus)
+
 #Load data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/StrengthPrePost.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks.RData")
 
-##########################################################
-#Compare distribution of grooming strength pre- to post- hurricane
-#Separate data by groom/prox
-data.groom = ID.strength.data.All[which(ID.strength.data.All$action == "groom"),]
-data.prox = ID.strength.data.All[which(ID.strength.data.All$action == "prox"),]
+##########################################
+#Add sex, age and rank info
+##########################################
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
+population_info = read.csv("Behavioral_Data/SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt")
+dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 
+#Find all unique IDs
+allIDs = unique(Networks$alter)
+
+#get sex and year of birth from "Population details_Allgroups.allyears.txt"
+ID_info= data.frame(); count = 0
+for (id in 1:length(allIDs)){
+  idx = which(as.character(population_info$id) == allIDs[id])
+  if (length(idx)!=0){
+    count = count +1
+    ID_info[count,c("id","sex","yob")]<-population_info[idx,c("id","sex","yob")]
+  }
+}
+ID_info$age = 2017-ID_info$yob #age in 2017
+Networks[,c("sex","age")] = ID_info[match(Networks$alter,ID_info$id),c("sex","age")]
+
+#Add rank info from "DOMINANCE.txt" file
+Networks$rankFind = paste(Networks$alter,Networks$year,sep="")
+Networks$ordrank=NA; Networks$percentrank=NA; Networkssexrank=NA
+for (ii in 1:nrow(dominance_info)){
+  idx = which(as.character(dominance_info$IDyear[ii]) == as.character(Networks$rankFind))
+  if (length(idx)!=0){
+    Networks$ordrank[idx] = as.character(dominance_info$ORD_RANK[ii])
+    Networks$percentrank[idx] = as.character(dominance_info$X.DOMINATED[ii])
+  }
+}
+Networks$percentrank = as.numeric(Networks$percentrank)/100
+
+#Separate data by groom/prox & Scale parameters
+data.groom = Networks[which(Networks$action == "groom"),]
+data.groom[,"age"] <- scale(data.groom[,"age"]) #helps avoid convergence issues: https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html
+
+
+
+##########################################
+#Model edge weight change pre-/post-
+##########################################
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/")
 
-#both groups
-tiff("StrengthBond.PrePost.tiff", 
-     units="in", width=10, height=10, res=300, compression = 'lzw')
+AllP.groom.V=data.frame(); AllP.groom.KK=data.frame(); 
+AllP.prox=data.frame(); iter=1
 
-hist(log(data.groom$strength.all[data.groom$isPost==0]), col=rgb(1,0,0,0.5), xlim=c(-5, 0),
-     xlab="Strength of grooming bond (log)",
-     main="Strength of grooming bond pre- to post-hurricane")
-hist(log(data.groom$strength.all[data.groom$isPost==1]), col=rgb(0,1,1,0.5), breaks=30, add=T)
-box()
-legend("topright", c("Pre", "Post"), fill=c("red", "cyan"))
+for (iter in 1:500){
+  print(paste("%%%%%%%%%%%%%%%%%%",iter, "%%%%%%%%%%%%%%%%%%"))
+  
+  data.groom.iter=data.groom[data.groom$iter==iter,]
+  data.prox.iter=data.prox[data.prox$iter==iter,]
+  
+  ## VISUALIZATION for 1 iteration ##
+  # #GROOMING
+  # strength.all.prepost<-ggplot(data.groom.iter, aes(x= as.factor(isPost), y=weight, fill=as.factor(isPost) ))+
+  #   geom_violin()+
+  #   # geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
+  #   ggtitle(paste("Srength Bond Stable Partners"))+
+  #   labs(fill = "Hurricane Status",x="Hurricane Status",y="Bond Strength")+
+  #   facet_grid(~group)
+  #   # facet_grid(group~year)
+  # ggsave("Strength.AllP.prepost.tiff",strength.all.prepost)
+  # ggsave("Strength.AllP.prepost.eps",strength.all.prepost)
 
-dev.off()
+  ## Separate data by groom and action (groom or prox) ##
+  data.prox.iter.V = data.prox[which(data.prox$iter == iter & data.prox$group=="V"),]
+  data.prox.iter.KK = data.prox[which(data.prox$iter == iter & data.prox$group=="KK"),]
+  data.groom.iter.V = data.groom[which(data.groom$iter == iter& data.groom$group=="V"),]
+  data.groom.iter.KK = data.groom[which(data.groom$iter == iter& data.groom$group=="KK"),]
+  
+  #GROOMING
+  strength.groom.V = lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|year), data=data.groom.iter.V)
+  # performance::check_model(strength.groom.V)
+  # summary(strength.groom.V)
+  AllP.groom.V[iter,c("(Intercept)","isPost","sexM","age","rank")] <- getME(strength.groom.V, "beta")
+  AllP.groom.V[iter,c("id", "year")] <- getME(strength.groom.V, "theta")
+  
+  strength.groom.KK = lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|year), data=data.groom.iter.KK)
+  # performance::check_model(strength.groom.KK)
+  AllP.groom.KK[iter,c("(Intercept)","isPost","sexM","age","rank")] <- getME(strength.groom.KK, "beta")
+  AllP.groom.KK[iter,c("id", "year")] <- getME(strength.groom.KK, "theta")
 
-data.groom$strength.all[data.groom$strength.all==0]=NA
-strength.BM = lmer(log(strength.all)~isPost*group+(1|id)+(1|year),data=data.groom)
-# performance::check_model(strengh.BM)
-export_summs(strength.BM, model.names = "change.Groom.Strength", to.file = "docx", file.name = "Modeling.GroomStrength.PrePost.docx")
+}
 
-#group V
-data.groom.V=data.groom[data.groom$group=="V",]
-hist(log(data.groom.V$strength.all[data.groom.V$isPost==0]), col=rgb(1,0,0,0.5), xlim=c(-5, 0))
-hist(log(data.groom.V$strength.all[data.groom.V$isPost==1]), col=rgb(0,1,1,0.5), breaks=30, add=T)
+# Pool results from all iterations - Groom
+Means = colMeans2(as.matrix(AllP.groom.V),na.rm = T); Means = round(Means,3)
+CI = colQuantiles(as.matrix(AllP.groom.V,na.rm = T), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
+Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
+t.groom.groom<-tableGrob(Estimates); t.groom.groom<-grid.arrange(t.groom.groom, top="Model All Effects: Groom Model Parameter Estimates"); #create table, arrange table
+write.csv(Estimates, file="C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/GroomStrengthPrePost.V.csv")
 
-data.groom.V$strength.all[data.groom.V$strength.all==0]=NA
-strength.V = lmer(log(strength.all)~isPost +(1|id)+(1|year),data=data.groom.V)
-# performance::check_model(strengh.V)
-export_summs(strength.V, model.names = "change.Groom.Strength", to.file = "docx", file.name = "Modeling.GroomStrength.PrePost.V.docx")
-
-#group KK
-data.groom.KK=data.groom[data.groom$group=="KK",]
-hist(log(data.groom.KK$strength.all[data.groom.KK$isPost==0]), col=rgb(1,0,0,0.5), xlim=c(-5, 0), ylim=c(0,3500))
-hist(log(data.groom.KK$strength.all[data.groom.KK$isPost==1]), col=rgb(0,1,1,0.5), breaks=20, add=T)
-
-data.groom.KK$strength.all[data.groom.KK$strength.all==0]=NA
-strength.KK = lmer(log(strength.all)~isPost +(1|id)+(1|year),data=data.groom.KK)
-# performance::check_model(strengh.KK)
-export_summs(strength.KK, model.names = "change.Groom.Strength", to.file = "docx", file.name = "Modeling.GroomStrength.PrePost.KK.docx")
+Means = colMeans2(as.matrix(AllP.groom.KK)); Means = round(Means,3)
+CI = colQuantiles(as.matrix(AllP.groom.KK), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
+Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
+t.groom.groom<-tableGrob(Estimates); t.groom.groom<-grid.arrange(t.groom.groom, top="Model All Effects: Groom Model Parameter Estimates"); #create table, arrange table
+write.csv(Estimates, file="C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/GroomStrengthPrePost.KK.csv")

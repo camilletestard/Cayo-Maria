@@ -91,7 +91,9 @@ obs.table.group = as.data.frame(table(droplevels(as.factor(SubScans$group)), as.
 obs.table.quarter= as.data.frame(table(droplevels(as.factor(SubScans$Q)), as.factor(SubScans$isPost))); obs.table.quarter$sampling = "Quarter"
 obs.table.timeBlock=as.data.frame(table(droplevels(as.factor(SubScans$timeBlock)), as.factor(SubScans$isPost))); obs.table.timeBlock$sampling = "TimeBlock"
 obs.table.sex = as.data.frame(table(droplevels(as.factor(SubScans$sex)), as.factor(SubScans$isPost))); obs.table.sex$sampling = "Sex"
-obs.table = rbind(obs.table.group,obs.table.quarter,obs.table.sex,obs.table.timeBlock)
+# obs.table = rbind(obs.table.group,obs.table.quarter,obs.table.sex,obs.table.timeBlock)
+obs.table = rbind(obs.table.quarter,obs.table.timeBlock)
+
 
 hist.ID = hist(obs.table.ID$Freq,breaks=20, col = rgb(1,0,0,0.5),
                main="Histogram of Number of observations per ID", xlab="Num Observations") #Distribution of Sampling effort per ID

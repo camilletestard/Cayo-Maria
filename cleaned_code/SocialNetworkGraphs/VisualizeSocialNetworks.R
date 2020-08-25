@@ -1,6 +1,16 @@
 #Visualize social network graph
-#This script aims at visualizing social networks and how they change over time 
-#(especially pre to post hurr). Social networks can be based on proximity or grooming.
+# This script aims at visualizing social networks and how they change over time 
+# (especially pre to post hurr). Social networks can be based on proximity or grooming. To compute weights 
+# I divide counts of prox or groom by the number of scan observations per IDs. This approach assumes a linear 
+# relationship whereby the more I observe an ID, the more counts of afffiliative interactions I will get.
+# Additionally, I use a subsampling approach to have equal number of observations for each ID pre-to-post hurricane, balances across
+# time of year and time of day.
+# Functions called: CalcSubsampledScans, functions_GlobalNetworkMetrics
+# Input: "allScans.txt"
+# Output: pre and post hurr equivalent network graphs, for each group and pre-hurricane years + for both prox and groom.
+# Note: I am only representing one iteration of sub-sample. But as for p(prox)/p(groom) plots, I see robust results 
+# across iterations of plotting. Thus I conclude they are representative plots of the whole data set.
+# IMPORTANT NOTE: I standardize weights by dividing by the mean for the group/year.
 
 # load libraries
 library(dplyr)
@@ -18,7 +28,7 @@ source("Functions/functions_GlobalNetworkMetrics.R")
 
 #Load scan data, population and dominance info
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
-allScans = read.csv("Data All Cleaned/allScans2019.txt")
+allScans = read.csv("Data All Cleaned/allScans.txt")
 # bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
 dominance_info =read.table("Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 
@@ -31,7 +41,7 @@ group = c("V","KK")
 # #This will allow us to see whether density goes back down to normal.
 # allScans$isPost[which(allScans$year==2018)] = 0 
 randomScans = calcRandomScans(allScans)
-a=1
+a=2
 for (a in 1:2){
   network_action = actions[a]
   if (network_action == "prox") {network_mode = "undirected"}
@@ -110,8 +120,8 @@ for (a in 1:2){
         V(am.g)$color=gsub("0","white",V(am.g)$color) #unknown sex will be white
         
         #set path for saving and plot graph
-        if (network_action == "groom"){setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/SocialNetworkGraph/GroomNetworks")} 
-        if (network_action == "prox"){setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/SocialNetworkGraph/ProxNetworks") }
+        if (network_action == "groom"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/GroomNetworks")} 
+        if (network_action == "prox"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/ProxNetworks") }
         tiff(paste("Social Network ",group[g],years[y],".",isPost[h],".tiff",sep=""), 
              units="in", width=10, height=8, res=300, compression = 'lzw')
         plot.igraph(am.g,layout=l, vertex.label=V(am.g)$name, vertex.color=V(am.g)$color, vertex.size=13,edge.color="grey20", 

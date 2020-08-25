@@ -1,23 +1,22 @@
 #Modeling Global Network Metrics
+# Test the difference in proximity and grooming network density distributions 
+# pre-to-post hurricane, for each group and year seperately.
+# Compute the difference between pre and post-hurricane network density for each subsampling iterations. We will get a 
+# distribution of that difference. I then compute and save the mean difference and 95% confidence interval.
+# Output: .csv files with mean difference and CI, for grooming and proximity and each group and year separately (total = 10 estimates).  
 
+library(overlapping)
+library(matrixStats)
+library(gridExtra) 
+library(graphics)
 
-library(lme4)# Generalized Linear Mixed Models
-library(glmmTMB)
-library(bbmle)#Tools for General Maximum Likelihood Estimation
-library(DHARMa) #residual diagnostic fr hierarchical (multi-level/mixed) regression models
-library(jtools)
-library(data.table)
-library(ggpubr)
-library(dplyr)
-library(fitdistrplus)
-library(lmtest)
 
 load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
 
 ##########################################################
 #Pooling all data together
 ##########################################################
-group = c("V", "V", "V", "K", "K")
+group = c("V", "V", "V", "KK", "KK")
 years = c(2015, 2016, 2017, 2015, 2017)
 groupyear = c("V.2015","V.2016","V.2017","KK.2015","KK.2017"); gy=1
 for (gy in 1:length(groupyear)){ #For each group
@@ -32,168 +31,54 @@ for (gy in 1:length(groupyear)){ #For each group
 }
 
 #Pooling data from multiple years: 
-PooledData = rbindlist(AllStats); PooledData$groupyear = paste(PooledData$group,PooledData$year,sep="")
-data.groom = PooledData[PooledData$`actions[a]`=="groom",]
-data.prox = PooledData[PooledData$`actions[a]`=="prox",]
+PooledData = rbindlist(AllStats); PooledData$groupyear = paste(PooledData$group,PooledData$year,sep=".")
+data.groom = as.data.frame(PooledData[PooledData$`actions[a]`=="groom",c(2,17,18,19,23,24,25,30,31,32,33,36)]) #Select columns of interest for grooming networks
+data.prox = as.data.frame(PooledData[PooledData$`actions[a]`=="prox",c(2,17,18,19,23,24,25,30,31,32,33,36)]) #Select columns of interest for proximity networks
 
-# #Check distribution of dependent variables.
-# hist(data.groom$dens, breaks = 40); #Histogram
-# ggdensity(data.groom$dens, main = "Distribution of social network density", xlab = "Social Network Density"); #density plot to show distribution
-# ggqqplot(data.groom$dens); #qqplot to check how much DV deviates from the  normal assumptions
-# shapiro.test(data.groom$dens) #Normality test of the DV.
-# descdist(data.groom$dens) #Function to determine the most appropriate GLMM to model this DV
-# hist(PooledData$eo.FF, breaks = 40); ggdensity(log(PooledData$eo.FF), main = "Distribution of social network density", xlab = "O/E female pairs");
-# ggqqplot(PooledData$eo.FF); shapiro.test(PooledData$eo.FF)
-# descdist(PooledData$dens)
+##########################################################
+#GROOMING
+##########################################################
+pref.stats.ALL = list()
+for (gy in 1:length(groupyear)){
+  
+  data.pre = data.groom[which(data.groom$groupyear==groupyear[gy] & data.groom$isPost==0),(1:10)]
+  data.post = data.groom[which(data.groom$groupyear==groupyear[gy] & data.groom$isPost==1),(1:10)]
+  data.post_pre = data.post - data.pre
+  
+  Means = colMeans2(as.matrix(data.post_pre)); Means = round(Means,3)
+  CI = colQuantiles(as.matrix(data.post_pre), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
+  Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
+  
+  pref.stats.ALL[[gy]] = Estimates
+}
+# pref.stats.ALL[[3]]
 
-###########################################################
-#Model GROOMING Network Properties
-###########################################################
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/") 
 
-#Testing density preferences
-densityModel <- glmmTMB(dens~ isPost*group + (1|year), data = data.groom, beta_family(link = "logit")) #Using beta family model because density = proportion
-summary(densityModel) #summary of model
-performance::check_model(densityModel) #Check model assumptions visually (method 1)
-simres <- simulateResiduals(fittedModel = densityModel, n = 250) #another method to check for model assumptions (normality of residuals, outlier test)
-testResiduals(simres) #statistical tests of model assumptions for method 2
-plot(effects::allEffects(densityModel)) #plot fixed effects
-sjPlot::plot_model(densityModel, type="re", vline.color = "black") # plot random effects
+for (gy in 1:length(groupyear)){
+write.csv(pref.stats.ALL[[gy]],paste("Groom.density.diff",groupyear[gy],"csv",sep="."))
+}
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/Groom") 
-export_summs(densityModel, model.names = c("Groom.Density"), digits=3, #Save & export model summary into a nice format
-             to.file = "docx", file.name = "Groom.DensityModel.docx")
+##########################################################
+#PROXIMITY
+##########################################################
+pref.stats.ALL = list()
+for (gy in 1:length(groupyear)){
+  
+  data.pre = data.prox[which(data.prox$groupyear==groupyear[gy] & data.prox$isPost==0),(1:10)]
+  data.post = data.prox[which(data.prox$groupyear==groupyear[gy] & data.prox$isPost==1),(1:10)]
+  data.post_pre = data.post - data.pre
+  
+  Means = colMeans2(as.matrix(data.post_pre)); Means = round(Means,3)
+  CI = colQuantiles(as.matrix(data.post_pre), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
+  Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
+  
+  pref.stats.ALL[[gy]] = Estimates
+}
 
-##########################
-#Testing sex preferences
-eo.FF.model <-  glmmTMB(eo.FF~ isPost + group + (1|year), data = data.groom, family = Gamma(link = "log")) 
-summary(eo.FF.model)
-# performance::check_model(eo.FF.model)
-            
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/") 
 
-eo.MM.model <-  glmmTMB(eo.MM~ isPost + group + (1|year), data = data.groom, family = Gamma(link = "log")) 
-summary(eo.MM.model)
-# performance::check_model(eo.MM.model)
-# simres <- simulateResiduals(fittedModel = eo.MM.model, n = 250)
-# testResiduals(simres)
+for (gy in 1:length(groupyear)){
+  write.csv(pref.stats.ALL[[gy]],paste("Prox.density.diff",groupyear[gy],"csv",sep="."))
+}
 
-eo.cross.model <-  glmmTMB(eo.cross~ isPost + group + (1|year), data = data.groom, family = Gamma(link = "log")) 
-summary(eo.cross.model)
-# performance::check_model(eo.cross.model)
-# simres <- simulateResiduals(fittedModel = eo.cross.model, n = 250)
-# testResiduals(simres)
-
-export_summs(eo.FF.model, eo.MM.model, eo.cross.model, model.names = c("eo.FF", "eo.MM", "eo.cross"),
-             to.file = "docx", file.name = "Groom.SexPrefModel.docx")
-
-##########################
-#Testing kin preferences
-eo.ck.model <-  glmmTMB(eo.ck~ isPost + (1|groupyear), data = data.groom, family = Gamma(link = "log")) 
-summary(eo.ck.model)
-# performance::check_model(eo.ck.model)
-
-# eo.dk.model <-  glmmTMB(eo.dk~ isPost + (1|groupyear), data = data.groom, family = Gamma(link = "log")) 
-# summary(eo.dkmodel)
-# performance::check_model(eo.dkmodel)
-#Note: Comment for now because we get negative values, which is not normal...(ratio of two positive values)
-
-eo.u.model <-  glmmTMB(eo.u~ isPost + (1|groupyear), data = data.groom, family = Gamma(link = "log")) 
-summary(eo.u.model)
-# performance::check_model(eo.u.model)
-
-export_summs(eo.ck.model, eo.u.model, model.names = c("eo.ck", "eo.u"),
-             to.file = "docx", file.name = "Groom.KinPrefModel.docx")
-
-##########################
-#Testing rank preferences
-eo.HH.model <-  glmmTMB(eo.HH~ isPost + group + (1|year), data = data.groom, family = Gamma(link = "log")) 
-# eo.HH.model <-  lmer(eo.HH~ isPost + group + (1|year), data = data.groom) 
-summary(eo.HH.model)
-# performance::check_model(eo.HH.model)
-
-eo.LL.model <-  glmmTMB(eo.LL~ isPost + group + (1|year), data = data.groom, family = Gamma(link = "log")) 
-# eo.LL.model <-  lmer(eo.LL~ isPost + group + (1|year), data = data.groom) 
-summary(eo.LL.model)
-performance::check_model(eo.LL.model)
-
-eo.crossR.model <-  glmmTMB(eo.crossR~ isPost + group + (1|year), data = data.groom, family = Gamma(link = "log")) 
-summary(eo.crossR.model)
-performance::check_model(eo.crossR.model)
-
-export_summs(eo.HH.model, eo.LL.model, eo.crossR.model, model.names = c("eo.HH", "eo.LL", "eo.crossR"),
-             to.file = "docx", file.name = "Groom.RankPrefModel.docx")
-
-###########################################################
-#Model PROXIMITY Network Properties
-###########################################################
-
-#Testing density preferences
-densityModel <- glmmTMB(dens~ isPost + (1|groupyear), data = data.prox, beta_family(link = "logit")) #Using beta family model because density = proportion
-summary(densityModel) #summary of model
-performance::check_model(densityModel) #Check model assumptions visually (method 1)
-simres <- simulateResiduals(fittedModel = densityModel, n = 250) #another method to check for model assumptions (normality of residuals, outlier test)
-testResiduals(simres) #statistical tests of model assumptions for method 2
-plot(effects::allEffects(densityModel)) #plot fixed effects
-sjPlot::plot_model(densityModel, type="re", vline.color = "black") # plot random effects
-
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Results/GlobalNetworkMetrics/Proximity") 
-export_summs(densityModel, model.names = c("Prox.Density"), digits=3, #Save & export model summary into a nice format
-             to.file = "docx", file.name = "Prox.DensityModel.docx")
-
-##########################
-#Testing sex preferences
-eo.FF.model <-  glmmTMB(eo.FF~ isPost + group + (1|year), data = data.prox, family = Gamma(link = "log")) 
-summary(eo.FF.model)
-# performance::check_model(eo.FF.model)
-
-
-eo.MM.model <-  glmmTMB(eo.MM~ isPost + group + (1|year), data = data.prox, family = Gamma(link = "log")) 
-summary(eo.MM.model)
-# performance::check_model(eo.MM.model)
-# simres <- simulateResiduals(fittedModel = eo.MM.model, n = 250)
-# testResiduals(simres)
-
-eo.cross.model <-  glmmTMB(eo.cross~ isPost + group + (1|year), data = data.prox, family = Gamma(link = "log")) 
-summary(eo.cross.model)
-# performance::check_model(eo.cross.model)
-# simres <- simulateResiduals(fittedModel = eo.cross.model, n = 250)
-# testResiduals(simres)
-
-export_summs(eo.FF.model, eo.MM.model, eo.cross.model, model.names = c("eo.FF", "eo.MM", "eo.cross"),
-             to.file = "docx", file.name = "Prox.SexPrefModel.docx")
-
-##########################
-#Testing kin preferences
-eo.ck.model <-  glmmTMB(eo.ck~ isPost + (1|groupyear), data = data.prox, family = Gamma(link = "log")) 
-summary(eo.ck.model)
-# performance::check_model(eo.ck.model)
-
-# eo.dk.model <-  glmmTMB(eo.dk~ isPost + (1|groupyear), data = data.prox, family = Gamma(link = "log")) 
-# summary(eo.dkmodel)
-# performance::check_model(eo.dkmodel)
-#Note: Comment for now because we get negative values, which is not normal...(ratio of two positive values)
-
-eo.u.model <-  glmmTMB(eo.u~ isPost + (1|groupyear), data = data.prox, family = Gamma(link = "log")) 
-summary(eo.u.model)
-# performance::check_model(eo.u.model)
-
-export_summs(eo.ck.model, eo.u.model, model.names = c("eo.ck", "eo.u"),
-             to.file = "docx", file.name = "Prox.KinPrefModel.docx")
-
-##########################
-#Testing rank preferences
-eo.HH.model <-  glmmTMB(eo.HH~ isPost + group + (1|year), data = data.prox, family = Gamma(link = "log")) 
-# eo.HH.model <-  lmer(eo.HH~ isPost + group + (1|year), data = data.prox) 
-summary(eo.HH.model)
-# performance::check_model(eo.HH.model)
-
-eo.LL.model <-  glmmTMB(eo.LL~ isPost + group + (1|year), data = data.prox, family = Gamma(link = "log")) 
-# eo.LL.model <-  lmer(eo.LL~ isPost + group + (1|year), data = data.prox) 
-summary(eo.LL.model)
-# performance::check_model(eo.LL.model)
-
-eo.crossR.model <-  glmmTMB(eo.crossR~ isPost + group + (1|year), data = data.prox, family = Gamma(link = "log")) 
-summary(eo.crossR.model)
-# performance::check_model(eo.crossR.model)
-
-export_summs(eo.HH.model, eo.LL.model, eo.crossR.model, model.names = c("eo.HH", "eo.LL", "eo.crossR"),
-             to.file = "docx", file.name = "Prox.RankPrefModel.docx")

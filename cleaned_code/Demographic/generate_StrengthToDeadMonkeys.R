@@ -1,13 +1,18 @@
-#Find whether individuals who lost partners are the most sensitive to the post-hurricane effect.
+# generate_StrengthToDeadMonkeys: The goal of this script is to find whether individuals who lost partners are the most 
+# sensitive to the hurricane. It will find the strength of relationship between each monkey to dead partners 
+# (cosnidering up to one year after the hurricane).
+# Input: CPRCdemographicfile_acquired_03.2020.csv; allScans.txt; allEL.Focal.RData
+# Output: strength.to.deceased.RData
+
 library(lubridate)
 library(dplyr)
 
 #Load data
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
 Demographics = read.csv("Behavioral_Data/CPRCdemographicfile_acquired_03.2020.csv"); names(Demographics)[1]="id"
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans2019.txt"); 
+allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt"); 
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data")
-load("weighted.allEL.Focal.RData")
+load("allEL.Focal.RData")
 
 #Find study population
 study.pop = unique(unlist(ID.list)) #all individuals in group by year files from pre-hurricane years in group V and KK
@@ -24,8 +29,9 @@ Demographics$AgeAtDeath[Demographics$AgeAtDeath <0]=0 #Note: there are discrepan
 # boxplot(Demographics$AgeAtDeath[Demographics$AgeAtDeath >0])
 
 ####################################################
-# Find who died in V and KK post hurricane
+# Find who died in V and KK in the year following the hurricane
 ####################################################
+
 Deaths.postHurr =  filter(Demographics,Demographics$DOD >= as.Date("2017-09-17") & Demographics$DOD < as.Date("2018-10-01"))#Find deaths before the hurricane
 #only onsider V and KK deaths
 Deaths.study.pop = filter(Deaths.postHurr, Deaths.postHurr$LastGroup=="V"|Deaths.postHurr$LastGroup=="KK")
@@ -39,9 +45,9 @@ Deaths.study.ID = as.character(Deaths.study.pop$id)
 # table(as.character(Deaths.study.pop$LastGroup))
 # table(as.character(Deaths.study.pop$LastGroup), as.character(Deaths.study.pop$Sex))
 
-####################################################
-# Find strength of bond from survivors to the deceased
-####################################################
+##########################################################################
+# Find pre-hurricane strength of bond from survivors to the deceased
+##########################################################################
 group = c("V","V","V","KK","KK")
 years = c(2015,2016,2017,2015, 2017)
 groupyears =c("V2015","V2016","V2017","KK2015","KK2017"); gy=1;id=1;id.dead=1
@@ -53,9 +59,9 @@ for (gy in 1:length(groupyears)){
   
   strength = as.data.frame(matrix(0,length(IDs),ncol= 7)); #Initialize ID-level stable partner interaction dataframe
   names(strength)=c("id", "group","year","dead.give","dead.get","std.dead.give","std.dead.get")
-  for (id in 1:length(IDs)){
-    for (id.dead in 1:length(Deaths.study.ID)){
-      if (IDs[id] != Deaths.study.ID[id.dead]){
+  for (id in 1:length(IDs)){ #for all monkeys
+    for (id.dead in 1:length(Deaths.study.ID)){ #for all dead monkeys
+      if (IDs[id] != Deaths.study.ID[id.dead]){ #only if monkey is not dead
         strength[id,"id"]=IDs[id]; strength[id,"group"]=group[gy]; strength[id,"year"]=years[gy]; 
         strength[id, "dead.give"] = strength$dead.give[id] + sum(EL$weight[which(EL$alter == IDs[id] & EL$ego == Deaths.study.ID[id.dead])])
         strength[id, "std.dead.give"] = strength$std.dead.give[id] + sum(EL$std.weight[which(EL$alter == IDs[id] & EL$ego == Deaths.study.ID[id.dead])])
@@ -67,5 +73,6 @@ for (gy in 1:length(groupyears)){
   strength.to.deceased=rbind(strength.to.deceased,strength)
 }
 strength.to.deceased$dead.all=strength.to.deceased$dead.give+strength.to.deceased$dead.get
+strength.to.deceased$std.dead.all=strength.to.deceased$std.dead.give+strength.to.deceased$std.dead.get
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data")
 save(strength.to.deceased,file="strength.to.deceased.RData")

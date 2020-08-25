@@ -1,7 +1,12 @@
+# generate_FocalBasedNetworks: This script generates social networks for pre-hurricane years, based on focal data.
+# Similarly as above, to compute weights I divide time spent grooming by the average number of hours observed between the dyad.
+# Weights are further standardized by dividing by the mean for the group/year.
+# Input: DOMINANCE.txt; _GroupByYear.txt & _GroomingEvents.txt for all groups and years
+# Output: allEL.Focal.RData
 
 #load local functions
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
-source("Functions/functions_SocialSupport.R")
+source("Functions/functions_GlobalNetworkMetrics.R")
 
 #Load scan data, population and dominance info
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
@@ -30,10 +35,10 @@ for (gy in 1:length(groupyears)){ #For each group
   meta_data=read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt",sep=""))
   data = data=read.csv(paste("Group",groupyears[gy],"_GroomingEvents.txt",sep=""))
   
-  #create date of observation information: 
-  data$date = mdy(gsub(".","-",substr(data$observation.session,1,8),fixed=T))
-  data$semester = semester(data$date)
-  data$quarter = quarter(data$date)
+  # #create date of observation information: 
+  # data$date = mdy(gsub(".","-",substr(data$observation.session,1,8),fixed=T))
+  # data$semester = semester(data$date)
+  # data$quarter = quarter(data$date)
   
   #Output the Master Edgelist of all possible pairs given the unique IDs.
   unqIDs = as.character(unique(meta_data$id))
@@ -49,7 +54,7 @@ for (gy in 1:length(groupyears)){ #For each group
   #count the duration of pair grooming
   count = data.frame(table(data$conc))
   for (i in 1:nrow(weightedEL)){
-    weightedEL$count[i] = sum(data$duration[which(data$conc == weightedEL$conc[i])]) #find the time spent grooming for each pair
+    weightedEL$count[i] = sum(data$constrained_duration[which(data$conc == weightedEL$conc[i])]) #find the time spent grooming for each pair
   }
   weightedEL$count[which(is.na(weightedEL$count))] = 0
   weightedEL$hrs <- (meta_data$hrs.focalfollowed[match(weightedEL$alter, meta_data$id)] + 

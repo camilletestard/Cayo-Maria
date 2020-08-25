@@ -1,4 +1,11 @@
 #Generate Random SubSampled Scans
+# function called everytime sub-sampling is required. This function implements
+# sub-sampling to have pre hurricane data match post-hurricane (2018) data. Match includes information about year,
+# time of day (time block AM/PM), time of year (Q), focal ID. 
+# Important to call whenever the goal is to compare pre-hurricane & 2018 years.
+# Input: allScans.txt
+# Output: sub-sampled scans (equal number of observation across all categories, pre-to-post hurricane)
+# Note: script version = generate_SubSampledScans.R
 
 calcRandomScans <- function(allScans) {
   
@@ -13,15 +20,15 @@ calcRandomScans <- function(allScans) {
   PostScans$subsampling_cat = paste(PostScans$focalID,PostScans$group,PostScans$Q,PostScans$timeBlock,sep=".")
 
   years = sort(unique(PreScans$year), decreasing=F) #unique years in increasing order
-  SubPostScans = data.frame(); SubPreScans = data.frame() #initialize dataframes
+  SubPostScans = data.frame(); SubPreScans = data.frame(); y=1 #initialize dataframes
   #count = 0
-  for (y in 1:length(years)){ #for all pre scan years
+  for (y in 1:length(years)){ #for EACH pre scan years separately
     
     pre_scans = PreScans[which(PreScans$year == years[y]),] #Select pre-scans of that year
     pre_scans$subsampling_cat = paste(pre_scans$focalID,pre_scans$group,pre_scans$Q,pre_scans$timeBlock,sep=".") #create subsampling category ID/group/Q/timeBlock
     numSamples_pre = as.data.frame(table(pre_scans$subsampling_cat)) # find the number of samples of each category in pre-hurricane data of that year
     
-    SubPostScansPerYear = data.frame(); #initialize dataframes
+    SubPostScansPerYear = data.frame(); cat=1 #initialize dataframes
     for (cat in 1:nrow(numSamples_pre)){ #for all ID/group/Q/timeBlock pre-hurricane
       
       post_scans=NA #Initialize post-hurricane data for that year
@@ -36,7 +43,7 @@ calcRandomScans <- function(allScans) {
         
         if (length(idxPost)<length(idxPre)){ #if there are more observations pre-hurricane in that category, in that year
           idxPre_subSample = sample(idxPre,length(idxPre)-length(idxPost), replace=F) # randomly select a sub-sample of occurences pre-hurricane to match post-hurricane
-          pre_scans = pre_scans[-idxPre_subSample,]#sub-sample pre-hurricane data of that category, that year
+          pre_scans = pre_scans[-idxPre_subSample,]#sub-sample (by REMOVING extra obs) pre-hurricane data of that category, that year
           post_scans = PostScans[idxPost,]
           post_scans$year = as.numeric(years[y])
         }

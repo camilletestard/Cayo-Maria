@@ -1,12 +1,8 @@
 This note describes the function of each script, their input and outputs.
 
-%%%%%%%%% Generate Behavioral Data %%%%%%%%%%
+%%%%%%%%% Functions %%%%%%%%%%
 
-1. generate_allScans: generates scan data from all group and years
-Input: proximity data from "normal" data collection protocol years (including 2019) & scan data from 2018 (hurricane year)
-Output: Combination of all scan data in "allScans.txt" file. This will be the input to many other scripts
-
-2. CalcSubsampledScans: function called everytime sub-sampling is required. This function implements
+1. CalcSubsampledScans: function called everytime sub-sampling is required. This function implements
 sub-sampling to have pre hurricane data match post-hurricane (2018) data. Match includes information about year,
 time of day (time block AM/PM), time of year (Q), focal ID. 
 Important to call whenever the goal is to compare pre-hurricane & 2018 years.
@@ -14,32 +10,54 @@ Input: allScans.txt
 Output: sub-sampled scans (equal number of observation across all categories, pre-to-post hurricane)
 Note: script version = generate_SubSampledScans.R
 
-3. Generate_AgonisticAction2018: Generate AgonisticActions.txt for scan data in 2018, using the same formal as
-previous years.
-Input: AllScans.txt
-Output: AgonisticActions.txt group V and group KK
+2. functions_GlobalNetworkMetrics: functions to generate social networks from unique IDs + compute global network
+# metrics & partner preference indices (sex, kin, rank).
+#- calcMasterEL: output non-directional EL (for proximity)
+#- calcEdgeList: Counts edge weights in non-directional EL (just count, division by #scans 
+#happens in "Generate_GlobalNetworkMetrics"
+#- calcMasterEl_groom: output directional EL (for grooming)
+#- calcEdgeList_groom: counts edge weights in directional EL (just counts as well)
+#- createIG / createIG_groom (nondirection and directional): create igraph and tnet objects
+#- calcGenStats: calculate generic network values: density, community size, clustering coefficient for whole network,
+#female only and male only networks
+#- calcSexProps: calculate ratio of observed MM/MF/FF pairs over expected given network (weighted)
+#- calcKinProps: calculate ratio of observed ck/dk/unrel pairs over expected given network (weighted)
+#- calcRankProps: calculate ratio of observed HH/LL/HL pairs over expected given network (weighted)
+#The last 3 functions allow to estimate how much more than chance are each pair category occurring, comparing pre- 
+#and post-hurricane.
+#Note: expected is computed based on the distribution of sex/kinship/rank attributes in the network IDs.
 
-4. Generate_commonID: Find common IDs across years for group V and KK. Used to create aggression networks and
-compare them across years. I want to make sure I compare the same IDs across years.
+
+%%%%%%%%% Generate Behavioral Data %%%%%%%%%%
+
+1. generate_allScans: generates scan data from all group and years
+Input: proximity data from "normal" data collection protocol years (including 2019) & scan data from 2018 (hurricane year)
+Output: Combination of all scan data in "allScans.txt" file. This will be the input to many other scripts
+
 
 %%%%%%%%% ChangePproxPgroom %%%%%%%%%%
 
-5. Modelling_PaccPsoc: Binomial Models of p(proximity) & p(grooming). Has p(groom) & p(prox) changed post-hurricane?
+3. Modelling_PaccPsoc: Binomial Mixed Models of p(proximity) & p(grooming). Has p(groom) & p(prox) changed post-hurricane?
 Are there inter-individual differences in how much probabilities have changed?
 Functions called: CalcSubsampledScans
 Input: allScans.txt
 Output: Model parameters over 500 iterations (multiple iterations of sub-sampling to make sure we actually take all 
 post-hurricane data into account). Models: 
-- Base Model: isPost + sex + age + rank + group + (1|year) + (1|ID)
-- Afternoon only, Group differences, Sex/age/rank differences, Quarter differences
-Saved as "ModelEffectsFinal.RData"
+- p(prox) or p(groom) ~ isPost*quarter + sex + age + rank + group + timeBlock + (1|year) + (1|ID)
+- Models are run separately for each group
+Model outputs are saved as "ModelEffectsFinal.RData"
+The second part of the script takes in "ModelEffectsFinal.RData" as input, averages across iterations, finds the 95% CI of parameter
+estimates and saves a .csv file for each group.
 
-6. VisualizeModelEffects: Density plot & tables to visualize mean estimate and 95%CI of model parameters
-generated in "Modeling_PaccPsoc".
-Input: ModelEffectsFinal.RData (output of script3)
-Output: Density plot and tables.
+3. Modelling_PaccPsoc_AllData: Binomial Mixed Models of p(proximity) & p(grooming). Has p(groom) & p(prox) changed post-hurricane?
+Here all the data is used, there is not subsampling. 
+Input: allScans.txt
+Output Models: 
+- p(prox) or p(groom) ~ isPost*quarter + sex + age + rank + group + timeBlock + (1|year) + (1|ID)
+- Models are run separately for each group
+Model outputs are saved as "ModelEffectsFinal_AllData.RData"
 
-7. VisualizePaccPsoc: This scripts aims to visualize how p(proximity) and p(grooming) changed pre-to-post huricane 
+4. VisualizePaccPsoc: This scripts aims to visualize how p(proximity) and p(grooming) changed pre-to-post huricane 
 and whether there are inter-individual differences in how much individuals changed their affiliative behaviors. 
 Note: visualization happen after 1 iteration of sub-sampling and therefore is not a representation of our full
 dataset. However, after mutliple output iterations, all plots look similar, which makes me think it is a good 
@@ -48,19 +66,46 @@ Functions called: CalcSubsampledScans
 Input: allScans.txt
 Outputs (visuals):
 - paired box plots pProx/pGroom pre- post-hurricane
-- Box plots and histograms of pProx/pGroom pre- post-hurricane
-- Separated by: group, sex, year, quarter and Timeblock.
+- Violin plots and histograms of pProx/pGroom pre- post-hurricane
+- Separated by group and quarter
 - Correlation plot dpGroom vs. dpProx.
 
-8. generate_corr.dprox.dgroom.R: This script computes correlation between change in proximity and change in grooming. 
-Are the individuals who spend more time in proximity also those that change their grooming sfreq. the most?
-Functions called: CalcSubsampledScans
-Input = allScans.txt
-Outputs: scatter plot with line fit and correlation coeff.
+
+%%%%%%%%% SocialNetworkGraphs (Affiliative) %%%%%%%%%%
+
+12. VisualizeSocialNetworks: This script aims at visualizing social networks and how they change over time 
+(especially pre to post hurr). Social networks can be based on proximity or grooming. Weights are based on scan data only. To compute weights 
+I divide counts of prox or groom events by the average number of scan observations between the dyad. This approach assumes a linear 
+relationship whereby the more I observe an ID, the more counts of afffiliative interactions I will get.
+Additionally, I use a subsampling approach to have equal number of observations for each ID pre-to-post hurricane, balances across
+time of year and time of day.
+Functions called: CalcSubsampledScans, functions_GlobalNetworkMetrics
+Input: "allScans.txt"
+Output: pre and post hurr equivalent network graphs, for each group and pre-hurricane years + for both prox and groom.
+Note: I am only representing one iteration of sub-sample. But as for p(prox)/p(groom) plots, I see robust results 
+across iterations of plotting. Thus I conclude they are representative plots of the whole data set.
+IMPORTANT NOTE: I standardize weights by dividing by the mean for the group/year.
+
+13. generate_FocalBasedNetworks: This script generates social networks for pre-hurricane years, based on focal data.
+Similarly as above, to compute weights I divide time spent grooming by the average number of hours observed between the dyad.
+Weights are further standardized by dividing by the mean for the group/year.
+Input: DOMINANCE.txt; _GroupByYear.txt & _GroomingEvents.txt for all groups and years
+Output: allEL.Focal.RData
+
 
 %%%%%%%%% Demographic_changes %%%%%%%%%%
 
-9.
+5. generate_deathBarPlot: This script takees in CPRC demographic file and implements two analyses: 
+(1) It finds who died in the year following the hurricane
+(2) It computes the number of deaths per 100 adults, for every month from one year before until one year after the hurricane.
+Input: CPRCdemographicfile_acquired_03.2020.csv; allScans.txt; DOMINANCE.txt
+Output: Longitudinal deaths/100 adults bar plot. 
+
+6. generate_StrengthToDeadMonkeys: The goal of this script is to find whether individuals who lost partners are the most 
+sensitive to the hurricane. It will find the strength of relationship between each monkey to dead partners (cosnidering up 
+to one year after the hurricane).
+Input: CPRCdemographicfile_acquired_03.2020.csv; allScans.txt; allEL.Focal.RData
+Output: strength.to.deceased.RData
 
 %%%%%%%%% GlobalNetworkMetrics_PartnerPref %%%%%%%%%%
 
@@ -69,233 +114,140 @@ It also generates network metrics- density, gini coeff, sex/rank/kinship proport
 Finally, it runs over all groups and years seperately, after sub-sampling.
 Note: edge weights are calculated by counting the frequency of proximity or grooming interactions between a pair
 of individuals (frequency rather than time becuase we are dealing with scan data, not focal). We then divide by the 
-average number of scans the two individuals were seen.
+average number of scans where each member of the dyad was seen.
 Note2: this assumes a linear relationship between number of scans and #observations in behavior X. (i.e. the more you
 observe an individual, the more likely he will be seen grooming or in proximity).
 Functions called: CalcSubsampledScans, functions_GlobalNetworkMetrics, KinshipPedigree
 Input: allScans.txt, PEDIGREE.txt
 Output: global network stats (density, community size, clustering coeff), partner preference stats (ratio obs/exp
 for sex, kin, rank). Output file: "AllStats.RData".
-IMPORTANT NOTE: I do not standardize by dividing by the mean for the group/year. Should I do that?
+IMPORTANT NOTE: I standardize weights by dividing by the mean for the group/year. 
+Also, in the paper I only ended up using network density.
 
-8. functions_GlobalNetworkMetrics: functions to generate social networks from unique IDs + compute global network
-metrics & partner preference indices (sex, kin, rank).
-- calcMasterEL: output non-directional EL (for proximity)
-- calcEdgeList: Counts edge weights in non-directional EL (just count, division by #scans 
-happens in "Generate_GlobalNetworkMetrics"
-- calcMasterEl_groom: output directional EL (for grooming)
-- calcEdgeList_groom: counts edge weights in directional EL (just counts as well)
-- createIG / createIG_groom (nondirection and directional): create igraph and tnet objects
-- calcGenStats: calculate generic network values: density, community size, clustering coefficient for whole network,
-female only and male only networks
-- calcSexProps: calculate ratio of observed MM/MF/FF pairs over expected given network (weighted)
-- calcKinProps: calculate ratio of observed ck/dk/unrel pairs over expected given network (weighted)
-- calcRankProps: calculate ratio of observed HH/LL/HL pairs over expected given network (weighted)
-The last 3 functions allow to estimate how much more than chance are each pair category occurring, comparing pre- 
-and post-hurricane.
-Note: expected is computed based on the distribution of sex/kinship/rank attributes in the network IDs.
-
-9. visualize_GlobalNetworkMetrics: This script aims at visualizing change in grooming and proximity network densities
-and custering.
+9. visualize_GlobalNetworkMetrics: This script aims at visualizing change in grooming and proximity network densities, 
+divided by group and year.
 Input: "AllStats.RData" (output of generate_GlobalNetworkMetrics.R)
 Output: 4 plots - proximity-based ans groom-based network densities and clustering for all groups and years.
 
-10. visualize_PartnerPreference: This script aims at visualizing change in partner preferences. Specifically, are 
-there more occurrences of FF/MF/MM pairs, CK/DK/UNR pairs or HH/LH/LL pairs pre-to-post-hurricane.
-Input: "AllStats.RData" (output of generate_GlobalNetworkMetrics.R)
-Output: 3 mega plots combining sex, kin and rank preferences for all groups and years.
-Note: The output graphs are very messy (one for each group and year because combining them does not make much sense,
-it is not the same scale across years). Maybe there would be a better way to visualize e.g. by plotting a ratio 
-pre-post which would highlight the direction of change?
+11. Modelling_GlobalNetworkMetrics: Test the difference in proximity and grooming network density distributions 
+pre-to-post hurricane, for each group and year seperately.
+Compute the difference between pre and post-hurricane network density for each subsampling iterations. We will get a 
+distribution of that difference. I then compute and save the mean difference and 95% confidence interval.
+Output: .csv files with mean difference and CI, for grooming and proximity and each group and year separately (total = 10 estimates).  
 
-11. Modelling_GlobalNetworkMetrics: 
-Input: "AllStats.RData" (output of generate_GlobalNetworkMetrics.R)
-Output:
-- Beta family model for density (proportion of edges observed over all possible edges): has density changed 
-pre-to-post hurr statistically?
-- Gamma Family (log link function) for partner preference stats. = ratio with values >= 0. Is there more pair 
-category than what is expected by chance pre- vs. post-hurricane. 
-Note 1: Not sure about which model is most appropriate + issue that I have to run 18 models (1 for each pair, for prox and groom)
-Note 2: I am not directly comparing pre- and post-hurricane years but rather estimating how much more than chance in 
-each year. This statistic does account for change in density which leads to higher occurrence of ALL ties.
-Note 3: I use mutliple packags to test model assumptions and select the appropriate model. Could be used in other circumstances.
-
-%%%%%%%%% SocialNetworkGraphs (Affiliative) %%%%%%%%%%
-
-12. VisualizeSocialNetworks: This script aims at visualizing social networks and how they change over time 
-(especially pre to post hurr). Social networks can be based on proximity or grooming. To compute weights 
-I divide counts of prox or groom by the number of scan observations per IDs. This approach assumes a linear 
-relationship whereby the more I observe an ID, the more counts of afffiliative interactions I will get.
-Additionally, I use a subsampling approach to have equal number of observations (in each category), for each ID.
-Functions called: CalcSubsampledScans, functions_GlobalNetworkMetrics
-Input: "allScans2019.txt"
-Output: pre and post hurr equivalent network graphs, for each group and pre-hurricane years + for both prox and groom.
-Note: I am only representing one iteration of sub-sample. But as for p(prox)/p(groom) plots, I see robust results 
-across iterations of plotting. Thus I conclude they are representative plots of the whole data set.
-IMPORTANT NOTE: I standardize weights by dividing by the mean for the group/year.
-
-13. VisualizeSocialNetworks_ScanData & VisualizeSocialNetworks_FocalData: These script aims at comparing 
-grooming networks computed using scan data versus focal data (only for years we have focal data!). 
-The goal is to check whether scan (or proximity data) pre-hurricane recapitulates grooming focal data well.
-Functions called: functions_GlobalNetworkMetrics
-Input_ScanData: allScans.txt, GroupByYear.txt (note: scans in allScans = .ProximityGroups.txt files).
-Output_ScanData: Scan-based social network graphs (for either proximity or grooming, either weighted ot not, for each year and group)
-Input_FocalData: GroomingEvents.txt, GroupByYear.txt
-Output_FocalData: Focal-based social network graphs (for either proximity or grooming, either weighted ot not, for each year and group)
 
 %%%%%%%%% FactorsPredictingChangeP %%%%%%%%%%
 
-13. generate_SocialCapitalMetrics: This script generates pre-hurricane social capital metrics with in mind the objective
-of determining which factors may predict the change in social rates post-hurricane. Why do some individual change 
-their social rate by a lot and others only by a little or even decrease?. 
-Functions called: functions_GlobalNetworkMetrics
-Input: GroomingEvents.txt, AgonisticActions.txt, FocalData.txt, GroupByYear.txt, 
-Output Social Capital Metrics: "SocialCapital.RData"
-GROOMING:
-- GroomIN and GroomOUT: based on focal data (so duration/hrs followed). Not standardized. I am  not using the usual 
-"network approach" here but rather finding this info through a different method.
-- DSIGroom: (GroomIN + GroomOUT)
-- numPartners: both partners for groomIN and groomOUT. 
-- Network measures: betweenness, eigenvector centrality and clustering coeff. IMPORTANT NOTE: These are based 
-on standardized weights (i.e. divided by mean)!
-PROXIMITY: 
-- numPartners
-- DSIprox = proximity rate = numPartners/numScans
-COMBINATION: numPartners, DSI
-AGGRESSION:
-- AggIN, AggOUT
-- DSIagg = AggIN + AggOut
-SDB & Vigiliance rates. (not standardized).
-IMPORTANT NOTE: I decided to remove standardization in the generation of social capital metrics as it will be 
-easy to standardize after (i.e. divide by mean) if we wish to. However if we don't want to use standardized measures
-it will be harder to recover "raw" measures after standardization.
-IMPORTANT NOTE 2: Standardization was done WITHIN group and year. So it is not as easy as I thought to implement.
+13. generate_SocialCapitalMetrics: This script generates pre-hurricane social capital metrics with in mind the following objectives:
+#(1) determining which factors pre-hurricane may predict the change in social rates post-hurricane. Why do some 
+#individual change their social rate  by a lot and others only by a little, or even decrease?
+#(2) determining which factors pre-hurricane may predict death post-hurricane (did some factor made individuals 
+#more likely to die in the year following the hurricane?
+#(3) Used as a dataframe for other analyses requiring pre-hurricane social capital factors.
+#Functions called: functions_GlobalNetworkMetrics
+#Input: GroomingEvents.txt, AgonisticActions.txt, FocalData.txt, GroupByYear.txt, 
+#Output Social Capital Metrics: "SocialCapital.RData"
+#GROOMING:
+#- GroomIN and GroomOUT: based on focal data (so duration/hrs followed). Not standardized. 
+#I am  not using the usual "network approach" here but rather using the grooming.txt file durations directly
+#- DSIGroom: (GroomIN + GroomOUT). std.DSIGroom = DSIGroom/mean(DSIGroom) [non-zero mean, for that group and year]
+#- Network measures: degree, betweenness, eigenvector centrality and clustering coeff. IMPORTANT NOTE: These are based 
+#on standardized weights (i.e. divided by mean)!
+#I also add standardized degree, divided by the non-zero degree mean, for that group and year.
+#PROXIMITY: 
+#- DSIprox = proximity rate = number of proximity partners per scans = total numPartners/numScans
+#- Network measures: degree, betweenness, eigenvector centrality and clustering coeff. 
+#IMPORTANT NOTE: weights = #proximity events between dyad/hrs followed. Weights are standardized (i.e. divided by non-zero mean)! 
+#COMBINATION: numPartners & DSI combining grooming and proximity (taking the average of the two measures)
+#AGGRESSION:
+#- AggIN, AggOUT: # aggressive interactions/hrs followed. All aggressive interactions are considered here.
+#- DSIagg = AggIN + AggOut. Also standardized measure, dividing by group mean for that year.
+#SDB & Vigiliance rates:
+# sdb or vigiance events / #hrs followed 
+#(both standardized and non-standardized measures).
 
 14. Modelling_ChangeP: The goal is to model change p(groom) and p(prox) post-hurricane. what factor pre-hurricane
 predicts the change in social behavior post-hurricane? 
 Modelling happens over multiple iterations because we compute dpgroom and dpprox over sub-sampled scans. At each
-iteration, i compute the change in pProx and pGroom (only considering IDs with at least 20obs), the script then
+iteration, I compute the change in pProx and pGroom (only considering IDs with at least 20obs), the script then
 combines change in social rates info with pre-hurricane social capital factors in one big data frame for modelling.
 Functions called: CalcSubsampledScans
 Input: "SocialCapital.RData" (output from generate_SocialCapitalMetrics), allScans.txt (to compute change in social rates)
-Output Models (for grooming and proximity separately): "ChangePModelEffects.RData"
-- Base Model: sex + age + group + rank + (1|ID) + (1|year)
-- "Need for change" Model: sex + age + group + rank + DSI + numPartners + (1|ID) + (1|year)
-- "Demographic change" Model: sex + age + group + rank + dead.all + DSI + numPartners + (1|ID) + (1|year)
-- "Capacity for change" Model: sex + age + group + rank + eigen.cent + betweenness + clustCoeff + (1|ID) + (1|year)
-- All Model: sex + age + group + rank + DSI + numPartners + eigen.cent + betweenness + clustCoeff + (1|ID) + (1|year)
-RELATIONSHIP TO DECEASED:
--dead.get/dead.give/dead.all = strength of bond to partners who died in the 6 months following the hurricane
--std.dead.all = standardized versions (divided by mean)
-
-15. VisualizeChangePModelEffects: visualize the model parameter estimates (compute tables) over mutliple iterations 
-to make sure we go throuh all post-hurricane data. (Same in principle as VisualizeModelEffects.R)
-Point estimate = Mean + 95%CI
+Output Models (for each group separately): "ChangePModelEffects.RData"
+- Groom Model: sex + age + group + rank + dead.all + std.DSIGroom + dpProx + (1|ID) + (1|year)
+- Prox Model: sex + age + group + rank + dead.all + std.DSIProx + (1|ID) + (1|year)
+NOTES:
+-dead.all = strength of bond to partners who died in the year following the hurricane
+-dProx = change in proximity
+-std.X = standardized versions (divided by mean)
+In sections 3. I compile model outputs from all iterations by computing mean estimates and 95% CI. 
+in section 4. I visualize individual effects
 
 %%%%%%%%% Partner.Strength.PrePost %%%%%%%%%%
 
-15.generate_strengthPrePost: This script computes the distribution of grooming & proximity strength before and after the disaster 
-over multiple iterations (running through sub-samples). This script was meant to investigate wether individuals interact with 
-more partners but more weakly (i.e. spreading their grooming efforts.
+15.generate_strengthPrePost: This script computes the distribution of grooming edge strength before and after the disaster 
+over multiple iterations (running through sub-samples). This script was meant to investigate wether individuals overall interact with 
+more partners but more weakly (i.e. spreading their grooming efforts), or if they reinforce individual relationships 
+(stronger dyadic bonds on average). Edge weights are all based on scan data and are comupted similarly to "VisualizeSocialNetworks"
+Functions called: CalcSubsampledScans; functions_GlobalNetworkMetrics
+Input: allScans.txt
+Output: Networks.RData
 
-16. VisualizeModel_StrengthPrePost: This script visualizes and models the change in grooming and proximity bond strength post-disaster.
-Overlapping histograms.
+16. VisualizeModel_StrengthPrePost: Compare strength of bonds pre-to-post hurricane. Are individuals spreading their grooming investment
+over more weak partners or do they have fewer but stronger bonds? or both stronger bonds and more partners?
+This script visualizes and tests the difference in grooming and proximity bond strength pre-to-post disaster.
+Note: bond strengths are log-transformed before being used as dependent variables in a linear mixed model to follow normal distribution assumption.
+Model: lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|year), data=data.groom.iter.V or KK)
+Input: Networks.RData
+Output: 2 .csv files with mean estimates and 95%CI, one for each group separately.
 
-16. generate_StrengthTo.Stable.New.Old.Partners: This script computes grooming/proximity strength with "Stable" 
-partners = pairs who interacted both before and after the hurricane; "Old" partners = pairs who only interacted before
-the hurricane and "New" partners who only strated interacting AFTER the hurricane.
-Questions: How much do IDs interact with partners they had before the hurricane? completely new partners post?
-Old partners they don't interact with anymore?
+16. generate_StrengthTo.StablePartners.PrePost: This script computes grooming strength with "Stable" partners 
+= pairs who interacted both before and after the hurricane.
 Functions Called: CalcSubsampledScans, functions_GlobalNetworkMetrics
 Inputs: allScans.txt
-Outputs: Overall population proximity and grooming strength to stable/new/old partners AND per ID metrics.  
-= Strength.Stable.New.Old.Partners.RData
+Outputs: Overall population proximity and grooming strength to stable partners AND per ID metrics.  
+= Strength.StablePartners.RData
 
-17. VisualizeStrengthStable.New.OldP: Visualize strength to stable/new/old partners. How has the composition of 
-the social environment changed pre-topost hurricane?
-Input: Strength.Stable.New.Old.Partners.RData
-Output: overlapping histogram =
-- Strengths stable partner pre vs. stable partner post
-- Strength new partner post vs. stable partner post 
-- Strength old partner pre vs. stable partner pre 
+18. VisualizeModel_StrengthPrePost_StableP: Statistically test the difference in grooming strength to "stable" partners pre-to-post hurricane.
+Question: How much do IDs interact with partners they had before the hurricane?
+Input:Strength.StablePartners.RData
+Note: bond strengths are log-transformed before being used as dependent variables in a linear mixed model to follow normal distribution assumption.
+Model: lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|year), data=data.groom.iter.V or KK)
 
-18. Modelling_pAccpSoc_SP: Statistically test the difference in grooming strength to stable partners pre-to-post hurricane.
-Input:Strength.Stable.New.Old.Partners.RData
-Output:
-- Gamma model with log link function for change in Prox strength to stable partners pre-to-post hurricane
-- Linear model for change in Groom strength to stable partners pre-to-post hurricane
 
-%%%%%%%%% Aggression Networks %%%%%%%%%%
+%%%%%%%%% Who are the new partners? Assess change in grooming activity budget %%%%%%%%%%
 
-14. VisualizeAggNetworks: This script compute agression-based edgelist and weights, and plots aggression-based networks.
- It uses all types of aggression interactions (contact/non-contact/submission etc.). Because aggression data was not
-collected  during proximity scans in "normal data collection" years, I cannot use the sub-sampling approach we 
-developed for affiliative behaviors (proximity and grooming). Pre-hurricane: aggression is collected during focals 
-and rates should be computed by dividing counts by the number of hours. Post-hurricane (2018): aggression is collected 
-during scans. Thus, to compute weights I divide counts by the number of scan observations per IDs. This approach assumes
-a linear relationship whereby the more I observe an ID, the more counts of aggressive interactions I will get.
-So far, I have not implemented any sub-sampling in terms of number of observations per ID. However, I only use 
-"common IDs" across years - that is IDs that are involved in aggression throughout all years of observations (longitudinal).
-IMPORTANT NOTE: aggression data post-hurricane is collected using a pseudo-systematic approach (almost ad-lib?) which
-may have introduced biases in our observations. However, if anything, we should see an artificial INCREASE in 
-#aggressive interactions (aggression is salient, easily observable during non-systematic sampling). However we rather 
-see a *decrease* in aggressive interactions.
-IMPORTANT NOTE #2: This could be simply due to the difference in feeding protocol. I should re-run the analysis only
-with PM data (not trivial to produce!).
-Functions Called: functions_GlobalNetworkMetrics
-Inputs: GroupByYear.txt, AgonsiticActions.txt, commonIDs.Rdata
-Outputs: Aggression network graphs
-
-20. generate_AggNetworkMetrics:  this script computes aggression network density and mean weight to compare across years.
-It uses the same procedure as described above (VisualizeAggNetworks).
-Additionally, I use a bootstrap approach to compute a distribution of density and mean weight value for each network, 
-in each year. The bootstrap simply samples randomly, with replacement, rows from the edgelist and computes density 
-and mean weights n_boot times.
-Functions Called: functions_GlobalNetworkMetrics
-Inputs: GroupByYear.txt, AgonsiticActions.txt, commonIDs.Rdata
-Outputs: bootstrapped density and mean weights for each group and year. "AggNetMetrics.RData".
-
-21. VisualizeAggMetrics: This script plots the output from generate_AggNetworkMetrics, i.e. density and mean weights.
-Inputs: "AggNetMetrics.RData".
-Outputs: Boxplots of aggression network metrics separated by year and group.
-
-%%%%%%%%% Social Support %%%%%%%%%%
-
-22. functions_SocialSupport
-
-23. generate_SocialSupport
-
-%%%%%%%%% Who are the new partners? %%%%%%%%%%
-
-24. generate_WhoAreTheNewPartners: This script computes the proportion of pair categories for each group/year/hurricane
-status separately. Pair categories based on: 
-- Social status: Low->Low; Low->High; High->Low; High->High. Note: Low rank <70%; High rank >70%
+24. generate_WhoAreTheNewPartners: This script computes the proportion of time spent grooming 
+between each pair categories relative to total grooming; for each group/year/hurricane status separately. 
+Dyadic categories are based on: 
+- Social status: Low->Low; Low->High; High->Low; High->High. Note: Low rank < top 80%; High rank = top 80%
 - Sex: M->M; F->M; M->F; F->F
-- Pre-hurr grooming strength: greg->greg; greg->shy; shy->greg; shy->shy. Note: threshold for shy/greg is 75% (or prctile)
-- Kinship: close kin (ck, >0.25); distant kin (dk) and unrelated (unrel <0.125)
-This allows us to assess the difference in relationship distribution pre-to-post hurricane. E.g. are there more
-F->M relationships occuring post-disaster? The output unit is in weighted % (or weighted proportion of all 
-edges/relationships, i.e. % of grooming time occurs for pairs of category X). 
-Comparisons are done in a fair way: we use subsampled scans, controlling for data collection biases. The proportions 
-are computed overall multiple iterations to make sure we cover all post-hurricane data.
-NOTE: Proportion takes into account overall change in density. It allowws to asses relative changed (instead of absolute)
+- Pre-hurr grooming strength: greg->greg; greg->shy; shy->greg; shy->shy. Note: threshold for shy < 80% (or prctile); greg > 80%
+- Kinship: related (rel>0.125) and unrelated (unrel <0.125)
+This allows us to assess the difference in "relationship distribution" pre-to-post hurricane. E.g. is there relatively more grooming 
+happening from fem->Male post-disaster? The output unit is in % of edge weights.
+Comparisons are done in a fair way: we use subsampled scans, controlling for data collection biases. The same individuals are present in
+both pre and post-hurricane networks, and the same number of obsevrations per ID are considered pre/post. The proportions 
+are computed overall multiple subsampling iterations to make sure we cover all post-hurricane data.
+NOTE: Proportion takes into account overall change in density. It allows to assess relative changes (instead of absolute)
 Functions Called: CalcSubsampledScans, functions_SocialSupport, KinshipPedigree
-Input: allScans2019.txt, SocialCapital.RData
-Ouput: PartnerAttributes.RData. Proportions of each pair category specified above pre-/post-hurricane.
+Input: allScans.txt, SocialCapital.RData
+Ouput: PartnerAttributes.RData.
 
 25. ModellingVisualize_WhoAreNewPartners: This script visualizes and runs statistics on the output of "generate_WhoAreTheNewPartners".
-= proportions of pair categories for each group/year/hurricane status separately. Pair categories based on: 
-- Social status: Low->Low; Low->High; High->Low; High->High. Note: Low rank <70%; High rank >70%
+= proportion of grooming between pair categories for each group/year/hurricane status separately. Pair categories based on: 
+- Social status: Low->Low; Low->High; High->Low; High->High. Note: Low rank <80%; High rank >80%
 - Sex: M->M; F->M; M->F; F->F
-- Pre-hurr grooming strength: greg->greg; greg->shy; shy->greg; shy->shy. Note: threshold for shy/greg is 75% (or prctile)
-- Kinship: close kin (ck, >0.25); distant kin (dk) and unrelated (unrel <0.125)
+- Pre-hurr grooming strength: greg->greg; greg->shy; shy->greg; shy->shy. Note: threshold for shy/greg is 80% (or prctile)
+- Kinship: related (rel>0.125) and unrelated (unrel <0.125)
 This script will allows us to assess the difference in relationship distribution pre-to-post hurricane. 
 E.g. are there more F->M relationships occuring post-disaster? 
-The input unit is in weighted % (or weighted proportion of all edges/relationships, i.e. % of grooming time occurs for pairs of category X). 
 Input: PartnerAttributes.RData
-Visulizations: Box plots separated by group, year and hurricane status of the proportons in each category.
-Models: beta family models (appropriate for proportions). isPost as fixed; groupyear as random effect. There is one 
-model per pair category (total of 15)
+(1) Compute difference in proportions between pre- and post- for each subsampling iteration. We will get distributions of differences.
+(2) Compute mean difference and 95% confidence interval for each dyadic category.
+(3) Compute one-sided p-value (=proportion of difference distribution above or below zero. It depends on which side we're testing).
+Output: .csv files with estimates, 95%CI and one-sided p-vals.
+Visulizations: Violin plots of difference in proportions pre/post in each dyadic category, separated by group.
 
 %%%%%%%%% What drives bond formation? %%%%%%%%%%
 
@@ -323,5 +275,6 @@ Silk et al 2017 (Animal Behavior)
 # http://statnet.org/Workshops/tergm_tutorial.html
 
 27. Visualize.TERGM: Visualize in TERGM model paramaters (for both formation and dissolution) in two ways: 
-	1. horizontal box plot
-	2. tables of coefficients with 95% confidence intervals.
+Remove outliers due to model misfits (coefficient is more than 3 std. deviations awat from mean or -Inf.
+	1. horizontal violin plot
+	2. tables of mean estimates for all coefficients & 95% confidence intervals.

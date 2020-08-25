@@ -1,7 +1,17 @@
 #GENERATE GLOBAL NETWORK METRICS
-#This script generates social networks based on proximity or grooming data.
-#It also generates network metrics: density, gini coeff, sex/rank/kinship proportions
-#It runs over all groups and years after sub-sampling.
+# This script generates social networks based on proximity or grooming data.
+# It also generates network metrics- density, gini coeff, sex/rank/kinship proportions
+# Finally, it runs over all groups and years seperately, after sub-sampling.
+# Note: edge weights are calculated by counting the frequency of proximity or grooming interactions between a pair
+# of individuals (frequency rather than time becuase we are dealing with scan data, not focal). We then divide by the 
+# average number of scans where each member of the dyad was seen.
+# Note2: this assumes a linear relationship between number of scans and #observations in behavior X. (i.e. the more you
+# observe an individual, the more likely he will be seen grooming or in proximity).
+# Functions called: CalcSubsampledScans, functions_GlobalNetworkMetrics, KinshipPedigree
+# Input: allScans.txt, PEDIGREE.txt
+# Output: global network stats (density, community size, clustering coeff), partner preference stats (ratio obs/exp
+# for sex, kin, rank). Output file: "AllStats.RData".
+# IMPORTANT NOTE: I standardize weights by dividing by the mean for the group/year. 
 
 # load libraries
 library(dplyr)
@@ -12,12 +22,13 @@ library(stringr)
 
 #load local functions
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
-source("Social_Network_Analysis/CalcSubsampledScans.R")
-source("Social_Network_Analysis/functions_GlobalNetworkMetrics.R")
-source("Social_Network_Analysis/KinshipPedigree.R")
+source("cleaned_code/Functions/CalcSubsampledScans.R")
+source("cleaned_code/Functions/functions_GlobalNetworkMetrics.R")
+source("cleaned_code/Functions/KinshipPedigree.R")
 
 #Load scan data and population info
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans2019.txt")
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
+allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
 bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
 
 #Compute pedigree for all IDs in this group
@@ -89,6 +100,8 @@ for (a in 1:length(actions)){ #for all actions
           #set num scans between each pair to be the average of the number of scans of the two individuals
           weightedEL$numscans <- (numscans$freq[match(weightedEL$alter, numscans$id)] + numscans$freq[match(weightedEL$ego, numscans$id)])/2 
           weightedEL$weight <- round(weightedEL$count / weightedEL$numscans, 5) #add weight information by dividing by #observations
+          meanWeight = mean(weightedEL$weight[weightedEL$weight!=0])
+          weightedEL$weight = weightedEL$weight/meanWeight
           weightedEL$count <- NULL;weightedEL$conc <- NULL #delete those calumn variables
           
           # 6. Generate graphs from proximity scans (has sex and age vertices attributes)
@@ -120,7 +133,7 @@ for (a in 1:length(actions)){ #for all actions
           name = paste(group[g],years[y],isPost[h],sep=".")
           
           AllStats[[name]] = rbind(AllStats[[name]], AllStatsDF)  
-          save(AllStats,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/AllStats.RData")
+          save(AllStats,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
           
         } #end of of pre-/post-hurricane loop
       } #end of year for loop

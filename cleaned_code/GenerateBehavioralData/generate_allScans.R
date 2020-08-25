@@ -18,30 +18,32 @@ setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data 
 # group = c("R","R","F", "F", "F", "F", "V", "V", "V", "HH", "HH", "KK","KK")
 # years = c(2015, 2016, 2014, 2015, 2016, 2017, 2015, 2016, 2017, 2014, 2016, 2015, 2017)
 # groupyears = c("R2015", "R2016", "F2014", "F2015", "F2016", "F2017", "V2015", "V2016", "V2017", "HH2014", "HH2016", "KK2015", "KK2017")
-group = c("F", "F","F", "V", "V", "V","V", "KK","KK","S")
-years = c(2015, 2016, 2017, 2015, 2016, 2017, 2019, 2015, 2017, 2019)
-groupyears = c("F2015", "F2016", "F2017", "V2015", "V2016", "V2017","V2019","KK2015", "KK2017","S2019")
+group = c("F","F", "F","F", "V", "V", "V","V", "KK","KK","S")
+years = c(2014,2015, 2016, 2017, 2015, 2016, 2017, 2019, 2015, 2017, 2019)
+groupyears = c("F2014","F2015", "F2016", "F2017", "V2015", "V2016", "V2017","V2019","KK2015", "KK2017","S2019")
 
-allScans2 = data.frame(); count = 0; i =1
-for (i in 1:length(groupyears)){ #for all group & years
+allScans2 = data.frame(); count = 0; total_count=0; gy =7
+for (gy in 1:length(groupyears)){ #for all group & years
   
-  prox_data = read.csv(paste("Group",groupyears[i],"_ProximityGroups.txt", sep = "")) #load prox data from groupyear i
+  prox_data = read.csv(paste("Group",groupyears[gy],"_ProximityGroups.txt", sep = "")) #load prox data from groupyear gy
+  names(prox_data)[7]="partners.activity"
   
   #Add group info
-  prox_data$group =group[i]
+  prox_data$group =group[gy]
   
-  #Format date and add year + quarter info
-  prox_data$date <- lubridate::dmy(as.character(prox_data$date))
+  #Format time and add year + quarter info
+  prox_data$time <- parse_date_time(as.character(prox_data$time), order="ymdHMS")
+  prox_data$time <- strftime(prox_data$time, format="%H:%M:%S",tz="GMT")
+  prox_data$time <- as_hms(prox_data$time)
   prox_data$year <- lubridate::year(prox_data$date)
   prox_data$Q    <- lubridate::quarter(prox_data$date)
   prox_data$date <- as.character(prox_data$date) #re-format to character after finding year and quarter
   
   #Add hurricane info
   prox_data$isPost = 0
-  if (years[i] == 2019) {prox_data$isPost = 2}
+  if (years[gy] == 2019) {prox_data$isPost = 2}
   
-  #Format time and add timeBlock info
-  prox_data$time = as_hms(as.character(prox_data$time))
+  #Add timeBlock info
   prox_data$timeBlock = NA
   prox_data$timeBlock[which(prox_data$time <= as_hms("11:00:00"))] = "AM";
   prox_data$timeBlock[which(prox_data$time > as_hms("11:00:00"))] = "PM";
@@ -56,6 +58,7 @@ for (i in 1:length(groupyears)){ #for all group & years
   prox_data$partner.ID=NA
   
   #Format name if needed
+  unique(prox_data$focal.monkey)#check focal names
   prox_data$focal.monkey=sub("'E","E",as.character(prox_data$focal.monkey)) #Replace 'XEX by XEX names if needed
   
   #Clean up: rename and delete unused columns
@@ -70,20 +73,22 @@ for (i in 1:length(groupyears)){ #for all group & years
   prox_data$num.prox[is.na(prox_data$num.prox)]=0 # if na count as 0
   
   #Add social information
-  prox_data$isProx=1; prox_data$isProx[which(prox_data$num.prox==0)]=0
+  prox_data$isProx=0; prox_data$isProx[which(prox_data$num.prox!=0)]=1
   prox_data$isSocial=0; prox_data$isSocial[which(prox_data$focal.activity=="social")]=1
   
   #Add grooming partner.ID and direction information from focal data
-  focal_data = read.csv(paste("Group",groupyears[i],"_FocalData.txt", sep = ""), sep=",")
+  focal_data = read.csv(paste("Group",groupyears[gy],"_FocalData.txt", sep = ""), sep=",")
   scans_grooming = which(prox_data$isSocial==1)
   
-  ii=1; count =0
+  ii=1; total_count= total_count+length(scans_grooming)
   for (ii in 1:length(scans_grooming)){ #for all scans in grooming state
     obs_name = prox_data$observation.name[scans_grooming[ii]] #find the obervation name for that scan
     scan_num = as.numeric(prox_data$scan.number[scans_grooming[ii]]) #find the scan number within that observation
-    idx_obs_name = which(!is.na(match(focal_data$observation.name, obs_name))) #find the obervation in the focal data
+    idx_obs_name = which(!is.na(match(focal_data$observation_name, obs_name))) #find the obervation in the focal data
     
-    groomBehav = which(focal_data$behaviour[idx_obs_name] == "GroomGET" | focal_data$behaviour[idx_obs_name] == "GroomGIVE") #find the grooming interaction in the focal data
+    groomBehav = which(focal_data$behaviour[idx_obs_name] == "GroomGET" | 
+                         focal_data$behaviour[idx_obs_name] == "GroomGIVE") #find the grooming interaction in the focal data
+    focal_data[idx_obs_name,]
     
     if (length(groomBehav)>1 & scan_num!=1){count = count +1} #check the number of times individual was grooming with different partners during a focal 
     #when the scan is not 1. Because if the scan in 1 then there is no uncertainty, the first instance of grooming should be used for partnerID and direction
@@ -92,11 +97,11 @@ for (i in 1:length(groupyears)){ #for all group & years
     #Add partner info. 
     if(length(groomBehav)>=scan_num) #if the number of grooming events is larger than or equal to the scan number
       #i.e. if thre are two grooming events in one focal, and the scan number is "2", than consider the second grooming event as the appropriate one
-    {prox_data$partner.ID[scans_grooming[ii]] = as.character(focal_data$partner.id[idx_obs_name[groomBehav[scan_num]]])
+    {prox_data$partner.ID[scans_grooming[ii]] = as.character(focal_data$partner_id[idx_obs_name[groomBehav[scan_num]]])
     prox_data$focal.activity.isPost[scans_grooming[ii]] = as.character(focal_data$behaviour[idx_obs_name[groomBehav[scan_num]]])}#Add direction of grooming}
     else #if the number of grooming events is less than the scan number, simply consider the first grooming event. In most cases 
       #this will happen when there is one grooming event ony happening at the second scan of this focal.
-    {prox_data$partner.ID[scans_grooming[ii]] = as.character(focal_data$partner.id[idx_obs_name[groomBehav[1]]]);
+    {prox_data$partner.ID[scans_grooming[ii]] = as.character(focal_data$partner_id[idx_obs_name[groomBehav[1]]]);
     prox_data$focal.activity.isPost[scans_grooming[ii]] = as.character(focal_data$behaviour[idx_obs_name[groomBehav[1]]])}#Add direction of grooming
     
   }
@@ -105,7 +110,7 @@ for (i in 1:length(groupyears)){ #for all group & years
   prox_data$isSocialGive = 0; prox_data$isSocialGive[which(prox_data$focal.activity.isPost=="G")]=1
   prox_data$isSocialGet = 0; prox_data$isSocialGet[which(prox_data$focal.activity.isPost=="E")]=1
   
-  prox_data[,c("observation.name","time","partners.activity..sequential.")] = NULL;
+  prox_data[,c("observation.name","time","partners.activity")] = NULL;
   
   #Order columns
   col_order <- c("date","focalID","group","year","scan.number","focal.activity","focal.activity.isPost","partner.ID","in.proximity","num.prox","isProx","isSocial","isSocialGive", "isSocialGet", "Q","isPost","timeBlock")
@@ -114,6 +119,7 @@ for (i in 1:length(groupyears)){ #for all group & years
   allScans2= rbind(allScans2, prox_data)
 }
 percentNoPartnerID = length(which(is.na(allScans2$partner.ID)))/length(which(allScans2$isSocial ==1))
+numUncertainCases = count/total_count
 ######################################################
 #Post-HURRICANE data
 ######################################################
@@ -143,7 +149,10 @@ allScans3$timeBlock[which(allScans3$start.time <= as_hms("11:00:00"))] = "AM";
 allScans3$timeBlock[which(allScans3$start.time > as_hms("11:00:00"))] = "PM";
 
 #Format XEX names
+unique(allScans3$subject.ID) #check spelling of subject id
 allScans3$subject.ID=sub("'","",as.character(allScans3$subject.ID)) #Replace 'XEX byXEX names if needed
+allScans3$subject.ID=str_trim(allScans3$subject.ID,side="both") #Remove blanks
+unique(allScans3$prox.adult.IDs)
 allScans3$prox.adult.IDs=sub("'","",as.character(allScans3$prox.adult.IDs))
 
 #Clean up: rename and delete unused columns
@@ -185,7 +194,7 @@ allScans3 <- allScans3[, col_order]
 ######################################################
 #COMBINE PRE-/POST-HURRICANE DATA
 ######################################################
-allScans= rbind(allScans2,allScans3)
+allScans=rbind(allScans2,allScans3)
 
 #Find all unique IDs
 a = str_split(allScans$in.proximity, c(","), simplify = TRUE)
@@ -216,7 +225,7 @@ allScans[which(allScans == "3.00E+04",arr.ind = TRUE)] = "3E4"
 #Load dominance and demographic info 
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data") 
 population_info = read.csv("SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt")
-dominance_info =read.table("Database Complete/Data All Raw/DOMINANCE.txt",header = T)
+dominance_info =read.table("Data All Raw/DOMINANCE.txt",header = T)
 
 #Find all unique focal IDs
 # a = str_split(allScans$in.proximity, c(","), simplify = TRUE)
@@ -254,9 +263,9 @@ col_order <- c("date","focalID","group","year","scan.number","sex","age","ordran
 allScans <- allScans[, col_order]
 
 ######################################################
-#sAVE ALLSCANS.TXT
+#SAVE ALLSCANS.TXT
 ######################################################
 
-write.csv(allScans,"Data All Cleaned/allScans2019.txt", row.names = F)
+write.csv(allScans,"Data All Cleaned/allScans.txt", row.names = F)
 
 #as.data.frame(table(allScans$samplingCateg))

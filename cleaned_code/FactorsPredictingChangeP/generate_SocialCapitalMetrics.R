@@ -1,42 +1,68 @@
 #Generate pre-hurricane social capital metrics
+# This script generates pre-hurricane social capital metrics with in mind the following objectives:
+#(1) determining which factors pre-hurricane may predict the change in social rates post-hurricane. Why do some 
+#individual change their social rate  by a lot and others only by a little, or even decrease?
+#(2) determining which factors pre-hurricane may predict death post-hurricane (did some factor made individuals 
+#more likely to die in the year following the hurricane?
+#(3) Used as a dataframe for other analyses requiring pre-hurricane social capital factors.
+#Functions called: functions_GlobalNetworkMetrics
+#Input: GroomingEvents.txt, AgonisticActions.txt, FocalData.txt, GroupByYear.txt, 
+#Output Social Capital Metrics: "SocialCapital.RData"
+#GROOMING:
+#- GroomIN and GroomOUT: based on focal data (so duration/hrs followed). Not standardized. 
+#I am  not using the usual "network approach" here but rather using the grooming.txt file durations directly
+#- DSIGroom: (GroomIN + GroomOUT). std.DSIGroom = DSIGroom/mean(DSIGroom) [non-zero mean, for that group and year]
+#- Network measures: degree, betweenness, eigenvector centrality and clustering coeff. IMPORTANT NOTE: These are based 
+#on standardized weights (i.e. divided by mean)!
+#I also add standardized degree, divided by the non-zero degree mean, for that group and year.
+#PROXIMITY: 
+#- DSIprox = proximity rate = number of proximity partners per scans = total numPartners/numScans
+#- Network measures: degree, betweenness, eigenvector centrality and clustering coeff. 
+#IMPORTANT NOTE: weights = #proximity events between dyad/hrs followed. Weights are standardized (i.e. divided by non-zero mean)! 
+#COMBINATION: numPartners & DSI combining grooming and proximity (taking the average of the two measures)
+#AGGRESSION:
+#- AggIN, AggOUT: # aggressive interactions/hrs followed. All aggressive interactions are considered here.
+#- DSIagg = AggIN + AggOut. Also standardized measure, dividing by group mean for that year.
+#SDB & Vigiliance rates:
+# sdb or vigiance events / #hrs followed 
+#(both standardized and non-standardized measures).
 
 library(stringr)
 library(igraph)
 
 #Load scan data and population info
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
-source("Social_Network_Analysis/functions_GlobalNetworkMetrics.R")
+setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
+source("Functions/functions_GlobalNetworkMetrics.R")
 
 group = c("KK","KK","V", "V", "V")
 years = c(2015,2017,2015,2016,2017)
 groupyears = c("KK2015", "KK2017","V2015", "V2016", "V2017")
-# group = c("KK","V")
-# years = c(2017,)
-# groupyears = c("KK2017", "V2017")
 SocialCapital.ALL = data.frame()
-gy = 3
 
 #####################################################################
 # Compute Social Capital Metrics, per individual, per year
 #####################################################################
 
+gy=1
 for (gy in 1:length(groupyears)){
   
   print(paste("%%%%%%%%%%%%%%%%%% ",groupyears[gy], "%%%%%%%%%%%%%%%%%%"))
   
   #Load data
-  setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Behavioral_Data/Data All Cleaned") 
+  setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
   groom_data = read.csv(paste("Group",groupyears[gy],"_GroomingEvents.txt", sep = ""))
-  agg_data = read.csv(paste("Group",groupyears[gy],"_AgonsiticActions.txt", sep = ""))
+  agg_data = read.csv(paste("Group",groupyears[gy],"_AgonisticActions.txt", sep = ""))
   focal_data = read.csv(paste("Group",groupyears[gy],"_FocalData.txt", sep = ""))
   meta_data = read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt", sep = ""))
   prox_data = read.csv(paste("Group",groupyears[gy],"_ProximityGroups.txt", sep = ""))
   
+  ## Format data
+  
   #Make sure all IDs are in character
-  groom_data$groom.giver = as.character(groom_data$groom.giver)
-  groom_data$groom.reciever = as.character(groom_data$groom.reciever)
+  groom_data$groom_giver = as.character(groom_data$groom_giver)
+  groom_data$groom_reciever = as.character(groom_data$groom_reciever)
   # agg_data$agonsim.loser = as.character(agg_data$agonsim.loser)
-  # agg_data$agonsim.winner = as.character(agg_data$agonsim.winner)
+  # agg_data$agonism_winner = as.character(agg_data$agonism_winner)
   
   #Create Social Capital Data frame & add Sex, Age, Rank, Group and Year
   SocialCapitalData= meta_data[,c("id","sex","age","ordinal.rank","percofsex.dominanted")]
@@ -52,17 +78,16 @@ for (gy in 1:length(groupyears)){
   #Using a non-network approach
   
   # 1. Output weighted edgelist from the groom data.
-  x = as.character(groom_data$observation.session)
-  groom_data$focalID = toupper(as.character(substr(x,10, 12))) #find focal ID from observation session name
-  if (gy == 3) {}
+  x = as.character(groom_data$observation_name)
+  groom_data$focalID = toupper(as.character(substr(x,12, 14))) #find focal ID from observation session name
   groom.ID = as.character(meta_data$id)
   groom.give = data.frame(); groom.receive = data.frame(); id=1 #Initialize
   for (id in 1:length(groom.ID)){ #For all IDs
     groom.give[id,"id"] = groom.ID[id]; groom.receive[id,"id"] = groom.ID[id]; #Initialize groom give and groom receive df for ID "id"
-    groom.give[id,"duration"] = sum(groom_data$duration[which(groom_data$focalID == groom.ID[id] #add groom.give duration if ID is focal
-                                                              & groom_data$groom.giver == groom.ID[id])], na.rm =T) # & is a groom giver
-    groom.receive[id,"duration"] = sum(groom_data$duration[which(groom_data$focalID == groom.ID[id] #add groom.give duration if ID is focal
-                                                                 & groom_data$groom.reciever == groom.ID[id])], na.rm =T)# & is a groom receiver
+    groom.give[id,"duration"] = sum(groom_data$constrained_duration[which(groom_data$focalID == groom.ID[id] #add groom.give duration if ID is focal
+                                                              & groom_data$groom_giver == groom.ID[id])], na.rm =T) # & is a groom giver
+    groom.receive[id,"duration"] = sum(groom_data$constrained_duration[which(groom_data$focalID == groom.ID[id] #add groom.give duration if ID is focal
+                                                                 & groom_data$groom_reciever == groom.ID[id])], na.rm =T)# & is a groom receiver
   }#Outputs 2 structures: groom.give and groom receive - all IDs and duration engaged in both states.
   
   #GROOM GIVE
@@ -76,26 +101,12 @@ for (gy in 1:length(groupyears)){
   # 2. Add Groom weighted in-degree and out-degree (weighted)
   SocialCapitalData$GroomIN = groom.receive$weight[match(meta_data$id,groom.receive$id)]
   SocialCapitalData$GroomOUT = groom.give$weight[match(meta_data$id,groom.give$id)]
+  SocialCapitalData$GroomIN[is.na(SocialCapitalData$GroomIN)]=0; SocialCapitalData$GroomOUT[is.na(SocialCapitalData$GroomOUT)]=0
   TotalGroom = SocialCapitalData$GroomIN + SocialCapitalData$GroomOUT
-  meanGroomRate = mean(TotalGroom, na.rm = T) #for standardization. If we wish to!
+  meanGroomRate = mean(TotalGroom) #for standardization. If we wish to!
   SocialCapitalData$DSIgroom = TotalGroom
   SocialCapitalData$std.DSIgroom = TotalGroom/meanGroomRate
-  
-  # 3. Find the number of grooming partners 
-  partners=data.frame(); id=1
-  for (id in 1:length(groom.ID)){
-    partners[id,"id"] = groom.ID[id] #focal ID
-    partners_rec = unique(as.character(groom_data$groom.reciever[which(groom_data$groom.giver == groom.ID[id])])) #find all partners when focal ID was giver
-    partners_give = unique(as.character(groom_data$groom.giver[which(groom_data$groom.reciever == groom.ID[id])]))#find all partners when focal ID was receiver
-    unique_partners = unique(c(partners_give, partners_rec)) #combine groom give and groom receive partners
-    numchar = nchar(unique_partners) #find the number of characters for each partner to make sure I only include partners who we know about
-    partners[id,"numPartners"] = length(unique_partners[which(numchar==3)])
-  }
-  mean_numP = mean(partners$numPartners, na.rm=T)
-  partners$std.numPartners = partners$numPartners/mean_numP #standardize partner number
-  SocialCapitalData$numPartnersGroom = partners$numPartners[match(meta_data$id,partners$id)]
-  SocialCapitalData$std.numPartnersGroom = partners$std.numPartners[match(meta_data$id,partners$id)]
-  
+
   ####################################  
   # 4. Create grooming network metrics. This uses a network approach.
   #Find all unique IDs
@@ -103,10 +114,10 @@ for (gy in 1:length(groupyears)){
   
   # Output the Master Edgelist of all possible pairs given the unique IDs.
   masterEL = calcMasterEL_groom(unqIDs)
-  groom_data$conc = paste(groom_data$groom.giver,groom_data$groom.reciever,sep=".")
+  groom_data$conc = paste(groom_data$groom_giver,groom_data$groom_reciever,sep=".")
   # table(groom_data$conc)
   for (ii in 1:length(masterEL$conc)){
-    masterEL$count[ii] = sum(groom_data$duration[which(groom_data$conc == masterEL$conc[ii])], na.rm=T)
+    masterEL$count[ii] = sum(groom_data$constrained_duration[which(groom_data$conc == masterEL$conc[ii])], na.rm=T)
   }
   #Compute grooming rates using hours followed
   masterEL$hrs.followed = rowSums(cbind(meta_data$hrs.focalfollowed[match(masterEL$givingID, meta_data$id)], #hours followed is the mean num hrs 
@@ -115,7 +126,7 @@ for (gy in 1:length(groupyears)){
   weightedEL = masterEL[,c("givingID","receivingID","weight")] #only keep columns of interest
   mean_weight = mean(weightedEL$weight[which(weightedEL$weight != 0)])
   weightedEL$stdWeight = weightedEL$weight/mean_weight; weightedEL$weight=NULL
-  NAidx = which(is.na(weightedEL$stdWeight)); if(length(NAidx)!=0){stop()} #Check to make sure we don't have NAs
+  NAidx = which(is.na(weightedEL$stdWeight)); if(length(NAidx)!=0){break} #Check to make sure we don't have NAs
   
   #Create an adjacency matrix to generate igraph object
   adjMat = dils::AdjacencyFromEdgelist(weightedEL)
@@ -129,13 +140,15 @@ for (gy in 1:length(groupyears)){
   #Get the network measures
   NetworkMetrics = data.frame(matrix(NA, nrow = length(V(graph)), ncol = 7)); names(NetworkMetrics)=c("id","deg","INdeg","OUTdeg","between","eig.cent", "clusterCoeff")
   NetworkMetrics$id = as_ids(V(graph))
-  #Weighted degree (Strength, undirected)
+  #Unweighted degree (undirected)
   NetworkMetrics$deg<-igraph::degree(graph)
-  #weighted indegree
+  mean_numP = mean(NetworkMetrics$deg, na.rm=T)
+  NetworkMetrics$std.deg = NetworkMetrics$deg/mean_numP #standardize partner number
+  #Unweighted indegree
   NetworkMetrics$INdeg <-igraph::degree(graph,v=V(graph), mode = "in", loops=F)
-  #weighted outdegree
+  #Unweighted outdegree
   NetworkMetrics$OUTdeg <-igraph::degree(graph,v=V(graph), mode = "out", loops=F)
-  #Weighted betweenness
+  #Unweighted betweenness
   NetworkMetrics$between<-igraph::betweenness(graph, v=V(graph), directed=T, normalized=T)
   #Weighted eigenvector centrality
   A <-igraph::eigen_centrality(graph, directed=F, scale=T)
@@ -144,7 +157,8 @@ for (gy in 1:length(groupyears)){
   #Weighted clustering coeff
   NetworkMetrics$clusterCoeff = transitivity(graph, type = "localundirected")
 
-  SocialCapitalData[,c("between.groom","eig.cent.groom","clusterCoeff.groom")] = NetworkMetrics[match(meta_data$id, NetworkMetrics$id), c("between","eig.cent","clusterCoeff")]
+  SocialCapitalData[,c("numPartnersGroom","std.numPartnersGroom","between.groom","eig.cent.groom","clusterCoeff.groom")] = 
+    NetworkMetrics[match(meta_data$id, NetworkMetrics$id), c("deg","std.deg","between","eig.cent","clusterCoeff")]
 
   #####################################################################
   ## For PROXIMITY DATA
@@ -173,16 +187,12 @@ for (gy in 1:length(groupyears)){
   }
   meanProxRate = mean(proxRate$proxRate, na.rm = T)#to standardize proximity rate later if we wish to.
   proxRate$DSIprox = proxRate$proxRate; proxRate$std.DSIprox = proxRate$proxRate/meanProxRate
-  mean_numP = mean(proxRate$numPartners, na.rm=T)#to standardize num prox partner later if we wish to.
-  proxRate$std.numPartners = proxRate$numPartners/mean_numP
-  
-  SocialCapitalData$numPartnersProx = proxRate$numPartners[match(meta_data$id,proxRate$id)]
-  SocialCapitalData$std.numPartnersProx = proxRate$std.numPartners[match(meta_data$id,proxRate$id)]
+
   SocialCapitalData$DSIprox = proxRate$DSIprox[match(meta_data$id,proxRate$id)]
   SocialCapitalData$std.DSIprox = proxRate$std.DSIprox[match(meta_data$id,proxRate$id)]
   
   ####################################  
-  # Create grooming network metrics. This uses a network approach.
+  # Create proximity network metrics. This uses a network approach.
   rscans = prox_data
   
   # Output the Master Edgelist of all possible pairs given the unique IDs.
@@ -209,10 +219,8 @@ for (gy in 1:length(groupyears)){
   NetworkMetrics$id = as_ids(V(graph))
   #Weighted degree (Strength, undirected)
   NetworkMetrics$deg<-igraph::degree(graph)
-  #weighted indegree
-  NetworkMetrics$INdeg <-igraph::degree(graph,v=V(graph), mode = "in", loops=F)
-  #weighted outdegree
-  NetworkMetrics$OUTdeg <-igraph::degree(graph,v=V(graph), mode = "out", loops=F)
+  mean_numP = mean(NetworkMetrics$deg, na.rm=T)
+  NetworkMetrics$std.deg = NetworkMetrics$deg/mean_numP #standardize partner number
   #Weighted betweenness
   NetworkMetrics$between<-igraph::betweenness(graph, v=V(graph), directed=F, normalized=T)
   #Weighted eigenvector centrality
@@ -222,7 +230,8 @@ for (gy in 1:length(groupyears)){
   #Weighted clustering coeff
   NetworkMetrics$clusterCoeff = igraph::transitivity(graph, type = "localundirected")
   
-  SocialCapitalData[,c("between.prox","eig.cent.prox","clusterCoeff.prox")] = NetworkMetrics[match(meta_data$id, NetworkMetrics$id), c("between","eig.cent","clusterCoeff")]
+  SocialCapitalData[,c("numPartnersProx","std.numPartnersProx","between.prox","eig.cent.prox","clusterCoeff.prox")] = 
+    NetworkMetrics[match(meta_data$id, NetworkMetrics$id), c("deg","std.deg","between","eig.cent","clusterCoeff")]
   
   #####################################################################
   ## Combining proximity and grooming data
@@ -239,7 +248,7 @@ for (gy in 1:length(groupyears)){
 
   # 1. Output weighted edgelist from the aggression data.
   #AGGRESSION GIVE = aggression "winner"
-  agg.give = as.data.frame(table(agg_data$agonsim.winner[which(agg_data$focal.individual=="agonsim.winner")]));names(agg.give)[1]='id'
+  agg.give = as.data.frame(table(agg_data$agonism_winner[which(agg_data$focal_individual=="agonism.winner")]));names(agg.give)[1]='id'
   agg.give = agg.give[-which(nchar(as.character(agg.give$id))>3),] #only include known IDs (i.e. 3 characters)
   hrs.followed.giver = meta_data$hrs.focalfollowed[match(agg.give$id, meta_data$id)] #find #hours followed
   #Exclude individuals not in meta data file
@@ -251,7 +260,7 @@ for (gy in 1:length(groupyears)){
   agg.give$weight = agg.give$Freq/hrs.followed.giver
   
   #AGGRESSION RECEIVE = aggression "loser"
-  agg.receive = as.data.frame(table(agg_data$agonsim.loser[which(agg_data$focal.individual=="agonsim.loser")]));names(agg.receive)[1]='id'
+  agg.receive = as.data.frame(table(agg_data$agonism_loser[which(agg_data$focal_individual=="agonism.loser")]));names(agg.receive)[1]='id'
   agg.receive = agg.receive[-which(nchar(as.character(agg.receive$id))>3),]
   hrs.followed.receive= meta_data$hrs.focalfollowed[match(agg.receive$id, meta_data$id)]
   #Exclude individuals not in meta data file
@@ -265,8 +274,9 @@ for (gy in 1:length(groupyears)){
   # 2. Add Aggression weighted in-degree and out-degree (weighted)
   SocialCapitalData$AggOUT = agg.give$weight[match(meta_data$id,agg.give$id)]
   SocialCapitalData$AggIN = agg.receive$weight[match(meta_data$id,agg.receive$id)]
+  SocialCapitalData$AggIN[is.na(SocialCapitalData$AggIN)]=0; SocialCapitalData$AggOUT[is.na(SocialCapitalData$AggOUT)]=0
   TotalAgg = SocialCapitalData$AggIN + SocialCapitalData$AggOUT
-  meanAggRate = mean(TotalAgg, na.rm = T)
+  meanAggRate = mean(TotalAgg)
   SocialCapitalData$DSIAgg = TotalAgg
   SocialCapitalData$std.DSIAgg = TotalAgg/meanAggRate
   
@@ -277,8 +287,8 @@ for (gy in 1:length(groupyears)){
   unqIDs = as.character(meta_data$id); vig.sdb=data.frame(matrix(NA,length(unqIDs), 3)); colnames(vig.sdb)=c("id","vig.freq","sdb.freq")
   for (id in 1:length(unqIDs)){
     vig.sdb$id[id] = unqIDs[id]
-    vig.sdb$vig.freq[id] = length(which(focal_data$focal.id == unqIDs[id] & (focal_data$behaviour == "Vigilnce" | focal_data$behaviour == "Vigilnce_overtime")))
-    vig.sdb$sdb.freq[id] = length(which(focal_data$focal.id == unqIDs[id] & (focal_data$behaviour == "SelfGrm" | focal_data$behaviour == "SelfGrm_overtime" | focal_data$behaviour == "Scratch" | focal_data$behaviour == "Scratch_overtime")))
+    vig.sdb$vig.freq[id] = length(which(focal_data$focal_id == unqIDs[id] & (focal_data$behaviour == "Vigilnce" | focal_data$behaviour == "Vigilnce_overtime")))
+    vig.sdb$sdb.freq[id] = length(which(focal_data$focal_id == unqIDs[id] & (focal_data$behaviour == "SelfGrm" | focal_data$behaviour == "SelfGrm_overtime" | focal_data$behaviour == "Scratch" | focal_data$behaviour == "Scratch_overtime")))
   }
   hrs.followed = meta_data$hrs.focalfollowed[match(unqIDs, meta_data$id)]
   vig.sdb$vig.ra = vig.sdb$vig.freq/hrs.followed
@@ -295,4 +305,4 @@ for (gy in 1:length(groupyears)){
   # Merge and save data
   SocialCapital.ALL = rbind(SocialCapital.ALL, SocialCapitalData)
 }
-save( SocialCapital.ALL,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/Social_Network_Analysis/SocialCapital.RData")
+save( SocialCapital.ALL,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/SocialCapital.RData")
