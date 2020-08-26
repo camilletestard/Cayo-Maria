@@ -60,7 +60,8 @@ for (a in 1:length(actions)) { #for both proximity and grooming
           weightedEL$numscans <- (numscans$freq[match(weightedEL$alter, numscans$id)] + numscans$freq[match(weightedEL$ego, numscans$id)])/2 
           weightedEL$weight <- round(weightedEL$count / weightedEL$numscans, 5) #add weight information by dividing by avg #observations for each ID pair
           #IMPORTANT NOTE: i do NOT standardize weights per group and year, toehrwise i cannot see whether strength has icnreased or not
-          weightedEL = weightedEL[which(weightedEL$weight != 0),]#only keep nonzero weighted edges
+          weightedEL = weightedEL[which(weightedEL$weight != 0),]
+          #IMPORTANT NOTE 2: i only keep nonzero weighted edges
           weightedEL$group = group[g]; weightedEL$year = years[y]; weightedEL$isPost = isPost[h]; 
           weightedEL$iter = iter; weightedEL$action=actions[a]
           
