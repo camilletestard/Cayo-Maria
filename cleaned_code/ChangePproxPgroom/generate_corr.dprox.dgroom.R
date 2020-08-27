@@ -10,18 +10,18 @@ library(matlab)
 #Load data
 load("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data/ChangeP.RData")
 
-correl.coeff=vector()
+correl.coeff=vector(); iter=1
 for (iter in 1:max(dprob.ALL$iter)){
   
   print(paste("%%%%%%%%%%%%%%%%%%%%%%%%%%%% iter", iter, " %%%%%%%%%%%%%%%%%%%%%%%%%%%%"))
   
   dprob.iter=dprob.ALL[dprob.ALL$iter==iter,]
-  #Plot change in prox vs. change in grooming
-  corr.plot <- ggplot(dprob.iter,aes(dpAcc, dpSocial)) +
-    geom_point(color='blue')+
-    xlab("Change in Proximity")+ylab("Change in Grooming")+
-    ggtitle("Correlation between change in proximity and change in grooming")+
-    geom_smooth(method='lm', formula= y~x)
+  # #Plot change in prox vs. change in grooming
+  # corr.plot <- ggplot(dprob.iter,aes(dpAcc, dpSocial)) +
+  #   geom_point(color='blue')+
+  #   xlab("Change in Proximity")+ylab("Change in Grooming")+
+  #   ggtitle("Correlation between change in proximity and change in grooming")+
+  #   geom_smooth(method='lm', formula= y~x)
   
   correl <- cor.test(dprob.iter$dpAcc,dprob.iter$dpSocial) #compute correlation
   correl.coeff[iter]=correl[["estimate"]]

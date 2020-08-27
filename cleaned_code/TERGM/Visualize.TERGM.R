@@ -4,7 +4,7 @@
 # (1)  horizontal violin plot
 # (2)  tables of mean estimates for all coefficients & 95% confidence intervals.
 
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/TERGMeffects_NoHom.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/TERGMeffects.RData")
 library(matrixStats)
 library(gridExtra) 
 library(graphics)

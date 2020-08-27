@@ -80,7 +80,7 @@ death.month.adults=c(); my=1
 for (my in 1:length(monthYears)){
   Demographics.temp =Demographics
   Demographics.temp$age=years[my]-Demographics.temp$YOB
-  Demographics.temp=filter(Demographics.temp,Demographics.temp$age>=4)
+  # Demographics.temp=filter(Demographics.temp,Demographics.temp$age<4)
   change.status = which(Demographics.temp$DOD > as.Date(paste(years[my],months[my],"28",sep="-")))
   Demographics.temp$Status[change.status] = "IN CS"
   
@@ -91,8 +91,8 @@ for (my in 1:length(monthYears)){
 # months.plot=c("oct","nov","dec","jan","fev","mar","avr","mai","jun","jul","aug","sep","oct","nov","dec","jan","fev","mar","avr","mai","jun","jul","aug","sep")
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Demography")
 
-tiff("Deaths_barplot.tiff",units="in", width=8, height=5, res=300, compression = 'lzw')
-barplot(death.month.adults,ylab="deaths per 100 adults",main="Deaths per 100 adults (age>=4)")
-segments(13.5,0,13.5,3,col="red",lwd=4)
+tiff("Deaths_barplot_all.tiff",units="in", width=8, height=5, res=300, compression = 'lzw')
+barplot(death.month.adults,ylab="deaths per 100 monkeys",main="Deaths per 100 monkeys", ylim=c(0,4))
+segments(14.5,0,14.5,4,col="red",lwd=4, lty=2)
 dev.off()
 

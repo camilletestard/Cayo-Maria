@@ -1,9 +1,9 @@
 # ModellingVisualize_WhoAreNewPartners: 
 # This script visualizes and runs statistics on the output of "generate_WhoAreTheNewPartners".
-# = proportion of grooming between pair categories for each group/year/hurricane status separately. Pair categories based on: 
+# = proportion of proxing between pair categories for each group/year/hurricane status separately. Pair categories based on: 
 #   - Social status: Low->Low; Low->High; High->Low; High->High. Note: Low rank <80%; High rank >80%
 #   - Sex: M->M; F->M; M->F; F->F
-#   - Pre-hurr grooming strength: greg->greg; greg->shy; shy->greg; shy->shy. Note: threshold for shy/greg is 80% (or prctile)
+#   - Pre-hurr proxing strength: greg->greg; greg->shy; shy->greg; shy->shy. Note: threshold for shy/greg is 80% (or prctile)
 #   - Kinship: related (rel>0.125) and unrelated (unrel <0.125)
 # This script will allows us to assess the difference in relationship distribution pre-to-post hurricane. 
 # E.g. are there more F->M relationships occuring post-disaster? 
@@ -26,17 +26,17 @@ library(gridExtra)
 library(matrixStats)
 
 #load & format data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes_prox.RData")
 PartnerAttr$groupyear = paste(PartnerAttr$group, PartnerAttr$year, sep="")
 PartnerAttr$isPost = as.factor(PartnerAttr$isPost)
 for (col in seq(6,33)) {PartnerAttr[,col] = as.numeric(PartnerAttr[,col])}
 
-#Separate data by grooming and proximity
-data.groom = PartnerAttr[which(PartnerAttr$action=="groom"),]
-data.groom.V=data.groom[data.groom$group=="V",];data.groom.KK=data.groom[data.groom$group=="KK",]
+#Separate data by proxing and proximity
+data.prox = PartnerAttr[which(PartnerAttr$action=="prox"),]
+data.prox.V=data.prox[data.prox$group=="V",];data.prox.KK=data.prox[data.prox$group=="KK",]
 #Select columns of interest
-data.V.pre = data.groom.V[data.groom.V$isPost==0,8:33]; data.V.post = data.groom.V[data.groom.V$isPost==1,8:33]; 
-data.KK.pre = data.groom.KK[data.groom.KK$isPost==0,8:33]; data.KK.post = data.groom.KK[data.groom.KK$isPost==1,8:33]; 
+data.V.pre = data.prox.V[data.prox.V$isPost==0,8:33]; data.V.post = data.prox.V[data.prox.V$isPost==1,8:33]; 
+data.KK.pre = data.prox.KK[data.prox.KK$isPost==0,8:33]; data.KK.post = data.prox.KK[data.prox.KK$isPost==1,8:33]; 
 
 ##############################################
 # TEST DIFFERENCE IN PROPORTIONS:
@@ -68,8 +68,8 @@ Estimates.KK = cbind(Means,CI, pval); Estimates.KK = as.data.frame(Estimates.KK)
 
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/WhoAreNewPartners/") 
 
-write.csv(Estimates.V,"GroomPartnerPref.Stats.V.csv")
-write.csv(Estimates.KK,"GroomPartnerPref.Stats.KK.csv")
+write.csv(Estimates.V,"proxPartnerPref.Stats.V .csv")
+write.csv(Estimates.KK,"proxPartnerPref.Stats.KK.csv")
 
 ##############################################
 #PLOTS/visualizations
@@ -78,161 +78,161 @@ data.KK.diff$group="KK"; data.V.diff$group="V"
 data.diff.full =rbind(data.V.diff, data.KK.diff)
 
 ##############################################
-#SOCIAL RANK : plot % HH/LH/HL/LL interactions
+#SOCIAL RANK : plot %change HH/LH/HL/LL interactions pre-to-post hurr.
 ##############################################
 
-## GROOM ##
+## prox ##
 
-# #Groom Low to High
+# #prox Low to High
 # tiff("L2H.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 l2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToHigh), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
   # geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
   ggtitle("Low|High")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of L2H interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of L2H interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))+
   scale_fill_manual(values=c("#E69F00", "#56B4E9"))
   # facet_grid(~group)
 # dev.off()
 
-#Groom High to Low
+#prox High to Low
 h2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToLow), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom HighR->LowR ")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of H2L interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox HighR->LowR ")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of H2L interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
   # facet_grid(~group)
 
 
-#Groom Low to Low
+#prox Low to Low
 # tiff("L2L.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 l2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToLow), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom LowR to LowR ")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of L2L interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox LowR to LowR ")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of L2L interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
   # facet_grid(~group)
 # dev.off()
 
 
-#Groom High to high
+#prox High to high
 # tiff("H2H.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 h2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToHigh), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom HighR to HighR ")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of H2H interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox HighR to HighR ")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of H2H interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
   # facet_grid(~group)
 # dev.off()
 
 
-FullPlot.groom = grid.arrange(h2h,h2l,l2h,l2l, ncol=4, nrow=1)
-ggsave(FullPlot.groom, file ="changeRankPref.png")
-ggsave(FullPlot.groom, file ="changeRankPref.eps")
+FullPlot.prox = grid.arrange(h2h,h2l,l2h,l2l, ncol=4, nrow=1)
+ggsave(FullPlot.prox, file ="changeRankPref_prox.png")
+ggsave(FullPlot.prox, file ="changeRankPref_prox.eps")
 
 
 ##################################################
-# KINSHIP : plot % ck/dk/unrel interactions
+# KINSHIP : plot %change ck/dk/unrel interactions pre-to-post hurr.
 ##################################################
 
-## GROOM #
+## prox #
 
-#Groom Kin
+#prox Kin
 # tiff("Kin.change.125.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 kin<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(Kin), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Kin")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Kin interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Kin")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of Kin interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 # dev.off()
-ggsave(kin, file ="changeKinPref.png")
-ggsave(kin, file ="changeKinPref.eps")
+ggsave(kin, file ="changeKinPref_prox.png")
+ggsave(kin, file ="changeKinPref_prox.eps")
 
 
 ##################################################
-# SOCIAL HOMOPHILY : plot % shy.shy/greg.greg/shy.greg/greg/shy interactions
+# SOCIAL HOMOPHILY : plot %change shy.shy/greg.greg/shy.greg/greg/shy interactions pre-to-post hurr.
 ##################################################
 
-## GROOM #
+## prox #
 
-#Groom shy.shy
+#prox shy.shy
 # tiff("shy2shy.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 shy2shy<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomophily.shy), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Social Homophily shy2shy")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Homophilic interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Social Homophily shy2shy")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of Homophilic interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 # dev.off()
 
-#Groom greg.greg
+#prox greg.greg
 # tiff("greg2greg.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 greg2greg<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomophily.greg), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Social Homophily greg2greg")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Homophilic interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Social Homophily greg2greg")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of Homophilic interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 # dev.off()
 
-# #Groom shy.greg
+# #prox shy.greg
 shy2greg<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.shygreg), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Social Opposite shy2greg")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Opposite interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Social Opposite shy2greg")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of Opposite interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 
-# #Groom greg.shy
+# #prox greg.shy
 # tiff("greg2shy.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 greg2shy<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.gregshy), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Social Opposite greg2shy")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of Opposite interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Social Opposite greg2shy")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of Opposite interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 # dev.off()
 
-FullPlot.groom = grid.arrange(shy2shy,greg2greg,shy2greg,greg2shy, ncol=4, nrow=1)
-ggsave(FullPlot.groom, file ="changeSocialPref.png")
-ggsave(FullPlot.groom, file ="changeSocialPref.eps")
+FullPlot.prox = grid.arrange(shy2shy,greg2greg,shy2greg,greg2shy, ncol=4, nrow=1)
+ggsave(FullPlot.prox, file ="changeSocialPref_prox.png")
+ggsave(FullPlot.prox, file ="changeSocialPref_prox.eps")
 
 ########################################
-# SEX: plot % MM/MF/FM/FF interactions
+# SEX: plot %change MM/MF/FM/FF interactions pre-to-post hurr.
 ########################################
 
-## GROOM #
+## prox #
 
-# # Groom Male --> Male
+# # prox Male --> Male
 M2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MM), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Male->Male")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of M->M interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Male->Male")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of M->M interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 
-# # Groom Male --> Female
+# # prox Male --> Female
 M2F<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MF), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Male->Female")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of M->F interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Male->Female")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of M->F interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
 
-# Groom Female --> Male
+# prox Female --> Male
 # tiff("F2M.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 F2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(FM), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Female->Male")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of F->M interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Female->Male")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of F->M interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 # dev.off()
 
-# Groom Female --> Female
+# prox Female --> Female
 F2F<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(FF), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed")+
-  ggtitle("Groom Female->Female")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Proportion of F->F interactions")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
+  ggtitle("prox Female->Female")+
+  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in proportion of F->F interactions pre-to-post hurr.")+scale_fill_manual(values=c("#E69F00", "#56B4E9"))
 
-FullPlot.groom = grid.arrange(M2M,M2F,F2M,F2F, ncol=4, nrow=1)
-ggsave(FullPlot.groom, file ="changeSexPref.png")
-ggsave(FullPlot.groom, file ="changeSexPref.eps")
+FullPlot.prox = grid.arrange(M2M,M2F,F2M,F2F, ncol=4, nrow=1)
+ggsave(FullPlot.prox, file ="changeSexPref_prox.png")
+ggsave(FullPlot.prox, file ="changeSexPref_prox.eps")
 
