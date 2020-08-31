@@ -50,7 +50,8 @@ Networks$percentrank = as.numeric(Networks$percentrank)/100
 #Separate data by groom/prox & Scale parameters
 data.groom = Networks[which(Networks$action == "groom"),]
 data.groom[,"age"] <- scale(data.groom[,"age"]) #helps avoid convergence issues: https://rstudio-pubs-static.s3.amazonaws.com/33653_57fc7b8e5d484c909b615d8633c01d51.html
-
+# data.prox = Networks[which(Networks$action == "prox"),]
+# data.prox[,"age"] <- scale(data.prox[,"age"])
 
 
 ##########################################
@@ -65,7 +66,7 @@ for (iter in 1:500){
   print(paste("%%%%%%%%%%%%%%%%%%",iter, "%%%%%%%%%%%%%%%%%%"))
   
   data.groom.iter=data.groom[data.groom$iter==iter,]
-  data.prox.iter=data.prox[data.prox$iter==iter,]
+  # data.prox.iter=data.prox[data.prox$iter==iter,]
   
   ## VISUALIZATION for 1 iteration ##
   # #GROOMING
@@ -80,22 +81,22 @@ for (iter in 1:500){
   # ggsave("Strength.AllP.prepost.eps",strength.all.prepost)
 
   ## Separate data by groom and action (groom or prox) ##
-  data.prox.iter.V = data.prox[which(data.prox$iter == iter & data.prox$group=="V"),]
-  data.prox.iter.KK = data.prox[which(data.prox$iter == iter & data.prox$group=="KK"),]
+  # data.prox.iter.V = data.prox[which(data.prox$iter == iter & data.prox$group=="V"),]
+  # data.prox.iter.KK = data.prox[which(data.prox$iter == iter & data.prox$group=="KK"),]
   data.groom.iter.V = data.groom[which(data.groom$iter == iter& data.groom$group=="V"),]
   data.groom.iter.KK = data.groom[which(data.groom$iter == iter& data.groom$group=="KK"),]
   
   #GROOMING
-  strength.groom.V = lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|year), data=data.groom.iter.V)
+  strength.groom.V = lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|ego)+(1|year), data=data.groom.iter.V)
   # performance::check_model(strength.groom.V)
   # summary(strength.groom.V)
   AllP.groom.V[iter,c("(Intercept)","isPost","sexM","age","rank")] <- getME(strength.groom.V, "beta")
-  AllP.groom.V[iter,c("id", "year")] <- getME(strength.groom.V, "theta")
+  AllP.groom.V[iter,c("id","partnerID", "year")] <- getME(strength.groom.V, "theta")
   
-  strength.groom.KK = lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|year), data=data.groom.iter.KK)
+  strength.groom.KK = lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|ego)+(1|year), data=data.groom.iter.KK)
   # performance::check_model(strength.groom.KK)
   AllP.groom.KK[iter,c("(Intercept)","isPost","sexM","age","rank")] <- getME(strength.groom.KK, "beta")
-  AllP.groom.KK[iter,c("id", "year")] <- getME(strength.groom.KK, "theta")
+  AllP.groom.KK[iter,c("id","partnerID", "year")] <- getME(strength.groom.KK, "theta")
 
 }
 

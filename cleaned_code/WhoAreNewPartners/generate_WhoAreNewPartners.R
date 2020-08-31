@@ -28,7 +28,7 @@ library(ggplot2)
 #load local functions
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code/functions") 
 source("CalcSubsampledScans.R")
-source("functions_SocialSupport.R")
+source("functions_GlobalNetworkMetrics.R")
 source("KinshipPedigree.R")
 
 #Load scan data, population and dominance info

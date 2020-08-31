@@ -37,7 +37,7 @@ vioplot(TERGMeffects.V$form.edge,TERGMeffects.V$form.triangle.close,
         TERGMeffects.V$form.reciprocity, TERGMeffects.V$form.prox,
         at=c(1,2,3,4),#outline=FALSE,
         horizontal =T, main="Coefficient from TERGM Formation Model, (Group V)",
-        xlab="coefficient",#range=0.9,
+        xlab="coefficient",cex.lab =18,#range=0.9,
         names=c("density","triad closure","reciprocity","proximity"))
 segments(0,0.2,0,10.8, col = "Red", lty=5, lwd=2)
 
@@ -61,7 +61,7 @@ vioplot(TERGMeffects.KK$form.edge,TERGMeffects.KK$form.triangle.close,
         TERGMeffects.KK$form.reciprocity, TERGMeffects.KK$form.prox,
         at=c(1,2,3,4),#outline=FALSE,
         horizontal =T, main="Coefficient from TERGM Formation Model (Group KK)",
-        xlab="coefficient",#range=0.9,
+        xlab="coefficient",cex=14,#range=0.9,
         names=c("density","triad closure","reciprocity","proximity"))
 segments(0,0.2,0,10.8, col = "Red", lty=5, lwd=2)
 

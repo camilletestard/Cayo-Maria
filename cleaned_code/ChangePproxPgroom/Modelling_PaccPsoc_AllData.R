@@ -59,6 +59,7 @@ export_summs(isNotAloneV, model.names = c("V.Model"), digits=3,error_format="[{c
 #Grooming model
 isSocialV <- glmer(isSocial~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID), data = ExSubScansV, family = binomial)
 summary(isSocialV)
+
 export_summs(isSocialV, model.names = c("V.Model"), digits=3,error_format="[{conf.low}, {conf.high}]", error_pos="right",
              to.file = "docx", file.name = "isSocialV.docx")
 
