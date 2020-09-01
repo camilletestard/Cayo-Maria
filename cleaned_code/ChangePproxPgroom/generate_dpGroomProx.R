@@ -37,14 +37,14 @@ for (iter in 1:num_iter){
       isSocial.pre = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
       isSocial.post = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
       dpAcc=NA; dpSocial=NA; num_obs = length(isProx.pre)
-      if (length(isProx.pre)>=20) { #If there are more than 10 observations for that individual
+      # if (length(isProx.pre)>=20) { #If there are more than 10 observations for that individual
         pACC.pre = sum(isProx.pre)/length(isProx.pre)
         pACC.post = sum(isProx.post)/length(isProx.post)
         dpAcc = pACC.post - pACC.pre
         pSocial.pre = sum(isSocial.pre)/length(isSocial.pre)
         pSocial.post = sum(isSocial.post)/length(isSocial.post)
         dpSocial = pSocial.post - pSocial.pre
-      } #end of min obs clause
+      # } #end of min obs clause
       dprob[id,]=c(unqIDs[id],dpAcc,dpSocial,num_obs)
     } #end of id for loop
     dprob$group = group[gy]; dprob$year = years[gy]; dprob$iter=iter
