@@ -131,130 +131,122 @@ t.Soc<-tableGrob(Estimates); t.Soc<-grid.arrange(t.Soc, top="Base Model: Change 
 write.csv(Estimates,"PredictGroom.KK.csv")
 #end of script
 
-# #####################################################################
-# # 4. Visualizations
-# #####################################################################
-# 
-# setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/PreHurricaneFactors-BehavioralFlex/Plots")
-# 
-# #check distribution of independent variables
-# tiff("ChangeProbProx.tiff",units="in", width=7, height=4, res=300, compression = 'lzw')
-# hist(full.data$dpAcc,col=rgb(1,0,0,0.5), breaks=20,main="Change p(proximity) pre- to post-hurricane",xlab="Change p(Proximity)", xlim=c(-0.5,1))
-# segments(x0=0,y0=0,x1=0,y1=20000,col="red",lwd=4, lty=2)
-# box()
-# dev.off()
-# 
-# # postscript("ChangeProbProx.eps")
-# # hist(full.data$dpAcc,col=rgb(1,0,0,0.5), breaks=20,main="Change p(proximity) pre- to post-hurricane",xlab="Change p(Proximity)", xlim=c(-0.5,1))
-# # segments(x0=0,y0=0,x1=0,y1=20000,col="red",lwd=4, lty=2)
-# # box()
-# # dev.off()
-# 
-# tiff("ChangeProbGroom.tiff",units="in", width=7, height=4, res=300, compression = 'lzw')
-# hist(full.data$dpSocial,col=rgb(0,1,1,0.5), breaks=20,main="Change p(grooming) pre- to post-hurricane",xlab="Change p(Grooming)", xlim=c(-0.4,0.4))
-# segments(x0=0,y0=0,x1=0,y1=25000,col="red",lwd=4, lty=2)
-# box()
-# dev.off()
-# 
-# # postscript("ChangeProbGroom.eps")
-# # hist(full.data$dpSocial,col=rgb(0,1,1,0.5), breaks=20,main="Change p(grooming) pre- to post-hurricane",xlab="Change p(Grooming)", xlim=c(-0.4,0.4))
-# # segments(x0=0,y0=0,x1=0,y1=25000,col="red",lwd=4, lty=2)
-# # box()
-# # dev.off()
-# 
-# #Visualize how strength of bond to dead individuals (from the hurricane) affects change in grooming/proximity 
-# dead<-ggplot(data, aes(x=dead.all, y=dpSocial))+
-#   geom_point(alpha = 0.25, size = 3) + 
-#   geom_smooth(method=lm, color=rgb(1,0,0))+
-#   ggtitle("Post-disaster change in grooming as a function of pre-disaster strength of bond to deceased IDs")+
-#   xlab("Strength of bond to deceased IDs pre-disaster (standardized)")+
-#   ylab("Change in Grooming")
-# cor.test(data$dpSocial,data$dead.all) #test correlation
-# tiff("dead.tiff",units="in", width=8.5, height=4, res=300, compression = 'lzw'); dead; dev.off() #save plot
-# 
-# ggplot(data, aes(x=dead.all, y=dpAcc))+
-#   geom_point(alpha = 0.25, size = 3) + 
-#   geom_smooth(method=lm, color=rgb(1,0,0))+
-#   ggtitle("Post-disaster change in proximity as a function of pre-disaster strength of bond to deceased IDs")+
-#   xlab("Strength of bond to deceased IDs pre-disaster (standardized)")+
-#   ylab("Change in proximity")
-# cor.test(data$dpAcc,data$dead.all) #test correlation
-# 
-# 
-# #Visualize how baseline p(groom) is related to post-disaster change in p(groom)
-# preGroom <- ggplot(data, aes(x=std.DSIgroom, y=dpSocial))+
-#   # geom_point(aes(colour = sex, size = age),alpha = 0.25) + 
-#   geom_point(aes(colour = sex),alpha = 0.25, size = 3) + 
-#   geom_point(alpha = 0.25, size = 3) + 
-#   geom_smooth(method=lm, color=rgb(1,0,0))+
-#   ggtitle("Post-disaster change in grooming as a function of pre-disaster grooming level")+
-#   xlab("Pre-disaster Grooming (standardized)")+
-#   ylab("Change in Grooming")+
-#   facet_grid(~sex)
-# cor.test(data$dpSocial,data$DSIgroom) #test correlation
-# tiff("preGroom.tiff",units="in", width=7, height=4, res=300, compression = 'lzw'); preGroom; dev.off() #save plot
-# 
-# #Visualize how age is related to post-disaster change in p(groom)
-# ggplot(data, aes(x=age, y=dpSocial))+
-#   geom_point(alpha = 0.25) + 
-#   geom_smooth(method=lm, color='#2C3E50')+
-#   ggtitle("Post-disaster change in grooming as a function of age")
-# cor.test(data$dpSocial,data$age) #test correlation
-# 
-# #Visualize how sex is related to post-disaster change in p(groom)
-# ggplot(data, aes(x=sex, y=dpSocial,fill=sex))+
-#   geom_boxplot(aes(group=sex),alpha = 0.75, col="grey")+
-#   geom_jitter(position = position_jitter(0.2), alpha = 0.2)
-# 
-#Visualize how group is related to post-disaster change in p(groom)
-# ggplot(data, aes(x=group, y=dpAcc,fill=group))+
-#   geom_boxplot(aes(group=group),alpha = 0.75, col="grey")+
-#   geom_jitter(position = position_jitter(0.2), alpha = 0.2)
-# table(data$id,data$group)
+#####################################################################
+# 5. Visualizations
+#####################################################################
 
-# #Visualize how number of partner is related to post-disaster change in p(groom)
-# numP.groom <- ggplot(data, aes(x=numPartnersGroom, y=dpSocial))+
-#   # geom_point(aes(colour = sex, size = age),alpha = 0.25) + 
-#   geom_point(alpha = 0.25, size = 3) + 
-#   geom_smooth(method=lm, color=rgb(1,0,0))+
-#   ggtitle("Post-disaster change in grooming as a function of pre-disaster grooming level")+
-#   xlab("Pre-disaster number of grooming partners (standardized)")+
-#   ylab("Change in Grooming post-disaster")+
-#   facet_grid(~sex)
-# cor.test(data$dpSocial,data$numPartnersGroom) #test correlation
-# # tiff("numP.groom.tiff",units="in", width=7, height=4, res=300, compression = 'lzw'); numP.groom; dev.off()
-# 
-# #Visualize how eigenvector centrality is related to post-disaster change in p(groom)
-# eigCent.groom <- ggplot(data, aes(x=eig.cent.groom, y=dpSocial))+
-#   # geom_point(aes(colour = sex, size = age),alpha = 0.25) + 
-#   # geom_point(aes(colour = sex),alpha = 0.25, size = 3) + 
-#   geom_point(alpha = 0.25, size = 3) +
-#   geom_smooth(method=lm, color=rgb(1,0,0))+
-#   ggtitle("Post-disaster change in grooming as a function of pre-disaster grooming network position")+
-#   xlab("Pre-disaster index of how well-connected your friends are (eigenvector centrality)")+
-#   ylab("Change in Grooming post-disaster")+
-#   facet_grid(~sex)
-# cor.test(data$dpAcc,data$eig.cent.groom)
-# #tiff("eigCent.prox.tiff",units="in", width=9, height=4, res=300, compression = 'lzw'); eigCent.prox; dev.off()
-# 
-# #Visualize how clustering coeff is related to post-disaster change in p(groom)
-# ClusterCoeff.groom <- ggplot(data, aes(x=clusterCoeff.groom, y=dpSocial))+
-#   # geom_point(aes(colour = sex, size = age),alpha = 0.25) + 
-#   geom_point(aes(colour = sex),alpha = 0.25, size = 3) + 
-#   geom_smooth(method=lm, color='#2C3E50')+
-#   ggtitle("Post-disaster change in proximity as a function of pre-disaster social network position")+
-#   xlab("Pre-disaster index of position in network (Clustering Coefficient)")+
-#   ylab("Change in Grooming post-disaster")+
-#   facet_grid(~sex)
-# cor.test(data$dpSocial,data$clusterCoeff.groom)
-# # tiff("eigCent.groom.tiff",units="in", width=9, height=4, res=300, compression = 'lzw'); eigCent.prox; dev.off()
-# 
-# ggplot(data, aes(x=between.groom, y=dpSocial))+
-#   # geom_point(aes(colour = sex, size = age),alpha = 0.25) + 
-#   geom_point(aes(colour = sex),alpha = 0.25, size = 3) + 
-#   geom_smooth(method=lm, color='#2C3E50')+
-#   ggtitle("Post-disaster change in grooming as a function of pre-disaster social network position")+
-#   xlab("Pre-disaster index of position in network (betweenness)")+
-#   ylab("Change in Grooming post-disaster")+
-#   facet_grid(~sex)
-# cor.test(data$dpSocial,data$between.groom)
+setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/PreHurricaneFactors-BehavioralFlex/Plots")
+
+#If want to plot only one iteration
+full.data.plot=full.data[full.data$iter==sample(500,1),]
+# full.data.plot=full.data
+
+#check distribution of independent variables
+tiff("ChangeProbProx.tiff",units="in", width=7, height=4, res=300, compression = 'lzw')
+hist(full.data.plot$dpAcc,col=rgb(1,0,0,0.5), breaks=20,main="Change p(proximity) pre- to post-hurricane",xlab="Change p(Proximity)", xlim=c(-0.5,1))
+segments(x0=0,y0=0,x1=0,y1=20000,col="red",lwd=4, lty=2)
+box()
+dev.off()
+
+tiff("ChangeProbGroom.tiff",units="in", width=7, height=4, res=300, compression = 'lzw')
+hist(full.data.plot$dpSocial,col=rgb(0,1,1,0.5), breaks=20,main="Change p(grooming) pre- to post-hurricane",xlab="Change p(Grooming)", xlim=c(-0.4,0.4))
+segments(x0=0,y0=0,x1=0,y1=25000,col="red",lwd=4, lty=2)
+box()
+dev.off()
+
+
+#Visualize how strength of bond to dead individuals (from the hurricane) affects change in grooming/proximity
+dead<-ggplot(full.data.plot, aes(x=dead.all, y=dpSocial))+
+  geom_point(alpha = 0.25, size = 3) +
+  geom_smooth(method=lm, color=rgb(1,0,0))+
+  ggtitle("Post-disaster change in grooming as a function of pre-disaster strength of bond to deceased IDs")+
+  xlab("Strength of bond to deceased IDs pre-disaster (standardized)")+
+  ylab("Change in Grooming")
+cor.test(full.data.plot$dpSocial,full.data.plot$dead.all) #test correlation
+tiff("dead.tiff",units="in", width=8.5, height=4, res=300, compression = 'lzw'); dead; dev.off() #save plot
+
+ggplot(full.data.plot, aes(x=dead.all, y=dpAcc))+
+  geom_point(alpha = 0.25, size = 3) +
+  geom_smooth(method=lm, color=rgb(1,0,0))+
+  ggtitle("Post-disaster change in proximity as a function of pre-disaster strength of bond to deceased IDs")+
+  xlab("Strength of bond to deceased IDs pre-disaster (standardized)")+
+  ylab("Change in proximity")
+cor.test(full.data.plot$dpAcc,full.data.plot$dead.all) #test correlation
+
+
+#Visualize how baseline grooming is related to post-disaster change in p(groom)
+preGroom <- ggplot(full.data.plot, aes(x=std.DSIgroom, y=dpSocial))+
+  geom_point(aes(colour = sex),alpha = 0.75, size = 3) +
+  geom_smooth(method=lm, color=rgb(1,0,0))+
+  ggtitle("Post-disaster change in grooming rate\nas a function of pre-disaster grooming level")+
+  xlab("Pre-disaster Grooming (standardized)")+
+  ylab("Change in p(grooming)")+ ylim(-0.3, 0.3)+
+  facet_grid(~sex)+ theme_classic(base_size=20)+
+  scale_color_manual(values=c("plum1","seagreen2"))
+cor.test(full.data.plot$dpSocial,full.data.plot$DSIgroom) #test correlation
+tiff("preGroom.tiff",units="in", width=7, height=4, res=300, compression = 'lzw'); preGroom; dev.off() #save plot
+
+#Visualize how age is related to post-disaster change in p(groom)
+ggplot(full.data.plot, aes(x=age, y=dpSocial))+
+  geom_point(alpha = 0.25) +
+  geom_smooth(method=lm, color='#2C3E50')+
+  ggtitle("Post-disaster change in grooming as a function of age")
+cor.test(full.data.plot$dpSocial,full.data.plot$age) #test correlation
+
+#Visualize how sex is related to post-disaster change in p(groom)
+ggplot(full.data.plot, aes(x=sex, y=dpSocial,fill=sex))+
+  geom_boxplot(aes(group=sex),alpha = 0.75, col="grey")+
+  geom_jitter(position = position_jitter(0.2), alpha = 0.2)
+
+Visualize how group is related to post-disaster change in p(groom)
+ggplot(full.data.plot, aes(x=group, y=dpAcc,fill=group))+
+  geom_boxplot(aes(group=group),alpha = 0.75, col="grey")+
+  geom_jitter(position = position_jitter(0.2), alpha = 0.2)
+table(full.data.plot$id,full.data.plot$group)
+
+#Visualize how number of partner is related to post-disaster change in p(groom)
+numP.groom <- ggplot(full.data.plot, aes(x=numPartnersGroom, y=dpSocial))+
+  # geom_point(aes(colour = sex, size = age),alpha = 0.25) +
+  geom_point(alpha = 0.25, size = 3) +
+  geom_smooth(method=lm, color=rgb(1,0,0))+
+  ggtitle("Post-disaster change in grooming as a function of pre-disaster grooming level")+
+  xlab("Pre-disaster number of grooming partners (standardized)")+
+  ylab("Change in Grooming post-disaster")+
+  facet_grid(~sex)
+cor.test(full.data.plot$dpSocial,full.data.plot$numPartnersGroom) #test correlation
+# tiff("numP.groom.tiff",units="in", width=7, height=4, res=300, compression = 'lzw'); numP.groom; dev.off()
+
+#Visualize how eigenvector centrality is related to post-disaster change in p(groom)
+eigCent.groom <- ggplot(full.data.plot, aes(x=eig.cent.groom, y=dpSocial))+
+  # geom_point(aes(colour = sex, size = age),alpha = 0.25) +
+  # geom_point(aes(colour = sex),alpha = 0.25, size = 3) +
+  geom_point(alpha = 0.25, size = 3) +
+  geom_smooth(method=lm, color=rgb(1,0,0))+
+  ggtitle("Post-disaster change in grooming as a function of pre-disaster grooming network position")+
+  xlab("Pre-disaster index of how well-connected your friends are (eigenvector centrality)")+
+  ylab("Change in Grooming post-disaster")+
+  facet_grid(~sex)
+cor.test(full.data.plot$dpAcc,full.data.plot$eig.cent.groom)
+#tiff("eigCent.prox.tiff",units="in", width=9, height=4, res=300, compression = 'lzw'); eigCent.prox; dev.off()
+
+#Visualize how clustering coeff is related to post-disaster change in p(groom)
+ClusterCoeff.groom <- ggplot(full.data.plot, aes(x=clusterCoeff.groom, y=dpSocial))+
+  # geom_point(aes(colour = sex, size = age),alpha = 0.25) +
+  geom_point(aes(colour = sex),alpha = 0.25, size = 3) +
+  geom_smooth(method=lm, color='#2C3E50')+
+  ggtitle("Post-disaster change in proximity as a function of pre-disaster social network position")+
+  xlab("Pre-disaster index of position in network (Clustering Coefficient)")+
+  ylab("Change in Grooming post-disaster")+
+  facet_grid(~sex)
+cor.test(full.data.plot$dpSocial,full.data.plot$clusterCoeff.groom)
+# tiff("eigCent.groom.tiff",units="in", width=9, height=4, res=300, compression = 'lzw'); eigCent.prox; dev.off()
+
+ggplot(full.data.plot, aes(x=between.groom, y=dpSocial))+
+  # geom_point(aes(colour = sex, size = age),alpha = 0.25) +
+  geom_point(aes(colour = sex),alpha = 0.25, size = 3) +
+  geom_smooth(method=lm, color='#2C3E50')+
+  ggtitle("Post-disaster change in grooming as a function of pre-disaster social network position")+
+  xlab("Pre-disaster index of position in network (betweenness)")+
+  ylab("Change in Grooming post-disaster")+
+  facet_grid(~sex)
+cor.test(full.data.plot$dpSocial,full.data.plot$between.groom)
