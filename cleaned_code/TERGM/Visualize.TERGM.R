@@ -36,9 +36,9 @@ tiff("TERGMcoeff.formation.V.tiff",
 vioplot(TERGMeffects.V$form.edge,TERGMeffects.V$form.triangle.close,
         TERGMeffects.V$form.reciprocity, TERGMeffects.V$form.prox,
         at=c(1,2,3,4),#outline=FALSE,
-        horizontal =T, main="Coefficient from TERGM Formation Model, (Group V)",
-        xlab="coefficient",cex.lab =18,#range=0.9,
-        names=c("density","triad closure","reciprocity","proximity"))
+        horizontal =T, main="Coefficient from TERGM Formation Model (Group V)",
+        cex.axis =2,cex.main =2,cex.names =1.75,
+        names=c("density","triad clos.","recip.","proximity"))
 segments(0,0.2,0,10.8, col = "Red", lty=5, lwd=2)
 
 dev.off()
@@ -61,8 +61,8 @@ vioplot(TERGMeffects.KK$form.edge,TERGMeffects.KK$form.triangle.close,
         TERGMeffects.KK$form.reciprocity, TERGMeffects.KK$form.prox,
         at=c(1,2,3,4),#outline=FALSE,
         horizontal =T, main="Coefficient from TERGM Formation Model (Group KK)",
-        xlab="coefficient",cex=14,#range=0.9,
-        names=c("density","triad closure","reciprocity","proximity"))
+        cex.axis =2,cex.main =2,cex.names =1.75,
+        names=c("density","triad clos.","recip.","proximity"))
 segments(0,0.2,0,10.8, col = "Red", lty=5, lwd=2)
 
 dev.off()

@@ -48,7 +48,7 @@ for (a in 1:2){
   if (network_action == "groom") {network_mode = "directed"}
   
   #For each group, each year separately: 
-  g=1;y=1;h=1
+  g=2;y=2;h=1
   for (g in 1:length(group)){ #For each group
     randscansG = randomScans[which(randomScans$group==group[g]),] 
     
@@ -115,17 +115,20 @@ for (a in 1:2){
         
         #set colour of sexes
         V(am.g)$color=V(am.g)$sex #assign the "Sex" attribute as the vertex color
-        V(am.g)$color=gsub("1","darkorange",V(am.g)$color) #Females will be orange
-        V(am.g)$color=gsub("2","cyan",V(am.g)$color) #Males will be lightblue
+        V(am.g)$color=gsub("1","plum1",V(am.g)$color) #Females will be orange
+        V(am.g)$color=gsub("2","seagreen2",V(am.g)$color) #Males will be lightblue
         V(am.g)$color=gsub("0","white",V(am.g)$color) #unknown sex will be white
         
+        #set degree attribute
+        V(am.g)$degree=degree(am.g)
+        
         #set path for saving and plot graph
-        if (network_action == "groom"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/GroomNetworks")} 
+        if (network_action == "groom"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/GroomNetworks/test")} 
         if (network_action == "prox"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/ProxNetworks") }
         tiff(paste("Social Network ",group[g],years[y],".",isPost[h],".tiff",sep=""), 
              units="in", width=10, height=8, res=300, compression = 'lzw')
-        plot.igraph(am.g,layout=l, vertex.label=V(am.g)$name, vertex.color=V(am.g)$color, vertex.size=13,edge.color="grey20", 
-                    edge.width=E(am.g)$weight*2,edge.arrow.size = 0.5, main = paste("Social Network ",group[g],years[y],".",isPost[h],sep=""))
+        plot.igraph(am.g,layout=l, vertex.label=V(am.g)$name, vertex.color=V(am.g)$color, vertex.size=3*V(am.g)$degree,edge.color="grey20", 
+                    edge.width=E(am.g)$weight*1.5,edge.arrow.size = 0.5, main = paste("Social Network ",group[g],years[y],".",isPost[h],sep=""))
         dev.off()
         
         

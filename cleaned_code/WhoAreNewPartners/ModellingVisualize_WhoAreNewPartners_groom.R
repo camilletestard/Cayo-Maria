@@ -87,30 +87,33 @@ data.diff.full =rbind(data.V.diff, data.KK.diff)
 # tiff("L2H.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 l2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToHigh), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   # geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
   ggtitle("Low|High")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+
-  scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y=NULL)+
+  scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
   # facet_grid(~group)
 # dev.off()
 
 #groom High to Low
 h2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToLow), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("HighR|LowR ")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
-  # facet_grid(~group)
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
+# facet_grid(~group)
 
 
 #groom Low to Low
 # tiff("L2L.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 l2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToLow), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("LowR|LowR ")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
   # facet_grid(~group)
 # dev.off()
 
@@ -119,9 +122,10 @@ l2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToLow), fil
 # tiff("H2H.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 h2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToHigh), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("HighR|HighR ")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
   # facet_grid(~group)
 # dev.off()
 
@@ -138,12 +142,12 @@ ggsave(FullPlot.groom, file ="changeRankPref_groom.eps")
 ## groom #
 
 #groom Kin
-tiff("Kin.change.125.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 kin<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(Kin), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Kin")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 # dev.off()
 ggsave(kin, file ="changeKinPref_groom.png")
 ggsave(kin, file ="changeKinPref_groom.eps")
@@ -159,35 +163,39 @@ ggsave(kin, file ="changeKinPref_groom.eps")
 # tiff("shy2shy.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 shy2shy<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomophily.shy), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Shy|Shy")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 # dev.off()
 
 #groom greg.greg
 # tiff("greg2greg.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 greg2greg<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomophily.greg), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Greg|Greg")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 # dev.off()
 
 # #groom shy.greg
 shy2greg<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.shygreg), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Shy|Greg")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 
 
 # #groom greg.shy
 # tiff("greg2shy.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 greg2shy<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.gregshy), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Greg|Shy")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 # dev.off()
 
 FullPlot.groom = grid.arrange(shy2shy,greg2greg,shy2greg,greg2shy, ncol=4, nrow=1)
@@ -203,34 +211,36 @@ ggsave(FullPlot.groom, file ="changeSocialPref_groom.eps")
 # # groom Male --> Male
 M2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MM), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Male|Male")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
-
+  labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 
 # # groom Male --> Female
 M2F<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MF), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Male|Female")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
-
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 
 # groom Female --> Male
 # tiff("F2M.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
 F2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(FM), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Female|Male")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 # dev.off()
 
 # groom Female --> Female
 F2F<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(FF), fill=as.factor(group) ))+
   geom_violin()+
-  geom_hline(yintercept=0, color = "red", linetype = "dashed")+
+  geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   ggtitle("Female|Female")+
-  labs(fill = "Hurricane Status",x="Hurricane Status",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=14)
+  labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
+  theme(legend.position = "none")
 
 FullPlot.groom = grid.arrange(M2M,M2F,F2M,F2F, ncol=4, nrow=1)
 ggsave(FullPlot.groom, file ="changeSexPref_groom.png")

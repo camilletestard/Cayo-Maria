@@ -22,9 +22,6 @@
 library(network)
 library(ergm)
 library(dplyr)
-# library(sna)
-# library(igraph)
-# library(tnet)
 library(stringr)
 library(ggplot2)
 library(statnet)
@@ -33,12 +30,12 @@ library(htmlwidgets)
 library(latticeExtra)
 
 # http://statnet.org/Workshops/ergm_tutorial.html#appendix_a:_clarifying_the_terms_%E2%80%93_ergm_and_network
-# http://statnet.org/Workshops/tergm_tutorial.html
+# http://statnet.org/Workshops/tergm _tutorial.html
 
 #load local functions
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code/functions") 
 source("CalcSubsampledScans.R")
-source("functions_Homophily.R")
+source("functions_GlobalNetworkMetrics.R")
 source("KinshipPedigree.R")
 
 #Load scan data, population and dominance info
@@ -57,7 +54,7 @@ SocialCapital.ALL$groomCat[which(SocialCapital.ALL$std.DSIgroom<threshold)]="shy
 pedigree=bigped[,c("ID","DAM","SIRE")]
 ped <- KinshipPedigree(pedigree)
 
-num_iter = 275
+num_iter = 20
 
 #For each group, each year separately: 
 group = c("V","V","V","KK","KK") #c("V","V","V","V","V","KK","KK","KK","S")
@@ -78,7 +75,7 @@ for (iter in 1:num_iter){ #for all iterations
   randomScans$groupyear = paste(randomScans$group, randomScans$year,sep="")
   
   # 2. For each group, each year and pre-/post-hurr separately, compute weighted edge list: 
-  gy=1
+  gy=3
   for (gy in 1:length(groupyears)){ #For each groupyear 
     randscansY = randomScans[which(randomScans$groupyear==groupyears[gy]),] #subselect scans of group G
     
@@ -138,17 +135,17 @@ for (iter in 1:num_iter){ #for all iterations
     
     # #plot networks
     # par(mfrow = c(2,2), oma=c(1,1,1,1), mar=c(4,1,1,1))
-    # plot(network.extract(prePostNet, at = 0), main = "Time 1", 
+    # plot(network.extract(prePostNet, at = 0), main = "Time 1",
     #      displaylabels = T, label.cex = 0.6, vertex.cex = 2, pad = 0.5)
-    # plot(network.extract(prePostNet, at = 1), main = "Time2", 
+    # plot(network.extract(prePostNet, at = 1), main = "Time2",
     #      displaylabels = T, label.cex = 0.6, vertex.cex = 2, pad = 0.5)
     # 
     # #Descriptive temporal network analysis
     # tSnaStats(prePostNet,"degree") # Changes in degree centrality
-    # tErgmStats(prePostNet, "~ edges+triangle") # Notice the increase in triangles
+    # tErgmStats(prePostNet, "~ edges+triangle+mutual") # Notice the increase in triangles
     # 
-    # #Visualize dynamics: 
-    # render.d3movie(prePostNet, 
+    # #Visualize dynamics:
+    # render.d3movie(prePostNet,
     #                plot.par=list(displaylabels=T))
     # proximity.timeline(prePostNet,default.dist = 6,
     #                    mode = 'sammon',labels.at = 17,vertex.cex = 4)
@@ -173,20 +170,21 @@ for (iter in 1:num_iter){ #for all iterations
 
     if("try-error" %in% class(t)){count=count+1} #keep track of errors, model which do not converge
     if(!("try-error" %in% class(t))){ #if don't converge
-      
+
       print(summary(mod))
       #Note: nodefactor & edges are linearly dependent when both sexes are included.
-      #There is an issue when trying to include gwesp in dissolution. Probably because none 
+      #There is an issue when trying to include gwesp in dissolution. Probably because none
       #of the edge that dissolve were part of a triangle
-      
+
       #Because we are running the model on multiple iterations of the data keeping track of the output
       TERGMeffects[1, c("iter", "groupyear")] = c(iter, groupyears[gy])
       TERGMeffects[1, c("form.edge", "form.triangle.close","form.reciprocity","form.prox")] <- unlist(coef(mod)["formation"])
       TERGMeffects[1, c("diss.edge","diss.prox")] <- unlist(coef(mod)["dissolution"])
       TERGMeffects.ALL = rbind(TERGMeffects.ALL,TERGMeffects)
-      
+
     }
     rm(mod)
+    
     # #Plot graph
     # #set up colours as an equivalent network attribute to sex
     # cols=vector();cols[sex=="M"]="cyan"; cols[sex=="F"]="pink"
@@ -215,7 +213,7 @@ for (iter in 1:num_iter){ #for all iterations
     # 
 
     #Save
-    save(TERGMeffects.ALL, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/TERGMeffects.RData")
+    # save(TERGMeffects.ALL, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/TERGMeffects.RData")
   }
 }
 
