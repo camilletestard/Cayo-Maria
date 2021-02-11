@@ -5,13 +5,14 @@
 # distribution of that difference. I then compute and save the mean difference and 95% confidence interval.
 # Output: .csv files with mean difference and CI, for grooming and proximity and each group and year separately (total = 10 estimates).  
 
+library(data.table)
 library(overlapping)
 library(matrixStats)
 library(gridExtra) 
 library(graphics)
 
 
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats_minObs.RData")
 
 ##########################################################
 #Pooling all data together
@@ -56,7 +57,7 @@ for (gy in 1:length(groupyear)){
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/") 
 
 for (gy in 1:length(groupyear)){
-write.csv(pref.stats.ALL[[gy]],paste("Groom.density.diff",groupyear[gy],"csv",sep="."))
+write.csv(pref.stats.ALL[[gy]],paste("Groom.density.diff",groupyear[gy],"minObs.csv",sep="_"))
 }
 
 ##########################################################

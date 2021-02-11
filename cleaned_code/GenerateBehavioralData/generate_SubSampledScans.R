@@ -111,4 +111,3 @@ ggplot(data = obs.table.ID, aes(x = reorder(Var1, -Freq), y= Freq, fill = Var2))
 
 end_time <- Sys.time()
 end_time - start_time
-

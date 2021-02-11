@@ -15,7 +15,7 @@ library(graphics)
 
 #Load data
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
-load("R.Data/Strength.StablePartners.RData")
+load("R.Data/Strength.StablePartners_minOBs.RData")
 
 ##########################################
 #Add sex, age and rank info
@@ -108,10 +108,10 @@ Means = colMeans2(as.matrix(StableP.groom.V)); Means = round(Means,3)
 CI = colQuantiles(as.matrix(StableP.groom.V), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
 Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
 t.groom.BM<-tableGrob(Estimates); t.groom.BM<-grid.arrange(t.groom.BM, top="Stable Partners Groom Model (Group V)"); #create table, arrange table
-write.csv(Estimates, file="StrengthStableP.V.csv")
+write.csv(Estimates, file="StrengthStableP.V_minOBs.csv")
 
 Means = colMeans2(as.matrix(StableP.groom.KK)); Means = round(Means,3)
 CI = colQuantiles(as.matrix(StableP.groom.KK), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
 Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
 t.groom.BM<-tableGrob(Estimates); t.groom.BM<-grid.arrange(t.groom.BM, top="Stable Partners Groom Model (Group KK)"); #create table, arrange table
-write.csv(Estimates, file="StrengthStableP.KK.csv")
+write.csv(Estimates, file="StrengthStableP_minOBs.KK.csv")

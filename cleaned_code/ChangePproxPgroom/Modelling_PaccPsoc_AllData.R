@@ -36,6 +36,16 @@ for (id in 1:length(unqIDs)){ #For all individuals
 ExSubScans=SubScans
 unqIDs = as.character(unique(ExSubScans$focalID))
 
+#Demographics
+demographics = data.frame(); id=1
+for (id in 1:length(unqIDs)){
+  demographics[id,"id"]=unqIDs[id]
+  idx=which(!is.na(match(ExSubScans$focalID,unqIDs[id])))
+  demographics[id,"sex"]=ExSubScans$sex[idx[1]]
+  demographics[id,"group"]=ExSubScans$group[idx[1]]
+}
+table(demographics$sex,demographics$group)
+
 # full.sample.table = table(as.character(ExSubScans$focalID),ExSubScans$isPost)
 
 #Scale parameters
@@ -53,6 +63,7 @@ setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/ChangePAccPSo
 
 #Proximity Model
 isNotAlone <- glmer(isProx~ isPost*Q + sex + age + percentrank + timeBlock + group + isPost:group + (1|focalID), data = ExSubScans, family = binomial) #Note: might want to try MCMCglmm?
+# check_model(isNotAlone)
 summary(isNotAlone)
 export_summs(isNotAlone, model.names = c("Full Model"), digits=3,error_format="[{conf.low}, {conf.high}]", error_pos="right",
              to.file = "docx", file.name = "isNotAloneFULL.docx")
@@ -73,44 +84,44 @@ summary(isNotAloneV)
 export_summs(isNotAloneV, model.names = c("V.Model"), digits=3,error_format="[{conf.low}, {conf.high}]", error_pos="right",
              to.file = "docx", file.name = "isNotAloneV.docx")
 
-plot(predictorEffect("isPost", isNotAloneV))
-effect("isPost",isNotAloneV)
+# plot(predictorEffect("isPost", isNotAloneV))
+# effect("isPost",isNotAloneV)
 
 #Grooming model
 isSocialV <- glmer(isSocial~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID), data = ExSubScansV, family = binomial)
 summary(isSocialV)
 
-plot(predictorEffect("isPost", isSocialV))
-effect("isPost",isSocialV)
-plot_model(isSocialV)
+# plot(predictorEffect("isPost", isSocialV))
+# effect("isPost",isSocialV)
+# plot_model(isSocialV)
 
-#############
-#Simone's code:
-as.data.frame(effects::allEffects(isSocialV))$isPost
-
-df2 = expand.grid(isPost = unique(ExSubScansV$isPost),
-                  focalID = unique(ExSubScansV$focalID),
-                  timeBLock=unique(ExSubScansV$timeBlock),
-                  Q=unique(ExSubScansV$Q),
-                  age = mean(ExSubScansV$age),
-                  percentrank = mean(ExSubScansV$percentrank),
-)
-df1$fit = predict(fit1, type = "response", newdata = df1)
-df1 <- df1 %>% 
-  group_by(RV) %>% 
-  summarise(fit=mean(fit))
-
-data_regression %>% 
-  Rmisc::summarySEwithin(., measurevar = "response", withinvars = "RV") %>% 
-  mutate(RV=as.numeric(as.character(RV))) %>% 
-  ggplot() +
-  geom_line(data = df1, aes(RV, fit), size = 1, color="navy") +
-  geom_pointrange(aes(RV, response, ymin=response-se, ymax=response+se), color="navy", size=1) +
-  labs(x="Item Difference Subjective Value", y="P(Right Chosen)") +
-  scale_x_continuous(breaks = -3:3) +
-  theme_pubr() +
-  theme
-#############
+# #############
+# #Simone's code:
+# as.data.frame(effects::allEffects(isSocialV))$isPost
+# 
+# df2 = expand.grid(isPost = unique(ExSubScansV$isPost),
+#                   focalID = unique(ExSubScansV$focalID),
+#                   timeBLock=unique(ExSubScansV$timeBlock),
+#                   Q=unique(ExSubScansV$Q),
+#                   age = mean(ExSubScansV$age),
+#                   percentrank = mean(ExSubScansV$percentrank),
+# )
+# df1$fit = predict(fit1, type = "response", newdata = df1)
+# df1 <- df1 %>% 
+#   group_by(RV) %>% 
+#   summarise(fit=mean(fit))
+# 
+# data_regression %>% 
+#   Rmisc::summarySEwithin(., measurevar = "response", withinvars = "RV") %>% 
+#   mutate(RV=as.numeric(as.character(RV))) %>% 
+#   ggplot() +
+#   geom_line(data = df1, aes(RV, fit), size = 1, color="navy") +
+#   geom_pointrange(aes(RV, response, ymin=response-se, ymax=response+se), color="navy", size=1) +
+#   labs(x="Item Difference Subjective Value", y="P(Right Chosen)") +
+#   scale_x_continuous(breaks = -3:3) +
+#   theme_pubr() +
+#   theme
+# #############
 
 export_summs(isSocialV, model.names = c("V.Model"), digits=3,error_format="[{conf.low}, {conf.high}]", error_pos="right",
              to.file = "docx", file.name = "isSocialV.docx")

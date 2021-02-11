@@ -60,18 +60,18 @@ for (i in 1:iter) {
   
   isNotAloneV <- glmer(isProx~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID) + (1|year), data = ExSubScansV, family = binomial) #Note: might want to try MCMCglmm?
   #isNotAloneV <- glmer(isProx~ isPost + sex + age + percentrank + (1|year), data = ExSubScansV, family = binomial) #Note: might want to try MCMCglmm?
+  # performance::check_model(isNotAloneV)
   print(summary(isNotAloneV))
   #Plot effects seperately
-  plot(effects::allEffects(isNotAloneV))
-  sjPlot::plot_model(isNotAloneV, type="re", vline.color = "black")
+  # plot(effects::allEffects(isNotAloneV))
+  # sjPlot::plot_model(isNotAloneV, type="re", vline.color = "black")
   NotAlone.V.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isNotAloneV, "beta")
   NotAlone.V.Effects[i,c("(focalID)","(year)")] <- getME(isNotAloneV, "theta")
   
   isSocialV <- glmer(isSocial~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID) + (1|year), data = ExSubScansV, family = binomial)
   print(summary(isSocialV))
-  # simres2 <- simulateResiduals(isSocial, n = 1000)
-  # testResiduals(simres2)
-  # performance::check_model(isSocial)
+  # performance::check_collinearity(isSocialV)
+  # performance::check_model(isSocialV)
   Social.V.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isSocialV, "beta")
   Social.V.Effects[i,c("(focalID)","(year)")] <- getME(isSocialV, "theta")
   
@@ -82,6 +82,7 @@ for (i in 1:iter) {
   #isNotAloneKK <- glmer(isProx~ isPost + sex + age + percentrank + year + (1|focalID), data = ExSubScansKK, family = binomial) #Note: might want to try MCMCglmm?
   print(summary(isNotAloneKK))
   #plot(effects::allEffects(isNotAloneKK))
+  # performance::check_model(isNotAloneKK)
   NotAlone.KK.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isNotAloneKK, "beta")
   NotAlone.KK.Effects[i,c("(focalID)","(year)")] <- getME(isNotAloneKK, "theta")
   
@@ -89,7 +90,7 @@ for (i in 1:iter) {
   print(summary(isSocialKK))
   # simres2 <- simulateResiduals(isSocial, n = 1000)
   # testResiduals(simres2)
-  # performance::check_model(isSocial)
+  # performance::check_model(isSocialKK)
   Social.KK.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isSocialKK, "beta")
   Social.KK.Effects[i,c("(focalID)","(year)")] <- getME(isSocialKK, "theta")
   

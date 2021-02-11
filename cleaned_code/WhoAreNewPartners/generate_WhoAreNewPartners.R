@@ -54,7 +54,7 @@ colnames(PartnerAttr)= c("action","iter","group","year","isPost","LowToHigh",
 
 # load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes_80.RData")
 
-start_time <- Sys.time(); iter=1; a=2
+start_time <- Sys.time(); iter=1; a=1
 
 # for (a in 1:length(action)){
 for (iter in 1:num_iter){

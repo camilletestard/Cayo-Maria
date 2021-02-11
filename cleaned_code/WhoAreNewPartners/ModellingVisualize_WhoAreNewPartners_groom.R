@@ -3,7 +3,7 @@
 # = proportion of grooming between pair categories for each group/year/hurricane status separately. Pair categories based on: 
 #   - Social status: Low->Low; Low->High; High->Low; High->High. Note: Low rank <80%; High rank >80%
 #   - Sex: M->M; F->M; M->F; F->F
-#   - Pre-hurr grooming strength: greg->greg; greg->shy; shy->greg; shy->shy. Note: threshold for shy/greg is 80% (or prctile)
+#   - Pre-hurr grooming strength: greg->greg; greg->Solitary; Solitary->greg; Solitary->Solitary. Note: threshold for Solitary/greg is 80% (or prctile)
 #   - Kinship: related (rel>0.125) and unrelated (unrel <0.125)
 # This script will allows us to assess the difference in relationship distribution pre-to-post hurricane. 
 # E.g. are there more F->M relationships occuring post-disaster? 
@@ -26,7 +26,7 @@ library(gridExtra)
 library(matrixStats)
 
 #load & format data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes_groom.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes_minObs.RData")
 PartnerAttr$groupyear = paste(PartnerAttr$group, PartnerAttr$year, sep="")
 PartnerAttr$isPost = as.factor(PartnerAttr$isPost)
 for (col in seq(6,33)) {PartnerAttr[,col] = as.numeric(PartnerAttr[,col])}
@@ -68,8 +68,8 @@ Estimates.KK = cbind(Means,CI, pval); Estimates.KK = as.data.frame(Estimates.KK)
 
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/WhoAreNewPartners/") 
 
-write.csv(Estimates.V,"groomPartnerPref.Stats.V .csv")
-write.csv(Estimates.KK,"groomPartnerPref.Stats.KK.csv")
+write.csv(Estimates.V,"groomPartnerPref.Stats.V_minObs.csv")
+write.csv(Estimates.KK,"groomPartnerPref.Stats.KK_minObs.csv")
 
 ##############################################
 #PLOTS/visualizations
@@ -89,7 +89,7 @@ l2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToHigh), fi
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
   # geom_jitter(position = position_jitter(0.2), alpha = 0.5)+
-  ggtitle("Low|High")+
+  ggtitle("Low-->High")+
   labs(fill = "Group",x="Group",y=NULL)+
   scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
@@ -100,7 +100,7 @@ l2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToHigh), fi
 h2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToLow), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("HighR|LowR ")+
+  ggtitle("HighR-->LowR ")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 # facet_grid(~group)
@@ -111,7 +111,7 @@ h2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToLow), fi
 l2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToLow), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("LowR|LowR ")+
+  ggtitle("LowR-->LowR ")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
   # facet_grid(~group)
@@ -123,7 +123,7 @@ l2l<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(LowToLow), fil
 h2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToHigh), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("HighR|HighR ")+
+  ggtitle("HighR-->HighR ")+
   labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
   # facet_grid(~group)
@@ -131,8 +131,8 @@ h2h<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(HighToHigh), f
 
 
 FullPlot.groom = grid.arrange(h2h,h2l,l2h,l2l, ncol=4, nrow=1)
-ggsave(FullPlot.groom, file ="changeRankPref_groom.png")
-ggsave(FullPlot.groom, file ="changeRankPref_groom.eps")
+ggsave(FullPlot.groom, file ="changeRankPref_groom_minObs.png")
+ggsave(FullPlot.groom, file ="changeRankPref_groom_minObs.eps")
 
 
 ##################################################
@@ -149,22 +149,22 @@ kin<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(Kin), fill=as.
   labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 # dev.off()
-ggsave(kin, file ="changeKinPref_groom.png")
-ggsave(kin, file ="changeKinPref_groom.eps")
+ggsave(kin, file ="changeKinPref_groom_minObs.png")
+ggsave(kin, file ="changeKinPref_groom_minObs.eps")
 
 
 ##################################################
-# SOCIAL HOMOPHILY : plot %change shy.shy/greg.greg/shy.greg/greg/shy interactions pre-to-post hurr.
+# SOCIAL HOMOPHILY : plot %change Solitary.Solitary/greg.greg/Solitary.greg/greg/Solitary interactions pre-to-post hurr.
 ##################################################
 
 ## groom #
 
-#groom shy.shy
-# tiff("shy2shy.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
-shy2shy<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomophily.shy), fill=as.factor(group) ))+
+#groom Solitary.Solitary
+# tiff("Solitary2Solitary.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
+Solitary2Solitary<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomophily.shy), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Shy|Shy")+
+  ggtitle("Solitary-->Solitary")+
   labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 # dev.off()
@@ -174,33 +174,33 @@ shy2shy<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomo
 greg2greg<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialHomophily.greg), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Greg|Greg")+
+  ggtitle("Greg-->Greg")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 # dev.off()
 
-# #groom shy.greg
-shy2greg<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.shygreg), fill=as.factor(group) ))+
+# #groom Solitary.greg
+Solitary2greg<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.shygreg), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Shy|Greg")+
+  ggtitle("Solitary-->Greg")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 
 
-# #groom greg.shy
-# tiff("greg2shy.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
-greg2shy<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.gregshy), fill=as.factor(group) ))+
+# #groom greg.Solitary
+# tiff("greg2Solitary.change.tiff",units="in", width=7, height=6, res=300, compression = 'lzw')
+greg2Solitary<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(SocialOpposite.gregshy), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Greg|Shy")+
+  ggtitle("Greg-->Solitary")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 # dev.off()
 
-FullPlot.groom = grid.arrange(shy2shy,greg2greg,shy2greg,greg2shy, ncol=4, nrow=1)
-ggsave(FullPlot.groom, file ="changeSocialPref_groom.png")
-ggsave(FullPlot.groom, file ="changeSocialPref_groom.eps")
+FullPlot.groom = grid.arrange(Solitary2Solitary,greg2greg,Solitary2greg,greg2Solitary, ncol=4, nrow=1)
+ggsave(FullPlot.groom, file ="changeSocialPref_groom_minObs.png")
+ggsave(FullPlot.groom, file ="changeSocialPref_groom_minObs.eps")
 
 ########################################
 # SEX: plot %change MM/MF/FM/FF interactions pre-to-post hurr.
@@ -212,7 +212,7 @@ ggsave(FullPlot.groom, file ="changeSocialPref_groom.eps")
 M2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MM), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Male|Male")+
+  ggtitle("Male-->Male")+
   labs(fill = "Group",x="Group",y="Change in prop. of grooming pre/post")+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 
@@ -220,7 +220,7 @@ M2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MM), fill=as.f
 M2F<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MF), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Male|Female")+
+  ggtitle("Male-->Female")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 
@@ -229,7 +229,7 @@ M2F<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(MF), fill=as.f
 F2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(FM), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Female|Male")+
+  ggtitle("Female-->Male")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 # dev.off()
@@ -238,11 +238,11 @@ F2M<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(FM), fill=as.f
 F2F<-ggplot(data.diff.full, aes(x= as.factor(group), y=as.numeric(FF), fill=as.factor(group) ))+
   geom_violin()+
   geom_hline(yintercept=0, color = "red", linetype = "dashed", lwd=2)+
-  ggtitle("Female|Female")+
+  ggtitle("Female-->Female")+
   labs(fill = "Group",x="Group",y=NULL)+scale_fill_manual(values=c("#E69F00", "#56B4E9")) + theme_classic(base_size=20)+
   theme(legend.position = "none")
 
 FullPlot.groom = grid.arrange(M2M,M2F,F2M,F2F, ncol=4, nrow=1)
-ggsave(FullPlot.groom, file ="changeSexPref_groom.png")
-ggsave(FullPlot.groom, file ="changeSexPref_groom.eps")
+ggsave(FullPlot.groom, file ="changeSexPref_groom_minObs.png")
+ggsave(FullPlot.groom, file ="changeSexPref_groom_minObs.eps")
 

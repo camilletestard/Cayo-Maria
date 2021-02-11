@@ -4,7 +4,7 @@
 # (1)  horizontal violin plot
 # (2)  tables of mean estimates for all coefficients & 95% confidence intervals.
 
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/TERGMeffects.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/TERGMeffects_minObs.RData")
 library(matrixStats)
 library(gridExtra) 
 library(graphics)
@@ -30,7 +30,7 @@ setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/ERGM/")
 ##### V #####
 
 #Plot distribution of parameters for bond formation model
-tiff("TERGMcoeff.formation.V.tiff", 
+tiff("TERGMcoeff.formation.V_minObs.tiff", 
      units="in", width=10, height=10, res=300, compression = 'lzw')
 
 vioplot(TERGMeffects.V$form.edge,TERGMeffects.V$form.triangle.close,
@@ -49,7 +49,7 @@ CI = colQuantiles(as.matrix(TERGMeffects.V[,3:6]), probs = c(0.025, 0.975), na.r
 Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); colnames(Estimates) = c("Estimate","2.5%","97.5%")
 row.names(Estimates)=c("edges","triad.closure","reciprocity","prox")
 t.formation<-tableGrob(Estimates); t.formation<-grid.arrange(t.formation, top="Coefficient from TERGM Formation Model"); #create table, arrange table
-write.csv(Estimates, file="TERGMcoeff.formation.V.csv")
+write.csv(Estimates, file="TERGMcoeff.formation.V_minObs.csv")
 
 ##### KK #####
 
@@ -73,4 +73,4 @@ CI = colQuantiles(as.matrix(TERGMeffects.KK[,3:6]), probs = c(0.025, 0.975), na.
 Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); colnames(Estimates) = c("Estimate","2.5%","97.5%")
 row.names(Estimates)=c("edges","triad.closure","reciprocity","prox")
 t.formation<-tableGrob(Estimates); t.formation<-grid.arrange(t.formation, top="Coefficient from TERGM Formation Model"); #create table, arrange table
-write.csv(Estimates, file="TERGMcoeff.formation.KK.csv")
+write.csv(Estimates, file="TERGMcoeff.formation.KK_minObs.csv")

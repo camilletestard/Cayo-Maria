@@ -71,7 +71,7 @@ for (iter in 1:num_iter){ #for all iterations
   print(paste("%%%%%%%%%%%%%%%%%% ", iter, " %%%%%%%%%%%%%%%%%%")) #print iteration to keep track
   
   # 1. Calculate random subsamples
-  randomScans = calcRandomScans(allScans)
+  randomScans = calcRandomScans(allScans);
   randomScans$groupyear = paste(randomScans$group, randomScans$year,sep="")
   
   # 2. For each group, each year and pre-/post-hurr separately, compute weighted edge list: 
@@ -169,13 +169,18 @@ for (iter in 1:num_iter){ #for all iterations
                          estimate="CMLE"))
 
     if("try-error" %in% class(t)){count=count+1} #keep track of errors, model which do not converge
-    if(!("try-error" %in% class(t))){ #if don't converge
+    if(!("try-error" %in% class(t))){ #if converge
 
       print(summary(mod))
       #Note: nodefactor & edges are linearly dependent when both sexes are included.
       #There is an issue when trying to include gwesp in dissolution. Probably because none
       #of the edge that dissolve were part of a triangle
-
+      
+      #Diagnostics
+      gof.mod<-gof(mod)
+      plot(gof.mod)
+      mcmc.diagnostics(mod)
+      
       #Because we are running the model on multiple iterations of the data keeping track of the output
       TERGMeffects[1, c("iter", "groupyear")] = c(iter, groupyears[gy])
       TERGMeffects[1, c("form.edge", "form.triangle.close","form.reciprocity","form.prox")] <- unlist(coef(mod)["formation"])

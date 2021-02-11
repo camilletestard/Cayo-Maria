@@ -12,7 +12,7 @@ years = c(2015,2017,2015,2016,2017)
 groupyears = c("KK2015", "KK2017","V2015", "V2016", "V2017")
 
 dprob.ALL = data.frame();
-for (iter in 1:num_iter){
+for (iter in 421:num_iter){
   
   print(paste("%%%%%%%%%%%%%%%%%% iter",iter, "%%%%%%%%%%%%%%%%%%"))
   #####################################################################
@@ -30,33 +30,32 @@ for (iter in 1:num_iter){
     meta_data = read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt", sep = ""))
     
     unqIDs = as.character(meta_data$id)
-    dprob=data.frame(matrix(NA, nrow=length(unqIDs),ncol=4)); colnames(dprob)=c("id","dpAcc","dpSocial","num_obs")
+    dprob=data.frame(matrix(NA, nrow=length(unqIDs),ncol=8)); colnames(dprob)=c(c("id","dpAcc","dpSocial","pACC.pre", "pACC.post", "pSocial.pre", "pSocial.post", "num_obs"))
     for (id in 1:length(unqIDs)){ #For all individuals
       isProx.pre = rscans$isProx[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
       isProx.post = rscans$isProx[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
       isSocial.pre = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
       isSocial.post = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
       dpAcc=NA; dpSocial=NA; num_obs = length(isProx.pre)
-      # if (length(isProx.pre)>=20) { #If there are more than 10 observations for that individual
+      if (length(isProx.pre)>=20) { #If there are more than 40 observations for that individual pre hurricane
         pACC.pre = sum(isProx.pre)/length(isProx.pre)
         pACC.post = sum(isProx.post)/length(isProx.post)
         dpAcc = pACC.post - pACC.pre
         pSocial.pre = sum(isSocial.pre)/length(isSocial.pre)
         pSocial.post = sum(isSocial.post)/length(isSocial.post)
         dpSocial = pSocial.post - pSocial.pre
-      # } #end of min obs clause
-      dprob[id,]=c(unqIDs[id],dpAcc,dpSocial,num_obs)
+      } #end of min obs clause
+      dprob[id,]=c(unqIDs[id],dpAcc,dpSocial,pACC.pre, pACC.post, pSocial.pre, pSocial.post, num_obs)
     } #end of id for loop
     dprob$group = group[gy]; dprob$year = years[gy]; dprob$iter=iter
     dprob.ALL = rbind(dprob.ALL, dprob)
   } #end of groupyear for loop
 }
 
-dprob.ALL$dpAcc=as.numeric(dprob.ALL$dpAcc)
-dprob.ALL$dpSocial=as.numeric(dprob.ALL$dpSocial)
+dprob.ALL[,-c(1,9,10,11)]=as.numeric(dprob.ALL[,-c(1,9,10,11)]); 
 if (length(which(is.na(dprob.ALL$dpAcc)))!=0) {dprob.ALL = dprob.ALL[-which(is.na(dprob.ALL$dpAcc)),]} #remove NA
 setwd("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data")
-save(dprob.ALL,file="ChangeP.RData")
+save(dprob.ALL,file="ChangeP_min20.RData")
 
 # load("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data/ChangeP.RData")
 # length(unique(dprob.ALL$id))

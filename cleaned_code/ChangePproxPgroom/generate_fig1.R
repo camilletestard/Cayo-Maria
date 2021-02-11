@@ -115,7 +115,7 @@ setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/ChangePAccPso
 #     count = count+1
 #     isSocial$id[count] = unqIDs[id]
 #     isSocial$prob[count] = sum(id.all.post)/length(id.all.post) #get proportion of observations this individual was seen grooming other partners POST-hurricane
-#     isSocial$isPost[count] = "post"; isSocial$group[count] = as.character(group[1]); isSocial$sex[count] = as.character(sex[1])
+#     isSocial$isPost[count] = "post"; isSocial$group[count] = as.character(group[1]); isSocial$sex[count] = as.character(sex[1]);
 #   }
 #   isSocial$groupsex = paste(isSocial$group,isSocial$sex,sep=".")
 #   isSocial$iter=iter
@@ -190,14 +190,18 @@ isSocialQ.all.plot=isSocialQ.all
 #For probability of PROXIMITY:
 ###################################################################
 
+#Our transformation function
+scaleFUN <- function(x) sprintf("%.2f", x)
+
 #Violin plots of p(prox) pre/post-hurricane (not paired)
 pAcc<-
   ggplot(isProx.all.plot, aes(x=as.factor(isPost), y=prob, fill=as.factor(isPost)))+
   geom_violin(alpha=0.5, colour=NA)+
   geom_boxplot(width=.1, outlier.shape = NA)+
-  ggtitle("Change in proximity rates\nfollowing Hurricane Maria")+
+  # ggtitle("Change in proximity rates\nfollowing Hurricane Maria")+
   theme(plot.title = element_text(hjust = 0.5))+
-  labs(fill = "Hurricane \n Status",x="Hurricane Status",y="P(Proximity)")+
+  labs(fill = "Hurricane \n Status",x="Hurricane Status",y="p(Proximity)")+
+  theme(legend.position = "none")+
   theme_classic(base_size=20)+
   facet_grid(~group)
 ggsave(file="Change.pProx.eps", plot=pAcc)
@@ -232,13 +236,14 @@ ggsave(file="Change.pProxQ.tiff", plot=pAccQ)
 #Violin plots of p(groom) pre/post-hurricane
 pSoc<-
   ggplot(isSocial.all.plot, aes(x=as.factor(isPost), y=prob, fill=as.factor(isPost)))+
-  geom_violin(alpha=0.5, colour=NA)+
+  geom_violin(alpha=0.5, colour=NA)+ ylim(0,1)+
   geom_boxplot(width=.1, outlier.shape = NA)+
-  ggtitle("Change in grooming rates\nfollowing Hurricane Maria")+
+  # ggtitle("Change in grooming rates\nfollowing Hurricane Maria")+
   labs(fill = "Hurricane\nStatus",x="Hurricane Status",y="p(Grooming)")+
   facet_grid(~group)+theme_classic(base_size=20)
-ggsave(file="Change.pSocial.eps", plot=pSoc)
-ggsave(file="Change.pSocial.tiff", plot=pSoc)
+  #+scale_y_continuous(labels = scaleFUN)
+ggsave(file="Change.pSocial_v2.eps", plot=pSoc)
+ggsave(file="Change.pSocial_v2.tiff", plot=pSoc)
 
 #Plot histogram of p(groom) pre/post-hurricane
 hist(isSocial.all.plot$prob[which(isSocial.all.plot$isPost=="pre")],col=rgb(1,0,0,0.5), breaks=20,main="Individual p(Grooming) pre- to post-hurricane",xlab="p(Grooming)")

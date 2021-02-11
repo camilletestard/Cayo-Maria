@@ -99,7 +99,7 @@ calcEdgeList_groom    <- function(rscans, masterEL){
   
   partners = str_split(rscans$partner.ID, c(","), simplify = TRUE)
   focalID = as.character(rscans$focalID)
-  a = cbind(focalID,partners,rscans$isSocialGive, rscans$isSocialGet,rscans$isSocial)
+  a = cbind(focalID, partners, rscans$isSocialGive, rscans$isSocialGet, rscans$isSocial)
   
   PP <- NULL;count1=0; count2=0; count3=0  
   for(ii in 1:nrow(a)){ #for all observations

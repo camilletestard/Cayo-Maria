@@ -38,7 +38,7 @@ for (gy in 1:length(groupyears)){ #for all group & years
   prox_data$year <- lubridate::year(prox_data$date)
   prox_data$Q    <- lubridate::quarter(prox_data$date)
   prox_data$date <- as.character(prox_data$date) #re-format to character after finding year and quarter
-  
+
   #Add hurricane info
   prox_data$isPost = 0
   if (years[gy] == 2019) {prox_data$isPost = 2}
@@ -110,10 +110,13 @@ for (gy in 1:length(groupyears)){ #for all group & years
   prox_data$isSocialGive = 0; prox_data$isSocialGive[which(prox_data$focal.activity.isPost=="G")]=1
   prox_data$isSocialGet = 0; prox_data$isSocialGet[which(prox_data$focal.activity.isPost=="E")]=1
   
-  prox_data[,c("observation.name","time","partners.activity")] = NULL;
+  prox_data[,c("time","partners.activity")] = NULL;
+  
+  #add unq scan id to match up post-hurricane data
+  prox_data$unq.scan.id = NA
   
   #Order columns
-  col_order <- c("date","focalID","group","year","scan.number","focal.activity","focal.activity.isPost","partner.ID","in.proximity","num.prox","isProx","isSocial","isSocialGive", "isSocialGet", "Q","isPost","timeBlock")
+  col_order <- c("date","observation.name","focalID","group","year","scan.number","focal.activity","focal.activity.isPost","partner.ID","in.proximity","num.prox","isProx","isSocial","isSocialGive", "isSocialGet", "Q","isPost","timeBlock")
   prox_data <- prox_data[, col_order]
   
   allScans2= rbind(allScans2, prox_data)
@@ -135,6 +138,9 @@ allScans3$date <- lubridate::mdy(as.character(allScans3$date))
 allScans3$year <- lubridate::year(allScans3$date)
 allScans3$Q    <- lubridate::quarter(allScans3$date)
 allScans3$date <- as.character(allScans3$date) #re-format to character after finding year and quarter
+
+#Add unique scan identifier
+allScans3$observation.name = as.factor(paste(allScans3$date, allScans3$scan.num,sep="."))
 
 #Add hurricane info
 allScans3$isPost = 1
@@ -188,7 +194,7 @@ allScans3$isSocialGive = 0; allScans3$isSocialGive[which(allScans3$focal.activit
 allScans3$isSocialGet = 0; allScans3$isSocialGet[which(allScans3$focal.activity.isPost=="E")]=1
 
 #Order columns
-col_order <- c("date","focalID","group","year","scan.number","focal.activity","focal.activity.isPost","partner.ID","in.proximity","num.prox","isProx","isSocial","isSocialGive", "isSocialGet", "Q","isPost","timeBlock")
+col_order <- c("date","observation.name","focalID","group","year","scan.number","focal.activity","focal.activity.isPost","partner.ID","in.proximity","num.prox","isProx","isSocial","isSocialGive", "isSocialGet", "Q","isPost","timeBlock")
 allScans3 <- allScans3[, col_order]
 
 ######################################################
@@ -259,7 +265,7 @@ allScans$rankFind = NULL
 
 allScans$samplingCateg = paste(allScans$focalID,allScans$group,as.numeric(allScans$year),sep=".")
 
-col_order <- c("date","focalID","group","year","scan.number","sex","age","ordrank","percentrank","focal.activity","focal.activity.isPost","partner.ID","in.proximity","num.prox","isProx","isSocial","isSocialGive", "isSocialGet","Q","isPost","timeBlock","samplingCateg")
+col_order <- c("date","observation.name","focalID","group","year","scan.number","sex","age","ordrank","percentrank","focal.activity","focal.activity.isPost","partner.ID","in.proximity","num.prox","isProx","isSocial","isSocialGive", "isSocialGet","Q","isPost","timeBlock","samplingCateg")
 allScans <- allScans[, col_order]
 
 ######################################################

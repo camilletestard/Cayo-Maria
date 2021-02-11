@@ -57,6 +57,10 @@ for (a in 1:length(actions)) { #for both proximity and grooming
           weightedEL = weightedEL[,c("alter","ego","count")]
           weightedEL$conc = paste(weightedEL$alter, weightedEL$ego, sep=".")
           }
+          ### Only used to exclude individuals with too low #scans
+          weightedEL$numscans.alter <-numscans$freq[match(weightedEL$alter, numscans$id)]
+          weightedEL$numscans.ego <-numscans$freq[match(weightedEL$ego, numscans$id)]
+          ###
           weightedEL$numscans <- (numscans$freq[match(weightedEL$alter, numscans$id)] + numscans$freq[match(weightedEL$ego, numscans$id)])/2 
           weightedEL$weight <- round(weightedEL$count / weightedEL$numscans, 5) #add weight information by dividing by avg #observations for each ID pair
           #IMPORTANT NOTE: i do NOT standardize weights per group and year, toehrwise i cannot see whether strength has icnreased or not
@@ -72,4 +76,9 @@ for (a in 1:length(actions)) { #for both proximity and grooming
     } #end of group for loop
   } #End of iteration loop
 } #End of action loop
-save(Networks, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks.RData")
+
+#Remove edges including individuals with too few scans 
+idx_to_remove = which(Networks$numscans.alter<40 | Networks$numscans.ego<40)
+Networks = Networks[-idx_to_remove,]
+
+save(Networks, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks_minObs.RData")

@@ -81,6 +81,7 @@ for (a in 1:length(actions)){ #for all actions
           
           # 2. Find the number of scans per individual (to correct for unequal representation later)
           numscans = as.data.frame(table(as.character(rscans$focalID))); names(numscans) =c("id","freq")
+          numscans_hold = data.frame(mean.scans = mean(numscans$freq), median.scans=median(numscans$freq))
           
           # 3. Find the number of unique IDs.
           unqIDs = unique(c(as.character(rscans$focalID)))
@@ -129,11 +130,11 @@ for (a in 1:length(actions)){ #for all actions
           RankPairStats <- calcRankProps(netList, dominance_info, year)
           
           # 11. Combine all stats and save
-          AllStatsDF <- bind_cols(data_frame(actions[a]),GlobalStats, SexPairStats, KinPairStats, RankPairStats)
+          AllStatsDF <- bind_cols(data_frame(actions[a]),GlobalStats, SexPairStats, KinPairStats, RankPairStats, numscans_hold)
           name = paste(group[g],years[y],isPost[h],sep=".")
           
           AllStats[[name]] = rbind(AllStats[[name]], AllStatsDF)  
-          save(AllStats,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
+          save(AllStats,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats_numScans.RData")
           
         } #end of of pre-/post-hurricane loop
       } #end of year for loop

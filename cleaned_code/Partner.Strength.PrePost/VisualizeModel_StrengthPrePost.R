@@ -11,7 +11,7 @@ library(graphics)
 library(fitdistrplus)
 
 #Load data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks_minObs.RData")
 
 ##########################################
 #Add sex, age and rank info
@@ -105,10 +105,10 @@ Means = colMeans2(as.matrix(AllP.groom.V),na.rm = T); Means = round(Means,3)
 CI = colQuantiles(as.matrix(AllP.groom.V,na.rm = T), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
 Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
 t.groom.groom<-tableGrob(Estimates); t.groom.groom<-grid.arrange(t.groom.groom, top="Model All Effects: Groom Model Parameter Estimates"); #create table, arrange table
-write.csv(Estimates, file="C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/GroomStrengthPrePost.V.csv")
+write.csv(Estimates, file="C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/GroomStrengthPrePost.V_minObs.csv")
 
 Means = colMeans2(as.matrix(AllP.groom.KK)); Means = round(Means,3)
 CI = colQuantiles(as.matrix(AllP.groom.KK), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
 Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
 t.groom.groom<-tableGrob(Estimates); t.groom.groom<-grid.arrange(t.groom.groom, top="Model All Effects: Groom Model Parameter Estimates"); #create table, arrange table
-write.csv(Estimates, file="C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/GroomStrengthPrePost.KK.csv")
+write.csv(Estimates, file="C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/GroomStrengthPrePost.KK_minObs.csv")

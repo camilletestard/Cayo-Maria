@@ -27,6 +27,13 @@ source("Functions/CalcSubsampledScans.R")
 source("Functions/functions_GlobalNetworkMetrics.R")
 
 #Load scan data, population and dominance info
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/DataPerGroup.RData")
+mean_numScans = round(mean_numScans,2); sd_numScans = round(sd_numScans,2);
+mean_numScans_list = list()
+mean_numScans_list[[1]]= mean_numScans[1:3]; mean_numScans_list[[2]] = mean_numScans[4:5];
+sd_numScans_list = list()
+sd_numScans_list[[1]]= sd_numScans[1:3]; sd_numScans_list[[2]] = sd_numScans[4:5];
+
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
 allScans = read.csv("Data All Cleaned/allScans.txt")
 # bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
@@ -41,27 +48,38 @@ group = c("V","KK")
 # #This will allow us to see whether density goes back down to normal.
 # allScans$isPost[which(allScans$year==2018)] = 0 
 randomScans = calcRandomScans(allScans)
-a=2
+
+# PrePostScans =  allScans[which(as.character(allScans$group) == "V" | as.character(allScans$group) == "KK"),]
+# SubScans=PrePostScans[-which(PrePostScans$year==2019),] #remove 2019
+# SubScans$groupyear = paste(SubScans$group, SubScans$year,sep="")
+# randomScans=SubScans
+
+a=2; numscans_list=list(); graph.dens.pre=vector(); graph.dens.post=vector()
 for (a in 1:2){
   network_action = actions[a]
   if (network_action == "prox") {network_mode = "undirected"}
   if (network_action == "groom") {network_mode = "directed"}
   
   #For each group, each year separately: 
-  g=2;y=2;h=1
+  g=1;y=1;h=1; gy=0
   for (g in 1:length(group)){ #For each group
     randscansG = randomScans[which(randomScans$group==group[g]),] 
     
-    years = unique(randscansG$year)
+    years = unique(randscansG$year);
     for (y in 1:length(years)){ #For each year in that group
       randscansY = randscansG[which(randscansG$year==years[y]),] 
       year = years[y]
+      gy=gy+1
       
       isPost = c(0,1)
       for (h in 1:length(isPost)){ #pre- and post-hurricane 
         
         rscans = randscansY[which(randscansY$isPost==isPost[h]),] 
-        numscans = as.data.frame(table(as.character(rscans$focalID))); names(numscans) =c("id","freq")
+        numscans = as.data.frame(table(as.character(rscans$focalID))); names(numscans) =c("id","freq"); 
+        
+        numscans_list[[paste(group[g],years[y],isPost[h],sep=".")]] = numscans
+        mean_num_scans = round(mean(numscans$freq, na.rm=T),2)
+        sd_num_scans = round(sd(numscans$freq, na.rm=T),2)
         
         # 2. Find the number of unique IDs.
         #Find all unique IDs
@@ -101,7 +119,11 @@ for (a in 1:2){
         #The fourth letter is 'B' for bipartite graphs. These letter codes are followed by two numbers: the first is the number of vertices and the second is the number of edges.
         
         #increase space between nodes if overlapping. Choose graph layout.
-        if (isPost[h] ==0) {l <- layout.spring(am.g,niter=500,area=vcount(am.g)^2.3,repulserad=vcount(am.g)^2.8)} #layout_in_circle}#
+        if (isPost[h] ==0) {l <- layout.fruchterman.reingold(am.g, repulserad=vcount(am.g)^5,
+                                                             area=vcount(am.g)^3)
+        graph.dens.pre[gy] = round(edge_density(am.g),3);
+        } else {graph.dens.post[gy] = round(edge_density(am.g),3)}
+        #layout.spring(am.g,niter=500,area=vcount(am.g)^2.3,repulserad=vcount(am.g)^2.8)} #layout_in_circle}#
         #Node: I added the "if isPost =0" clause to make sure the node position is the same when comparing pre- and post graphs.
         #changes size of labels of vertices
         V(am.g)$label.cex <- 0.8
@@ -119,18 +141,41 @@ for (a in 1:2){
         V(am.g)$color=gsub("2","seagreen2",V(am.g)$color) #Males will be lightblue
         V(am.g)$color=gsub("0","white",V(am.g)$color) #unknown sex will be white
         
+        #Set color of vertex labels
+        color_vector=V(am.g)$sex #assign the "Sex" attribute as the vertex color
+        color_vector=gsub("1","purple",color_vector) #Females will be orange
+        color_vector=gsub("2","darkblue",color_vector) #Males will be lightblue
+        color_vector=gsub("0","grey",color_vector) #unknown sex will be white
+        
         #set degree attribute
-        V(am.g)$degree=degree(am.g)
+        V(am.g)$degree=igraph::degree(am.g)
         
         #set path for saving and plot graph
-        if (network_action == "groom"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/GroomNetworks/test")} 
-        if (network_action == "prox"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/ProxNetworks") }
+        # if (network_action == "groom"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/GroomNetworks/Sampling_R2R/test_v2")
+        #   if (isPost[h]==0){title = paste("Grooming Network ",group[g],years[y]," pre-hurricane, mean (SD) scans: ", mean_numScans_list[[g]][y],"(",sd_numScans_list[[g]][y],"); density:", graph.dens.pre[gy],sep="")
+        #   } else {title = paste("Grooming Network ",group[g],years[y]," post-hurricane"," pre-hurricane, mean (SD) scans: ", mean_numScans_list[[g]][y]," (",sd_numScans_list[[g]][y],"); density:", graph.dens.post[gy],sep="")}}
+        # 
+        if (network_action == "groom"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/GroomNetworks/Sampling_R2R/test_v2")
+          if (isPost[h]==0){title = paste("Grooming Network ",group[g],years[y]," pre-hurricane, mean (SD) scans: ", mean_num_scans,"(",sd_num_scans,"); density:", graph.dens.pre[gy],sep="")
+          } else {title = paste("Grooming Network ",group[g],years[y]," post-hurricane"," pre-hurricane, mean (SD) scans: ", mean_num_scans," (",sd_num_scans,"); density:", graph.dens.post[gy],sep="")}}
+        
+        if (network_action == "prox"){setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/SocialNetworkGraph/ProxNetworks")
+          if (isPost[h]==0){title = paste("Proximity Network ",group[g],years[y]," pre-hurricane, mean (SD) scans: ", mean_numScans_list[[g]][y]," (",sd_numScans_list[[g]][y],"); density:", graph.dens.pre[gy],sep="")
+          } else {title = paste("Proximity Network ",group[g],years[y]," post-hurricane"," pre-hurricane, mean (SD) scans: ", mean_numScans_list[[g]][y]," (",sd_numScans_list[[g]][y],"); density:", graph.dens.post[gy],sep="")}}
+        
         tiff(paste("Social Network ",group[g],years[y],".",isPost[h],".tiff",sep=""), 
              units="in", width=10, height=8, res=300, compression = 'lzw')
-        plot.igraph(am.g,layout=l, vertex.label=V(am.g)$name, vertex.color=V(am.g)$color, vertex.size=3*V(am.g)$degree,edge.color="grey20", 
-                    edge.width=E(am.g)$weight*1.5,edge.arrow.size = 0.5, main = paste("Social Network ",group[g],years[y],".",isPost[h],sep=""))
+        plot.igraph(am.g, layout=l, vertex.label=V(am.g)$name, vertex.color=V(am.g)$color, vertex.label.color=color_vector, vertex.label.font=2,
+                    vertex.size=2*V(am.g)$degree+2,edge.color="grey20", 
+                    edge.width=E(am.g)$weight*1.5,edge.arrow.size = 0.5,edge.curved=0.5,
+                    main = title)
         dev.off()
         
+        tiff(paste("NumScans vs Degree ",group[g],years[y],".",isPost[h],".tiff",sep=""), 
+             units="in", width=10, height=8, res=300, compression = 'lzw')
+        plot(V(am.g)$degree, numscans$freq, cex=2, pch = 20, ylab='#scans',xlab='degree', 
+             col=V(am.g)$color, xlim=c(-1,15), ylim=c(1,120), cex.lab=1.5, cex.axis=1.25,main=paste(group[g],years[y]))
+        dev.off()
         
         # plot.igraph(am.g,layout=l, vertex.color="CYAN1", vertex.size=7,edge.color="grey20", 
         #             edge.width=E(am.g)$weight*2,edge.arrow.size = 0.5)
@@ -156,3 +201,13 @@ for (a in 1:2){
     }
   }  
 }
+
+tiff(paste("NumScans_vs_density.tiff",sep=""), 
+     units="in", width=10, height=8, res=300, compression = 'lzw')
+plot(graph.dens.pre, mean_numScans, ylim=c(50,130), xlim=c(0,0.05), cex=2, pch = 20,col=c('red','red','red','blue','blue'),
+     ylab='mean #scans',xlab='network density', cex.lab=1.5, cex.axis=1.25)
+text(graph.dens.pre, mean_numScans, c("2015","2016","2017","2015","2017"),
+     cex=1, pos=3,col="black") 
+legend("bottomleft", inset=.02, title="Group",
+       c("V","KK"), fill=c("red","blue"), horiz=TRUE, cex=0.8)
+dev.off()
