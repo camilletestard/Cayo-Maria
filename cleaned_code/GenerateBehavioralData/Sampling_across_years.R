@@ -24,8 +24,24 @@ scans_per_id = scans_per_id[scans_per_id$Freq!=0,]
 # Get number of years per IDs:
 idyear=rowSums(as.matrix(table(droplevels(scans_per_id$Var1), scans_per_id$Var2)))
 mean(idyear); sd(idyear)
+
+# Get mean and sd number of scans pre and post-hurricane
 mean(scans_per_id$Freq[scans_per_id$Var2!=2018]); sd(scans_per_id$Freq[scans_per_id$Var2!=2018])
 mean(scans_per_id$Freq[scans_per_id$Var2==2018]); sd(scans_per_id$Freq[scans_per_id$Var2==2018])
+
+#posthurricane divided by group
+post.scans = SubScans[SubScans$isPost==1,]
+post.scans.V = post.scans[post.scans$group=="V",]; 
+scans_per_id_postV = as.data.frame(table(droplevels(post.scans.V$focalID)))
+scans_per_id_postV= scans_per_id_postV[which(!is.na(match(scans_per_id_postV$Var1,unqIDs))),]
+mean(scans_per_id_postV$Freq); sd(scans_per_id_postV$Freq); sum(scans_per_id_postV$Freq)
+
+post.scans.KK = post.scans[post.scans$group=="KK",]
+scans_per_id_postKK = as.data.frame(table(droplevels(post.scans.KK$focalID)))
+scans_per_id_postKK= scans_per_id_postKK[which(!is.na(match(scans_per_id_postKK$Var1,unqIDs))),]
+mean(scans_per_id_postKK$Freq); sd(scans_per_id_postKK$Freq); sum(scans_per_id_postKK$Freq)
+
+sd(scans_per_id_postKK$Freq)/mean(scans_per_id_postKK$Freq) #CV
 
 #Get number of observations by date
 freqs <- aggregate(SubScans$date, by=list(SubScans$date, SubScans$group), FUN=length)
@@ -48,6 +64,7 @@ names(all_grooming_bouts) = c("id","groupyear","num.groom.bouts","groom.time.in.
 mean_hrs_followed = vector(); sd_hrs_followed = vector(); min_hrs_followed = vector();
 mean_numScans = vector(); sd_numScans = vector(); min_numScans = vector();
 mean_groomingBouts = vector(); sd_groomingBouts = vector()
+total_numScans = vector(); total_hrs_followed = vector()
 for (gy in 1:length(groupyears)){ #for all groups & years
   
   meta_data = read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt", sep = ""))
@@ -55,7 +72,7 @@ for (gy in 1:length(groupyears)){ #for all groups & years
   
   grooming_bouts_per_group$group[gy]=groupyears[gy]
   grooming_bouts_per_group$total_bouts[gy]= nrow(groom_data)
-  grooming_bouts_per_group$num_focals[gy]=length(!is.na(match(meta_data$id,unqIDs)))
+  grooming_bouts_per_group$num_focals[gy]=length(which(!is.na(match(meta_data$id,unqIDs))))
   
   id_list = as.character(meta_data$id[match(unqIDs,meta_data$id)])
   IDs = id_list[!is.na(id_list)]; grooming_bouts = data.frame(matrix(data=NA, nrow=length(IDs), ncol=7)); 
@@ -71,10 +88,13 @@ for (gy in 1:length(groupyears)){ #for all groups & years
   }
   
   all_grooming_bouts = rbind(all_grooming_bouts, grooming_bouts)
+  
+  total_hrs_followed[gy]=sum(grooming_bouts$hrs.followed)
   mean_hrs_followed[gy]=mean(grooming_bouts$hrs.followed) #mean(meta_data$hrs.focalfollowed)
   sd_hrs_followed[gy]=sd(grooming_bouts$hrs.followed)
   min_hrs_followed[gy]=min(grooming_bouts$hrs.followed)
   
+  total_numScans[gy]=sum(grooming_bouts$num.scans)
   mean_numScans[gy]=mean(grooming_bouts$num.scans) #mean(meta_data$hrs.focalfollowed)
   sd_numScans[gy]=sd(grooming_bouts$num.scans)
   min_numScans[gy]=min(grooming_bouts$num.scans)

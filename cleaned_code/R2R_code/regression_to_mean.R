@@ -31,7 +31,7 @@ full.data[,c("dpSocial","pSocial.pre","pSocial.post","percentrank","std.dead.all
 
 n_iter = max(full.data$iter); 
 iter=sample(n_iter,1)
-dpSocial.Effects = data.frame(); p.value=vector(); t.value=vector(); df =vector()
+dpSocial.Effects = data.frame(); p.value=vector(); t.value=vector(); df =vector(); var.change=vector()
 for (iter in 1:n_iter){
   
   print(paste("%%%%%%%%%%%%%%%%%% iter",iter, "%%%%%%%%%%%%%%%%%%"))
@@ -69,6 +69,8 @@ for (iter in 1:n_iter){
   t.value[iter] = num/den
   p.value[iter] = 2*pt(-abs(t.value[iter]), df=df[iter])
   
+  var.change[iter] = (var2-var1)/var1*100
+  
   if (p.value[iter]<0.05){
   D.adj = rho*(x1-mean1)-(x2-mean2)
   } else {
@@ -91,6 +93,7 @@ for (iter in 1:n_iter){
 }
 quantile(t.value,probs = c(0.025, 0.95))
 quantile(p.value,probs = c(0.025, 0.95))
+quantile(var.change,probs = c(0.025, 0.95))
 
 Means = colMeans2(as.matrix(dpSocial.Effects)); Means = round(Means,3)
 CI = colQuantiles(as.matrix(dpSocial.Effects), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,4) #compute mean estimte and 95% CI (2.5 and 97.5 percentiles)
@@ -100,15 +103,18 @@ Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimat
 #Simulation to understand regression to the mean:
 
 pre.data = sample(20, 100, replace = T)/100
-post.data = pre.data-sample(100,100)/1000#sample(20, 100, T)/100#pre.data+sample(100,100)/1000#
+post.data = sample(20, 100, T)/100#pre.data+sample(100,100)/1000#
 post.min.pre = post.data-pre.data
 
 plot(pre.data, post.data, col='blue', alpha=0.5)
 rho=cor(pre.data, post.data)
 
-plot(pre.data, post.min.pre, col='blue', alpha=0.5)
+plot(pre.data, post.min.pre, pch=16, col='lightblue', alpha=0.5, xlab = "pre-value", 
+     ylab = "change pre-to-post", cex=1,cex.lab=1.5)
+legend("topright", 
+       legend = "rho = -0.65,\nvar1 = 0.0036,\nvar2 = 0.0035,\np>0.7",bty = "n")
 cor.test(pre.data, post.min.pre)
-plot(pre.data, post.min.pre, col='blue', alpha=0.5, xlim=c(0.05, 0.15))
+# plot(pre.data, post.min.pre, col='blue', alpha=0.5, xlim=c(0.05, 0.15))
 
 var1=var(pre.data)
 var2=var(post.data)
