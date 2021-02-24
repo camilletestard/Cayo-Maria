@@ -33,16 +33,19 @@ library(latticeExtra)
 # http://statnet.org/Workshops/tergm _tutorial.html
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code/functions") 
+#setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code/functions") 
+setwd("/Users/camilletestard/Documents/GitHub/Cayo-Maria/cleaned_code/functions") 
 source("CalcSubsampledScans.R")
 source("functions_GlobalNetworkMetrics.R")
 source("KinshipPedigree.R")
 
 #Load scan data, population and dominance info
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
+#setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
+setwd("/Users/camilletestard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
+allScans = read.csv("Data All Cleaned/allScans.txt")
 bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
+# setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
+setwd("/Users/camilletestard/Documents/GitHub/Cayo-Maria/")
 load("R.Data/SocialCapital.RData")
 SocialCapital.ALL$groupyear = paste(SocialCapital.ALL$group, SocialCapital.ALL$year,sep="")
 #Create gregariousness category
@@ -107,7 +110,7 @@ for (iter in 1:num_iter){ #for all iterations
       net<-as.network.matrix(mat,loops=FALSE,directed=T)
       
       #set kinship as edge attribute
-      KC      <- NULL; for(i in 1:length(el[,1])){ 
+      KC      <- NULL; for(i in 1:length(el[,1])){
         KC[i] <-  ped[which(rownames(ped)==as.character(el$receivingID[i])) , which(colnames(ped)==as.character(el$givingID[i]))]
       }
       set.network.attribute(net, "kinship",KC)
@@ -133,13 +136,13 @@ for (iter in 1:num_iter){ #for all iterations
     prePostList = list(net.pre, net.post) 
     prePostNet <- networkDynamic(network.list=prePostList)#creating a "dynamic network" structure for temporal analyses
     
-    # #plot networks
-    # par(mfrow = c(2,2), oma=c(1,1,1,1), mar=c(4,1,1,1))
-    # plot(network.extract(prePostNet, at = 0), main = "Time 1",
-    #      displaylabels = T, label.cex = 0.6, vertex.cex = 2, pad = 0.5)
-    # plot(network.extract(prePostNet, at = 1), main = "Time2",
-    #      displaylabels = T, label.cex = 0.6, vertex.cex = 2, pad = 0.5)
-    # 
+    #plot networks
+    par(mfrow = c(2,2), oma=c(1,1,1,1), mar=c(4,1,1,1))
+    plot(network.extract(prePostNet, at = 0), main = "Time 1",
+         displaylabels = T, label.cex = 0.6, vertex.cex = 2, pad = 0.5)
+    plot(network.extract(prePostNet, at = 1), main = "Time2",
+         displaylabels = T, label.cex = 0.6, vertex.cex = 2, pad = 0.5)
+
     # #Descriptive temporal network analysis
     # tSnaStats(prePostNet,"degree") # Changes in degree centrality
     # tErgmStats(prePostNet, "~ edges+triangle+mutual") # Notice the increase in triangles
