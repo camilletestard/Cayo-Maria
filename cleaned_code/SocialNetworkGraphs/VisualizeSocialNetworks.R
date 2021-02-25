@@ -22,7 +22,8 @@ library(stringr)
 library(ggplot2)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
+#setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
+setwd("/Users/camilletestard/Documents/GitHub/Cayo-Maria/cleaned_code") 
 source("Functions/CalcSubsampledScans.R")
 source("Functions/functions_GlobalNetworkMetrics.R")
 
@@ -34,10 +35,11 @@ mean_numScans_list[[1]]= mean_numScans[1:3]; mean_numScans_list[[2]] = mean_numS
 sd_numScans_list = list()
 sd_numScans_list[[1]]= sd_numScans[1:3]; sd_numScans_list[[2]] = sd_numScans[4:5];
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
-allScans = read.csv("Data All Cleaned/allScans.txt")
+# setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
+setwd("/Users/camilletestard/Documents/GitHub/Cayo-Maria/Data All Cleaned/") 
+allScans = read.csv("allScans.txt")
 # bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
-dominance_info =read.table("Database Complete/Data All Raw/DOMINANCE.txt",header = T)
+dominance_info =read.table("DOMINANCE.txt",header = T)
 
 #Set parameters
 actions = c("prox","groom") 
@@ -61,7 +63,7 @@ for (a in 1:2){
   if (network_action == "groom") {network_mode = "directed"}
   
   #For each group, each year separately: 
-  g=1;y=1;h=1; gy=0
+  g=1;y=2;h=2; gy=0
   for (g in 1:length(group)){ #For each group
     randscansG = randomScans[which(randomScans$group==group[g]),] 
     
