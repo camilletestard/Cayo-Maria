@@ -11,6 +11,7 @@
 # Note: I am only representing one iteration of sub-sample. But as for p(prox)/p(groom) plots, I see robust results 
 # across iterations of plotting. Thus I conclude they are representative plots of the whole data set.
 # IMPORTANT NOTE: I standardize weights by dividing by the mean for the group/year.
+# Camille Testard - 2020
 
 # load libraries
 library(dplyr)
@@ -178,25 +179,6 @@ for (a in 1:2){
         plot(V(am.g)$degree, numscans$freq, cex=2, pch = 20, ylab='#scans',xlab='degree', 
              col=V(am.g)$color, xlim=c(-1,15), ylim=c(1,120), cex.lab=1.5, cex.axis=1.25,main=paste(group[g],years[y]))
         dev.off()
-        
-        # plot.igraph(am.g,layout=l, vertex.color="CYAN1", vertex.size=7,edge.color="grey20", 
-        #             edge.width=E(am.g)$weight*2,edge.arrow.size = 0.5)
-        # 
-        # 
-        # #spring embedded layout
-        # s <- layout.spring(am.g, spring.length=1000,area=vcount(am.g)^2.3,repulserad=vcount(am.g)^2.8)
-        # 
-        # #REMOVE NODE LABEL
-        # plot.igraph(am.g,layout=l, vertex.label=NA, vertex.color="orange", vertex.size=6,edge.color="grey20",edge.width=E(am.g)$weight*0.01)
-        # 
-        # #plot spring embedded graph
-        # plot.igraph(am.g,layout=s, vertex.size=6, vertex.label.cex=0.5, edge.color="grey20",edge.width=E(am.g)$weight*0.01)
-        
-        
-        #Import an attribute file for labelling nodes
-        # attr<-read.csv("ATTRIBUTES_allsubjects.csv")
-        # str(attr)
-        
         
         
       }

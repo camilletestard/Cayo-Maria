@@ -3,6 +3,7 @@
 #   Input:Strength.StablePartners.RData
 # Note: bond strengths are log-transformed before being used as dependent variables in a linear mixed model to follow normal distribution assumption.
 # Model: lmer(log(weight) ~ isPost + sex + age + percentrank+ (1|alter)+(1|year), data=data.groom.iter.V or KK)
+# Camille Testard - 2020
 
 library(lme4)# Generalized Linear Mixed Models
 library(bbmle)#Tools for General Maximum Likelihood Estimation

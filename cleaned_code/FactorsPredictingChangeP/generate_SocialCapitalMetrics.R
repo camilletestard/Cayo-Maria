@@ -26,6 +26,7 @@
 #SDB & Vigiliance rates:
 # sdb or vigiance events / #hrs followed 
 #(both standardized and non-standardized measures).
+#Camille Testard - 2020
 
 library(stringr)
 library(igraph)

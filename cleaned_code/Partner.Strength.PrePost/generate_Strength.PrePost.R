@@ -1,7 +1,12 @@
 # Investigate Change in strength of bond pre-to-post disaster (regardless of who the partners are)
-# This script computes the distribution of grooming & proximity strength before and after the disaster 
-# over multiple iterations (running through sub-samples). This script was meant to investigate wether individuals interact with 
-# more partners but more weakly (i.e. spreading their grooming efforts.
+# This script computes the distribution of grooming edge strength before and after the disaster over multiple iterations (running through sub-samples). This script was meant to investigate wether individuals overall interact with 
+# more partners but more strongly after the hurricane or to the contrary less strongly (i.e. spreading their grooming efforts), or if they reinforce individual relationships 
+# (stronger dyadic bonds on average). Edge weights are all based on scan data and are computed similarly to "VisualizeSocialNetworks"
+# Functions called: CalcSubsampledScans; functions_GlobalNetworkMetrics
+# Input: allScans.txt
+# Output: Networks.RData
+# Camille Testard - 2020
+
 
 library(stringr)
 library(igraph)

@@ -1,8 +1,14 @@
-#Load data
-setwd("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/")
+#generate_dpGroomProx: Generate change in probability of grooming and proximity over 500 iterations for all individuals or only including individuals with at least X observations.
+#p(grooming) -> #scans grooming/total #scans
+#  Functions called: CalcSubsampledScans
+#Input: allScans.txt and GroupByYear.txt
+#Output: ChangeP_minX.RData
+
+
+#Load functions and data
+setwd("/Users/camilletestard/Documents/Github/Cayo-Maria/")
 source("cleaned_code/Functions/CalcSubsampledScans.R")
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
+allScans = read.csv("Data All Cleaned/allScans.txt")
 
 #Set parameters:
 num_iter = 500; iter =1
@@ -12,7 +18,7 @@ years = c(2015,2017,2015,2016,2017)
 groupyears = c("KK2015", "KK2017","V2015", "V2016", "V2017")
 
 dprob.ALL = data.frame();
-for (iter in 421:num_iter){
+for (iter in 1:num_iter){
   
   print(paste("%%%%%%%%%%%%%%%%%% iter",iter, "%%%%%%%%%%%%%%%%%%"))
   #####################################################################
@@ -26,7 +32,7 @@ for (iter in 421:num_iter){
     
     rscans = randomScans[which(randomScans$year == years[gy] & randomScans$group == group[gy]),]
     #Load data
-    setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned")
+    setwd("/Users/camilletestard/Documents/Github/Cayo-Maria/Data All Cleaned")
     meta_data = read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt", sep = ""))
     
     unqIDs = as.character(meta_data$id)
@@ -37,7 +43,7 @@ for (iter in 421:num_iter){
       isSocial.pre = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
       isSocial.post = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
       dpAcc=NA; dpSocial=NA; num_obs = length(isProx.pre)
-      if (length(isProx.pre)>=20) { #If there are more than 40 observations for that individual pre hurricane
+      if (length(isProx.pre)>=20) { #If there are more than 20 observations for that individual pre hurricane
         pACC.pre = sum(isProx.pre)/length(isProx.pre)
         pACC.post = sum(isProx.post)/length(isProx.post)
         dpAcc = pACC.post - pACC.pre
@@ -54,8 +60,6 @@ for (iter in 421:num_iter){
 
 dprob.ALL[,-c(1,9,10,11)]=as.numeric(dprob.ALL[,-c(1,9,10,11)]); 
 if (length(which(is.na(dprob.ALL$dpAcc)))!=0) {dprob.ALL = dprob.ALL[-which(is.na(dprob.ALL$dpAcc)),]} #remove NA
-setwd("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data")
+setwd("/Users/camilletestard/Documents/Github/Cayo-Maria/R.Data")
 save(dprob.ALL,file="ChangeP_min20.RData")
 
-# load("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data/ChangeP.RData")
-# length(unique(dprob.ALL$id))

@@ -12,6 +12,7 @@
 # Output: global network stats (density, community size, clustering coeff), partner preference stats (ratio obs/exp
 # for sex, kin, rank). Output file: "AllStats.RData".
 # IMPORTANT NOTE: I standardize weights by dividing by the mean for the group/year. 
+# Camille Testard - 2020
 
 # load libraries
 library(dplyr)
@@ -134,7 +135,7 @@ for (a in 1:length(actions)){ #for all actions
           name = paste(group[g],years[y],isPost[h],sep=".")
           
           AllStats[[name]] = rbind(AllStats[[name]], AllStatsDF)  
-          save(AllStats,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats_numScans.RData")
+          save(AllStats,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
           
         } #end of of pre-/post-hurricane loop
       } #end of year for loop

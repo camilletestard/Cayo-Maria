@@ -12,7 +12,7 @@ library(gridExtra)
 library(graphics)
 
 
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats_minObs.RData")
+load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
 
 ##########################################################
 #Pooling all data together

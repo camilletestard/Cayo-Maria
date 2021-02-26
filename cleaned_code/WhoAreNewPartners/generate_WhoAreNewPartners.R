@@ -8,13 +8,14 @@
 #   - Kinship: related (rel>0.125) and unrelated (unrel <0.125)
 # This allows us to assess the difference in "relationship distribution" pre-to-post hurricane. E.g. is there relatively more grooming 
 # happening from fem->Male post-disaster? The output unit is in % of edge weights.
-# Comparisons are done in a fair way: we use subsampled scans, controlling for data collection biases. The same individuals are present in
+# Comparisons are done in a controlled fashion: we use subsampled scans, controlling for data collection biases. The same individuals are present in
 # both pre and post-hurricane networks, and the same number of obsevrations per ID are considered pre/post. The proportions 
 # are computed overall multiple subsampling iterations to make sure we cover all post-hurricane data.
 # NOTE: Proportion takes into account overall change in density. It allows to assess relative changes (instead of absolute)
 # Functions Called: CalcSubsampledScans, functions_SocialSupport, KinshipPedigree
 # Input: allScans.txt, SocialCapital.RData
 # Ouput: PartnerAttributes.RData.
+# Camille Testard - 2020
 
 # load libraries
 library(dplyr)

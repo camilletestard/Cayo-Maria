@@ -1,9 +1,14 @@
+#Sampling across years
+# Computes number of scan samples, hours followed and grooming bouts per individual pre-hurricane and number of scan samples post-hurricane.
+# Also outputs descriptive plots
+# Camille Testard - 2021
+
 library(ggplot2)
 library(scales)
 
 #Load AllScans file
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
+setwd("Users/camilletestard/Documents/GitHub/Cayo-Maria/") 
+allScans = read.csv("Data All Cleaned/allScans.txt")
 
 #WITHOUT SUBSAMPLING
 PrePostScans =  allScans[which(as.character(allScans$group) == "V" | as.character(allScans$group) == "KK"),]
@@ -11,7 +16,6 @@ SubScans=PrePostScans[-which(PrePostScans$year==2019),] #remove 2019
 SubScans$groupyear = paste(SubScans$group, SubScans$year,sep="")
 
 #WITH SUBSAMPLING
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
 source("cleaned_code/Functions/CalcSubsampledScans.R")
 ExSubScans = calcRandomScans(allScans);
 unqIDs = as.character(unique(ExSubScans$focalID))
@@ -55,7 +59,7 @@ ggplot(freqs, aes(x=names, y=x)) + geom_bar(stat="identity") +
 
 #PRE-HURRICANE NUMBER OF GROOMING BOUTS, FOCAL HOURS AND NUMBER OF SCANS PER IDYEAR IN OUR SAMPLE
 #Load proximity scans from groups and years of interest in the focal format: 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
+setwd("Users/camilletestard/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
 groupyears = c("V2015", "V2016", "V2017","KK2015", "KK2017")
 
 gy=1; grooming_bouts_per_group=data.frame(matrix(data=NA, nrow=length(groupyears), ncol=0)); 
@@ -103,9 +107,6 @@ for (gy in 1:length(groupyears)){ #for all groups & years
   sd_groomingBouts[gy]=sd(grooming_bouts$num.groom.bouts)
 }
 
-save(mean_hrs_followed, sd_hrs_followed, mean_numScans, sd_numScans, 
-     file = "C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/DataPerGroup.RData")
-
 mean(all_grooming_bouts$num.groom.bouts); sd(all_grooming_bouts$num.groom.bouts)
 mean(all_grooming_bouts$hrs.followed); sd(all_grooming_bouts$hrs.followed) ; range(all_grooming_bouts$hrs.followed)
 mean(all_grooming_bouts$num.scans); sd(all_grooming_bouts$num.scans); range(all_grooming_bouts$num.scans)
@@ -122,7 +123,6 @@ ggplot(all_grooming_bouts, aes(x=hrs.followed, fill=groupyear))+
 #Restricting to only individuals with a lot of data?
 length(which(all_grooming_bouts$hrs.followed>4))
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results")
 #Correlation between hrs followed and number of grooming bouts
 plot(all_grooming_bouts$hrs.followed, all_grooming_bouts$num.groom.bouts)
 cor.test(all_grooming_bouts$num.groom.bouts,all_grooming_bouts$hrs.followed)
@@ -159,52 +159,3 @@ cor.test(data_above_thresh$unq.partners,data_above_thresh$num.scans)
 #Correlation between hrs followed and number of unq partners
 plot(all_grooming_bouts$hrs.followed, all_grooming_bouts$unq.partners)
 cor.test(all_grooming_bouts$unq.partners,all_grooming_bouts$hrs.followed)
-
-#####################################################################
-load("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data/ChangeP_min40.RData")
-dprob.ALL$groupyear=paste(dprob.ALL$group, dprob.ALL$year,sep="")
-dprob.ALL$idyear=paste(dprob.ALL$id, dprob.ALL$groupyear,sep="")
-IDs_minObs=unique(dprob.ALL$idyear)
-all_grooming_bouts$idyear = paste(all_grooming_bouts$id, all_grooming_bouts$groupyear,sep="")
-IDs_to_exclude = setdiff(all_grooming_bouts$idyear, IDs_minObs)
-
-data_minObs=all_grooming_bouts[match(IDs_minObs, all_grooming_bouts$idyear),]
-mean(data_minObs$num.scans)
-sd(data_minObs$num.scans)
-min(data_minObs$num.scans)
-
-for (gy in 1:length(groupyears)){ #for all groups & years
-  data = data_minObs[data_minObs$groupyear == groupyears[gy],]
-  
-  mean_hrs_followed[gy]=mean(data$hrs.followed) #mean(meta_data$hrs.focalfollowed)
-  sd_hrs_followed[gy]=sd(data$hrs.followed)
-  
-  mean_numScans[gy]=mean(data$num.scans) #mean(meta_data$hrs.focalfollowed)
-  sd_numScans[gy]=sd(data$num.scans)
-}
-save(mean_hrs_followed, sd_hrs_followed, mean_numScans, sd_numScans, 
-     file = "C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/DataPerGroup_minObs.RData")
-
-######
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks_minObs.RData")
-Networks$groupyear=paste(Networks$group, Networks$year,sep="")
-Networks$alteryear=paste(Networks$alter, Networks$groupyear,sep="")
-Networks$egoyear=paste(Networks$ego, Networks$groupyear,sep="")
-idyear = unique(c(Networks$alteryear, Networks$egoyear))
-
-data_minObs=all_grooming_bouts[match(idyear, all_grooming_bouts$idyear),]
-mean(data_minObs$num.scans)
-min(data_minObs$num.scans)
-
-######
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Strength.StablePartners_minOBs.RData")
-ID.strength.stableP.All$groupyear=paste(ID.strength.stableP.All$group, ID.strength.stableP.All$year,sep="")
-ID.strength.stableP.All$idyear=paste(ID.strength.stableP.All$id, ID.strength.stableP.All$groupyear,sep="")
-IDs_minObs=unique(ID.strength.stableP.All$idyear)
-all_grooming_bouts$idyear = paste(all_grooming_bouts$id, all_grooming_bouts$groupyear,sep="")
-IDs_to_exclude = setdiff(all_grooming_bouts$idyear, IDs_minObs)
-
-data_minObs=all_grooming_bouts[match(IDs_minObs, all_grooming_bouts$idyear),]
-mean(data_minObs$num.scans)
-sd(data_minObs$num.scans)
-min(data_minObs$num.scans)

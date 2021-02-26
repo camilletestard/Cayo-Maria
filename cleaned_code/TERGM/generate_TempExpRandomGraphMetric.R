@@ -3,13 +3,11 @@
 # grooming network data. We can include a number of parameters to test what is driving bond formation or dissolution 
 # (e.g. homophily terms, closure of triads, reciprocity etc.). Once again, i run the model over mutliple iterations to account
 # for all of the data (through subsampling).
-# Bond formation model ~ edges + gwesp + mutual + kinship edge cov.+ Proximity edge cov.
+# Bond formation model ~ edges + gwesp + mutual + Proximity edge cov.
 # edges = control for the change in degree
 # gwesp = model whether there are more triangles than expected by chance for a network of this size and density, and thus
 # that there is some sort of explicit triangle closure effect going on.
 # mutual = test whether bond formation is more likely in the case of reciprocating a bond
-# kinship & proximity edge covariate = test whether bond formation between two nodes is more or less likely to form as kin 
-# relationship or proximity increases 
 # Positive coeff = relationshis is more likely than chance to form (negative -> less likely)
 # Bond dissolution model ~ edges + kinship edge cov.+ Proximity edge cov.
 # Positive coeff = bond is more likely than chance to persist in the next time step.
@@ -17,6 +15,7 @@
 #   Silk et al 2017 (Animal Behavior)
 # http://statnet.org/Workshops/ergm_tutorial.html#appendix_a:_clarifying_the_terms_%E2%80%93_ergm_and_network
 # http://statnet.org/Workshops/tergm_tutorial.html
+#Camille Testard - 2020
 
 #load required packages
 library(network)

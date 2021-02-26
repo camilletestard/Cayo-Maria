@@ -3,8 +3,9 @@
 # Questions: How much do IDs interact with partners they had before the hurricane?
 # Functions Called: CalcSubsampledScans, functions_GlobalNetworkMetrics
 # Inputs: allScans.txt
-# Outputs: Overall population proximity and grooming strength to stable partners AND per ID metrics.  
+# Outputs:  roximity and grooming strength to stable partners  
 # = Strength.StablePartners.RData
+# Camille Testard - 2020
 
 library(stringr)
 library(igraph)

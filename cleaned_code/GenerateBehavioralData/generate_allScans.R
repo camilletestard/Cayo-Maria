@@ -1,5 +1,7 @@
-#Create allScans file
-# Camille Testard 2019
+#generate_allScans: generates scan data from all group and years
+#Input: proximity data from "normal" data collection protocol years (including 2019) & scan data from 2018 (hurricane year)
+#Output: Combination of all scan data in "allScans.txt" file. This will be the input to many other scripts
+# Camille Testard - 2021
 
 #load required libraries
 library(dplyr)
@@ -14,13 +16,10 @@ library(schoolmath)
 ######################################################
 
 #Load proximity scans from groups and years of interest in the focal format: 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
-# group = c("R","R","F", "F", "F", "F", "V", "V", "V", "HH", "HH", "KK","KK")
-# years = c(2015, 2016, 2014, 2015, 2016, 2017, 2015, 2016, 2017, 2014, 2016, 2015, 2017)
-# groupyears = c("R2015", "R2016", "F2014", "F2015", "F2016", "F2017", "V2015", "V2016", "V2017", "HH2014", "HH2016", "KK2015", "KK2017")
-group = c("F","F", "F","F", "V", "V", "V","V", "KK","KK","S")
-years = c(2014,2015, 2016, 2017, 2015, 2016, 2017, 2019, 2015, 2017, 2019)
-groupyears = c("F2014","F2015", "F2016", "F2017", "V2015", "V2016", "V2017","V2019","KK2015", "KK2017","S2019")
+setwd("Users/camilletestard/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
+group = c("V", "V", "V", "V", "KK", "KK")
+years = c(2015, 2016, 2017, 2019, 2015, 2017)
+groupyears = c("V2015", "V2016", "V2017","KK2015", "KK2017")
 
 allScans2 = data.frame(); count = 0; total_count=0; gy =7
 for (gy in 1:length(groupyears)){ #for all group & years

@@ -1,6 +1,5 @@
 ######## Modelling Logistic Regressions on A2
 # Modelling_PaccPsoc: Binomial Mixed Models of p(proximity) & p(grooming). Has p(groom) & p(prox) changed post-hurricane?
-#   Are there inter-individual differences in how much probabilities have changed?
 #   Functions called: CalcSubsampledScans
 # Input: allScans.txt
 # Output: Model parameters over 500 iterations (multiple iterations of sub-sampling to make sure we actually take all 
@@ -58,8 +57,8 @@ for (i in 1:iter) {
   #Group V
   ExSubScansV = ExSubScans[which(ExSubScans$group=='V'),]
   
+  #PROXIMITY MODEL
   isNotAloneV <- glmer(isProx~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID) + (1|year), data = ExSubScansV, family = binomial) #Note: might want to try MCMCglmm?
-  #isNotAloneV <- glmer(isProx~ isPost + sex + age + percentrank + (1|year), data = ExSubScansV, family = binomial) #Note: might want to try MCMCglmm?
   # performance::check_model(isNotAloneV)
   print(summary(isNotAloneV))
   #Plot effects seperately
@@ -68,6 +67,7 @@ for (i in 1:iter) {
   NotAlone.V.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isNotAloneV, "beta")
   NotAlone.V.Effects[i,c("(focalID)","(year)")] <- getME(isNotAloneV, "theta")
   
+  #GROOMING MODEL
   isSocialV <- glmer(isSocial~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID) + (1|year), data = ExSubScansV, family = binomial)
   print(summary(isSocialV))
   # performance::check_collinearity(isSocialV)
@@ -78,14 +78,15 @@ for (i in 1:iter) {
   #Group KK
   ExSubScansKK = ExSubScans[which(ExSubScans$group=='KK'),]
   
+  #PROXIMITY MODEL
   isNotAloneKK <- glmer(isProx~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID) + (1|year), data = ExSubScansKK, family = binomial) #Note: might want to try MCMCglmm?
-  #isNotAloneKK <- glmer(isProx~ isPost + sex + age + percentrank + year + (1|focalID), data = ExSubScansKK, family = binomial) #Note: might want to try MCMCglmm?
   print(summary(isNotAloneKK))
   #plot(effects::allEffects(isNotAloneKK))
   # performance::check_model(isNotAloneKK)
   NotAlone.KK.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isNotAloneKK, "beta")
   NotAlone.KK.Effects[i,c("(focalID)","(year)")] <- getME(isNotAloneKK, "theta")
   
+  #GROOMING MODEL
   isSocialKK <- glmer(isSocial~ isPost*Q + sex + age + percentrank + timeBlock + (1|focalID) + (1|year), data = ExSubScansKK, family = binomial)
   print(summary(isSocialKK))
   # simres2 <- simulateResiduals(isSocial, n = 1000)
@@ -94,14 +95,14 @@ for (i in 1:iter) {
   Social.KK.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isSocialKK, "beta")
   Social.KK.Effects[i,c("(focalID)","(year)")] <- getME(isSocialKK, "theta")
   
-  save.image("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/ModelEffectsFinal.RData")
+  save.image("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/ModelEffectsFinal.RData") #Save output
   
 }
 end_time <- Sys.time()
 end_time - start_time
 
 ###############################################################################################
-# Visualize model effects
+# Save model effects into .csv tables
 ###############################################################################################
 
 #Load data

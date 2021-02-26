@@ -1,8 +1,9 @@
 # generate_StrengthToDeadMonkeys: The goal of this script is to find whether individuals who lost partners are the most 
 # sensitive to the hurricane. It will find the strength of relationship between each monkey to dead partners 
-# (cosnidering up to one year after the hurricane).
+# (considering up to one year after the hurricane).
 # Input: CPRCdemographicfile_acquired_03.2020.csv; allScans.txt; allEL.Focal.RData
 # Output: strength.to.deceased.RData
+# Camille Testard - 2020
 
 library(lubridate)
 library(dplyr)

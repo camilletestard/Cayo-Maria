@@ -1,7 +1,7 @@
 # Modelling_ChangeP: The goal is to model change p(groom) and p(prox) post-hurricane. what factor pre-hurricane
 # predicts the change in social behavior post-hurricane? 
 #   Modelling happens over multiple iterations because we compute dpgroom and dpprox over sub-sampled scans. At each
-# iteration, I compute the change in pProx and pGroom (only considering IDs with at least 20obs), the script then
+# iteration, I compute the change in pProx and pGroom, the script then
 # combines change in social rates info with pre-hurricane social capital factors in one big data frame for modelling.
 # Functions called: CalcSubsampledScans
 # Input: "SocialCapital.RData" (output from generate_SocialCapitalMetrics), allScans.txt (to compute change in social rates)
@@ -9,11 +9,12 @@
 # - Groom Model: sex + age + group + rank + dead.all + std.DSIGroom + dpProx + (1|ID) + (1|year)
 # - Prox Model: sex + age + group + rank + dead.all + std.DSIProx + (1|ID) + (1|year)
 # NOTES:
-#   -dead.all = strength of bond to partners who died in the year following the hurricane
+# -dead.all = strength of bond to partners who died in the year following the hurricane
 # -dProx = change in proximity
 # -std.X = standardized versions (divided by mean)
 # In sections 3. I compile model outputs from all iterations by computing mean estimates and 95% CI. 
 # in section 4. I visualize individual effects
+# Camille Testard - 2020
 
 library(lme4)# Generalized Linear Mixed Models
 library(lmerTest)
@@ -71,17 +72,17 @@ for (iter in 1:n_iter){
   ## Model Social Capital effect on change in proximity rates 
   ###########################################################
   
-  # dpAcc.V <- lmer(dpAcc~ age + percentrank + std.dead.all + sex:std.DSIprox  +  (1|id) +(1|year), data = data.V, na.action=na.omit)
-  # summary(dpAcc.V)
-  # # performance::check_model(dpAcc.V) #check model assumptions
-  # dpAcc.Effects.V[iter,c("(Intercept)","age","rank","dead.all","sexM","DSIprox","sexM:DSIprox")] <- getME(dpAcc.V, "beta")
-  # dpAcc.Effects.V[iter,c("(focalID)","(year)")] <- getME(dpAcc.V, "theta")
-  # 
-  # dpAcc.KK <- lmer(dpAcc~ age + percentrank + std.dead.all + sex:std.DSIprox  +  (1|id) +(1|year), data = data.KK, na.action=na.omit)
-  # summary(dpAcc.KK)
-  # # performance::check_model(dpAcc.KK) #check model assumptions
-  # dpAcc.Effects.KK[iter,c("(Intercept)","age","rank","dead.all","sexM","DSIprox","sexM:DSIprox")] <- getME(dpAcc.KK, "beta")
-  # dpAcc.Effects.KK[iter,c("(focalID)","(year)")] <- getME(dpAcc.KK, "theta")
+  dpAcc.V <- lmer(dpAcc~ age + percentrank + std.dead.all + sex:std.DSIprox  +  (1|id) +(1|year), data = data.V, na.action=na.omit)
+  summary(dpAcc.V)
+  # performance::check_model(dpAcc.V) #check model assumptions
+  dpAcc.Effects.V[iter,c("(Intercept)","age","rank","dead.all","sexM","DSIprox","sexM:DSIprox")] <- getME(dpAcc.V, "beta")
+  dpAcc.Effects.V[iter,c("(focalID)","(year)")] <- getME(dpAcc.V, "theta")
+
+  dpAcc.KK <- lmer(dpAcc~ age + percentrank + std.dead.all + sex:std.DSIprox  +  (1|id) +(1|year), data = data.KK, na.action=na.omit)
+  summary(dpAcc.KK)
+  # performance::check_model(dpAcc.KK) #check model assumptions
+  dpAcc.Effects.KK[iter,c("(Intercept)","age","rank","dead.all","sexM","DSIprox","sexM:DSIprox")] <- getME(dpAcc.KK, "beta")
+  dpAcc.Effects.KK[iter,c("(focalID)","(year)")] <- getME(dpAcc.KK, "theta")
   
   ###########################################################
   ## Model Social Capital effect on change in grooming rates
@@ -106,7 +107,7 @@ for (iter in 1:n_iter){
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/PreHurricaneFactors-BehavioralFlex")
 
 #####################################################################
-# 4. Compile model effects
+# 3. Compile model effects
 #####################################################################
 
 #Proximity
@@ -137,7 +138,7 @@ write.csv(Estimates,"PredictGroom.KK.csv")
 #end of script
 
 #####################################################################
-# 5. Visualizations
+# 4. Visualizations
 #####################################################################
 
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/PreHurricaneFactors-BehavioralFlex/Plots")

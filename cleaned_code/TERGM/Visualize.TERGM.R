@@ -1,8 +1,9 @@
 #Visualize TERGM
 # Visualize in TERGM model paramaters (for both formation and dissolution) in two ways: 
-#  Remove outliers due to model misfits (coefficient is more than 3 std. deviations awat from mean or -Inf.
+#  Remove outliers due to model misfits (coefficient is more than 3 std. deviations awat from mean or -Inf).
 # (1)  horizontal violin plot
 # (2)  tables of mean estimates for all coefficients & 95% confidence intervals.
+# Camille Testard - 2020
 
 load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/TERGMeffects_minObs.RData")
 library(matrixStats)

@@ -3,6 +3,7 @@
 # Weights are further standardized by dividing by the mean for the group/year.
 # Input: DOMINANCE.txt; _GroupByYear.txt & _GroomingEvents.txt for all groups and years
 # Output: allEL.Focal.RData
+#Camille Testard - 2020
 
 #load local functions
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
