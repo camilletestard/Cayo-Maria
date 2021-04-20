@@ -15,14 +15,14 @@ library(gridExtra)
 library(graphics)
 
 #Load data
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
+setwd("~/Documents/GitHub/Cayo-Maria/")
 load("R.Data/Strength.StablePartners_minOBs.RData")
 
 ##########################################
 #Add sex, age and rank info
 ##########################################
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
-population_info = read.csv("Behavioral_Data/SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt")
+setwd("~/Desktop/Desktop-Cayo-Maria/")
+population_info = read.csv("Behavioral_Data/SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt") #Document with restricted access
 dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 
 #Find all unique IDs
@@ -60,8 +60,8 @@ data.groom[,"age"] <- scale(data.groom[,"age"]) #helps avoid convergence issues:
 ## MODELLING
 ##########################################################
 
-#Note: for now I implement one model over multiple iterations.
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/New.vs.Stable.Partner.Strength") #set saving directory
+#Note: I implement one model over multiple iterations.
+setwd("~/Desktop/Desktop-Cayo-Maria/Results/Partner.Strength.PrePost/New.vs.Stable.Partner.Strength") #set saving directory
 
 # Separate model for each iteration and keep track of parameter estimates each time.
 StableP.groom.V =data.frame(); StableP.groom.KK =data.frame();

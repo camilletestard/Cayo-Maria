@@ -16,7 +16,7 @@ library(schoolmath)
 ######################################################
 
 #Load proximity scans from groups and years of interest in the focal format: 
-setwd("Users/camilletestard/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
+setwd("~/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
 group = c("V", "V", "V", "V", "KK", "KK")
 years = c(2015, 2016, 2017, 2019, 2015, 2017)
 groupyears = c("V2015", "V2016", "V2017","KK2015", "KK2017")

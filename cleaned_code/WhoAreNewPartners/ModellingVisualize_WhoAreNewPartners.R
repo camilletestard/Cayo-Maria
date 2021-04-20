@@ -26,17 +26,17 @@ library(gridExtra)
 library(matrixStats)
 
 #load & format data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes_minObs.RData")
+load("~/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes_minObs.RData") #output of "generate_WhoAreTheNewPartners.R"
 PartnerAttr$groupyear = paste(PartnerAttr$group, PartnerAttr$year, sep="")
 PartnerAttr$isPost = as.factor(PartnerAttr$isPost)
-for (col in seq(6,33)) {PartnerAttr[,col] = as.numeric(PartnerAttr[,col])}
+for (col in seq(6,ncol(PartnerAttr))) {PartnerAttr[,col] = as.numeric(PartnerAttr[,col])}
 
-#Separate data by grooming and groomimity
+#Separate data by grooming and proximity
 data.groom = PartnerAttr[which(PartnerAttr$action=="groom"),]
 data.groom.V=data.groom[data.groom$group=="V",];data.groom.KK=data.groom[data.groom$group=="KK",]
 #Select columns of interest
-data.V.pre = data.groom.V[data.groom.V$isPost==0,8:33]; data.V.post = data.groom.V[data.groom.V$isPost==1,8:33]; 
-data.KK.pre = data.groom.KK[data.groom.KK$isPost==0,8:33]; data.KK.post = data.groom.KK[data.groom.KK$isPost==1,8:33]; 
+data.V.pre = data.groom.V[data.groom.V$isPost==0,8:ncol(PartnerAttr)]; data.V.post = data.groom.V[data.groom.V$isPost==1,8:33]; 
+data.KK.pre = data.groom.KK[data.groom.KK$isPost==0,8:ncol(PartnerAttr)]; data.KK.post = data.groom.KK[data.groom.KK$isPost==1,8:33]; 
 
 ##############################################
 # TEST DIFFERENCE IN PROPORTIONS:

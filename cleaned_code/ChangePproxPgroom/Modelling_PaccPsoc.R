@@ -1,4 +1,4 @@
-######## Modelling Logistic Regressions on A2
+######## Modelling Logistic Regressions
 # Modelling_PaccPsoc: Binomial Mixed Models of p(proximity) & p(grooming). Has p(groom) & p(prox) changed post-hurricane?
 #   Functions called: CalcSubsampledScans
 # Input: allScans.txt
@@ -22,10 +22,9 @@ library(fitdistrplus)
 library(lmtest)
 
 #Load AllScans file
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
+setwd("~/Documents/GitHub/Cayo-Maria/") 
 source("cleaned_code/Functions/CalcSubsampledScans.R")
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
+allScans = read.csv("Data All Cleaned/allScans.txt")
 
 ###############################################################################################
 #Run glmm on social rates
@@ -95,7 +94,7 @@ for (i in 1:iter) {
   Social.KK.Effects[i,c("(Intercept)","isPost","Q","sexM","age","rank","timeBlockPM","isPost1:Q")] <- getME(isSocialKK, "beta")
   Social.KK.Effects[i,c("(focalID)","(year)")] <- getME(isSocialKK, "theta")
   
-  save.image("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/ModelEffectsFinal.RData") #Save output
+  save.image("~/Documents/GitHub/Cayo-Maria/R.Data/ModelEffectsFinal.RData") #Save output
   
 }
 end_time <- Sys.time()
@@ -106,14 +105,14 @@ end_time - start_time
 ###############################################################################################
 
 #Load data
-load ("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/ModelEffectsFinal.RData")
+load ("~/Documents/GitHub/Cayo-Maria/R.Data/ModelEffectsFinal.RData")
 
 library(ggplot2)
 library(matrixStats)
 library(gridExtra) 
 library(graphics)
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/ChangePAccPSoc/")
+setwd("~/Desktop/Desktop-Cayo-Maria/Results/ChangePAccPSoc/")
 #GROUP V MODEL EFFECTS
 Means = colMeans2(as.matrix(NotAlone.V.Effects)); Means = round(Means,3)
 CI = colQuantiles(as.matrix(NotAlone.V.Effects), probs = c(0.025, 0.975), na.rm = TRUE); CI = round(CI,3)
@@ -139,3 +138,4 @@ CI = colQuantiles(as.matrix(Social.KK.Effects), probs = c(0.025, 0.975), na.rm =
 Estimates = cbind(Means,CI); Estimates = as.data.frame(Estimates); names(Estimates) = c("Estimate","2.5%","97.5%")
 t.Soc.KK<-tableGrob(Estimates);t.Soc.KK<-grid.arrange(t.Soc.KK, top="p(Groom) Model (Group KK)");
 write.csv(Estimates,"psoc.KK.csv")
+

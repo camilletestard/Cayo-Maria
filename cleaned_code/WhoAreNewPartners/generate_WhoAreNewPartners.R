@@ -36,7 +36,8 @@ source("KinshipPedigree.R")
 setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
 allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
 dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
-bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
+bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE_2021.txt", sep="\t")
+#IMPORTANT NOTE: this input file belongs to CPRC and has restricted access.
 setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
 load("R.Data/SocialCapital.RData")
 
@@ -48,12 +49,8 @@ action = c("groom", "prox")
 num_iter = 500
 PartnerAttr = data.frame(matrix(ncol = 31, nrow = 0)); 
 colnames(PartnerAttr)= c("action","iter","group","year","isPost","LowToHigh",
-                         "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF","OO","OY","YO","YY",
-                         "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy",
-                         "SocialHomophily.lowP","SocialHomophily.highP","socialOpposite.lowPhighP","socialOpposite.highPlowP",
-                         "SocialHomophily.ecL","SocialHomophily.ecH","socialOpposite.ecLecH","socialOpposite.ecHecL")
-
-# load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes_80.RData")
+                         "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF",
+                         "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy")
 
 start_time <- Sys.time(); iter=1; a=1
 
@@ -120,8 +117,7 @@ for (iter in 1:num_iter){
         }
         el$KC   <- round(KC, 4)
         el$KinPairClass <- "unrelated"
-        # el$KinPairClass[which(el$KC >= .125 & el$KC < .25)] <- "dRel"
-        el$KinPairClass[which(el$KC >= .125)] <- "rel"
+        el$KinPairClass[which(el$KC >= .125)] <- "rel" #In this package: kinship will be 0.5 for an individual with themselves, .25 between mother and child, .125 between an uncle and neice
         
         # 6. Find sex of givingID & receivingID
         el$sexGivingID   <- rscans$sex[match(as.character(el$alter), as.character(rscans$focalID))]
@@ -187,39 +183,19 @@ for (iter in 1:num_iter){
         MF = sum(el$weight[which(el$SexPairClass == "M.F")])/sum(el$weight)#length(which(el$SexPairClass == "M.F"))/nrow(el)
         FM = sum(el$weight[which(el$SexPairClass == "F.M")])/sum(el$weight)#length(which(el$SexPairClass == "F.M"))/nrow(el)
         FF = sum(el$weight[which(el$SexPairClass == "F.F")])/sum(el$weight)
-        #Age category
-        OO = sum(el$weight[which(el$AgePairClass == "O.O")])/sum(el$weight)
-        OY = sum(el$weight[which(el$AgePairClass == "O.Y")])/sum(el$weight)
-        YO = sum(el$weight[which(el$AgePairClass == "Y.O")])/sum(el$weight)
-        YY = sum(el$weight[which(el$AgePairClass == "Y.Y")])/sum(el$weight)
         #Grooming category
         SocialHomophily.shy = sum(el$weight[which(el$GroomPairClass == "shy.shy")])/sum(el$weight)
         SocialHomophily.greg = sum(el$weight[which(el$GroomPairClass == "greg.greg")])/sum(el$weight)#(length(which(el$SocialPairClass == "shy.shy")) + length(which(el$SocialPairClass == "greg.greg")))/nrow(el)
         socialOpposite.shygreg = sum(el$weight[which(el$GroomPairClass == "shy.greg")])/sum(el$weight)
         socialOpposite.gregshy = sum(el$weight[which(el$GroomPairClass == "greg.shy")])/sum(el$weight)
-        #NumP category
-        SocialHomophily.lowP = sum(el$weight[which(el$numPPairClass == "shyP.shyP")])/sum(el$weight)
-        SocialHomophily.highP = sum(el$weight[which(el$numPPairClass == "gregP.gregP")])/sum(el$weight)#(length(which(el$SocialPairClass == "shy.shy")) + length(which(el$SocialPairClass == "greg.greg")))/nrow(el)
-        socialOpposite.lowPhighP = sum(el$weight[which(el$numPPairClass == "shyP.gregP")])/sum(el$weight)
-        socialOpposite.highPlowP = sum(el$weight[which(el$numPPairClass == "gregP.shyP")])/sum(el$weight)
-        #Eigenvec. cent. category
-        SocialHomophily.ecL = sum(el$weight[which(el$EigCentPairClass == "ecL.ecL")])/sum(el$weight)
-        SocialHomophily.ecH = sum(el$weight[which(el$EigCentPairClass == "ecH.ecH")])/sum(el$weight)#(length(which(el$SocialPairClass == "shy.shy")) + length(which(el$SocialPairClass == "greg.greg")))/nrow(el)
-        socialOpposite.ecLecH = sum(el$weight[which(el$EigCentPairClass == "ecL.ecH")])/sum(el$weight)
-        socialOpposite.ecHecL = sum(el$weight[which(el$EigCentPairClass == "ecH.ecL")])/sum(el$weight)
         
         PartnerAttrDF = data.frame(matrix(nrow=1,ncol=33)); 
         names(PartnerAttrDF)= c("action","iter","group","year","isPost","total.pairs","total.pairs.weights","LowToHigh",
-                                "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF","OO","OY","YO","YY",
-                                "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy",
-                                "SocialHomophily.lowP","SocialHomophily.highP","socialOpposite.lowPhighP","socialOpposite.highPlowP",
-                                "SocialHomophily.ecL","SocialHomophily.ecH","socialOpposite.ecLecH","socialOpposite.ecHecL")
+                                "HighToLow","HighToHigh","LowToLow", "Kin","Unrel", "MM", "MF", "FM","FF",
+                                "SocialHomophily.shy","SocialHomophily.greg","SocialOpposite.shygreg","SocialOpposite.gregshy")
         PartnerAttrDF[1,] <- c(action[a],iter,group[g],years[y],isPost[h],total.pairs,total.pair.weights, as.numeric(LowToHigh), as.numeric(HighToLow), as.numeric(HighToHigh),
                                as.numeric(LowToLow), as.numeric(Kin),as.numeric(Unrel), as.numeric(MM), as.numeric(MF), as.numeric(FM), 
-                               as.numeric(FF), as.numeric(OO), as.numeric(OY), as.numeric(YO), as.numeric(YY), 
-                               as.numeric(SocialHomophily.shy), as.numeric(SocialHomophily.greg), as.numeric(socialOpposite.shygreg), as.numeric(socialOpposite.gregshy),
-                               as.numeric(SocialHomophily.lowP), as.numeric(SocialHomophily.highP), as.numeric(socialOpposite.lowPhighP), as.numeric(socialOpposite.highPlowP),
-                               as.numeric(SocialHomophily.ecL), as.numeric(SocialHomophily.ecH), as.numeric(socialOpposite.ecLecH), as.numeric(socialOpposite.ecHecL))
+                               as.numeric(SocialHomophily.shy), as.numeric(SocialHomophily.greg), as.numeric(socialOpposite.shygreg), as.numeric(socialOpposite.gregshy),)
         
         PartnerAttr= rbind(PartnerAttr, PartnerAttrDF)  
         save(list="PartnerAttr",file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/PartnerAttributes.RData")

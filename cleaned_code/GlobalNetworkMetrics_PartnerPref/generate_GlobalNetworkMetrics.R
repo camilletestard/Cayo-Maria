@@ -22,15 +22,14 @@ library(ineq)
 library(stringr)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/") 
+setwd("~/Documents/GitHub/Cayo-Maria/") 
 source("cleaned_code/Functions/CalcSubsampledScans.R")
 source("cleaned_code/Functions/functions_GlobalNetworkMetrics.R")
 source("cleaned_code/Functions/KinshipPedigree.R")
 
 #Load scan data and population info
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
-bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
+allScans = read.csv("Data All Cleaned/allScans.txt")
+bigped <- read.delim("~/Desktop/Desktop-Cayo-Maria/Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t") #This document is owned by CPRC and has restricted access.
 
 #Compute pedigree for all IDs in this group
 IDs = allScans$focalID[which(allScans$group == "KK"|allScans$group == "V")]; #only select group V and groupKK individuals
@@ -42,7 +41,7 @@ if(length(discard.na)!=0) #if their are unknown pedigree for certain idnvidiuals
 ped <- KinshipPedigree(pedigree)
 
 #Load Dominance info
-dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
+dominance_info =read.table("Data All Raw/DOMINANCE.txt",header = T)
 
 num_iter = 500 #set number of iterations
 AllStats = list() #initialize output
@@ -135,7 +134,7 @@ for (a in 1:length(actions)){ #for all actions
           name = paste(group[g],years[y],isPost[h],sep=".")
           
           AllStats[[name]] = rbind(AllStats[[name]], AllStatsDF)  
-          save(AllStats,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
+          save(AllStats,file ="~/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
           
         } #end of of pre-/post-hurricane loop
       } #end of year for loop

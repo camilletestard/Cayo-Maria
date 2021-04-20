@@ -15,14 +15,14 @@ library(graphics)
 library(fitdistrplus)
 
 #Load data
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks.RData")
+load("~/Documents/GitHub/Cayo-Maria/R.Data/Networks.RData")
 
 ##########################################
 #Add sex, age and rank info
 ##########################################
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/")
-population_info = read.csv("Behavioral_Data/SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt")
-dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
+setwd("~/Desktop/Desktop-Cayo-Maria/")
+population_info = read.csv("Behavioral_Data/SubjectInfo_2010-2017/Population details_Allgroups.allyears.txt") #File with restricted access
+dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T) #File with restricted access
 
 #Find all unique IDs
 allIDs = unique(Networks$alter)

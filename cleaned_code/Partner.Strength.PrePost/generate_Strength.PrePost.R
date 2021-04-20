@@ -11,11 +11,10 @@
 library(stringr)
 library(igraph)
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
-source("Functions/CalcSubsampledScans.R")
-source("Functions/functions_GlobalNetworkMetrics.R")
+setwd("~/Documents/GitHub/Cayo-Maria/") 
+allScans = read.csv("Data All Cleaned/allScans.txt")
+source("cleaned_code/Functions/CalcSubsampledScans.R")
+source("cleaned_code/Functions/functions_GlobalNetworkMetrics.R")
 
 num_iter = 500 #number of iterations
 actions = c("groom", "prox"); a=1; iter=1
@@ -82,8 +81,10 @@ for (a in 1:length(actions)) { #for both proximity and grooming
   } #End of iteration loop
 } #End of action loop
 
-#Remove edges including individuals with too few scans 
-idx_to_remove = which(Networks$numscans.alter<40 | Networks$numscans.ego<40)
-Networks = Networks[-idx_to_remove,]
+### OPTIONAL ###
+# This option was coded in response to reviewer comments about individuals with too few observations.
+# #Remove edges including individuals with too few scans 
+# idx_to_remove = which(Networks$numscans.alter<40 | Networks$numscans.ego<40)
+# Networks = Networks[-idx_to_remove,]
 
-save(Networks, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Networks_minObs.RData")
+save(Networks, file ="~/Documents/GitHub/Cayo-Maria/R.Data/Networks_minObs.RData")

@@ -7,7 +7,7 @@ library(ggplot2)
 library(scales)
 
 #Load AllScans file
-setwd("Users/camilletestard/Documents/GitHub/Cayo-Maria/") 
+setwd("~/Documents/GitHub/Cayo-Maria/") 
 allScans = read.csv("Data All Cleaned/allScans.txt")
 
 #WITHOUT SUBSAMPLING
@@ -59,7 +59,7 @@ ggplot(freqs, aes(x=names, y=x)) + geom_bar(stat="identity") +
 
 #PRE-HURRICANE NUMBER OF GROOMING BOUTS, FOCAL HOURS AND NUMBER OF SCANS PER IDYEAR IN OUR SAMPLE
 #Load proximity scans from groups and years of interest in the focal format: 
-setwd("Users/camilletestard/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
+setwd("~/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
 groupyears = c("V2015", "V2016", "V2017","KK2015", "KK2017")
 
 gy=1; grooming_bouts_per_group=data.frame(matrix(data=NA, nrow=length(groupyears), ncol=0)); 

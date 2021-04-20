@@ -1,6 +1,7 @@
 # generate_deathBarPlot: This script takes in CPRC demographic file and computes the number of deaths per 100 adults, 
 # for every month from 1998 to 2018 (one year after the hurricane).
 # Input: CPRCdemographicfile_acquired_03.2020.csv; allScans.txt; DOMINANCE.txt
+# NOTE: The .csv input file to generate this figure is owned by the CPRC and has restricted access. 
 # Output: Longitudinal deaths/100 adults plot. 
 # Camille Testard - 2020
 
@@ -15,15 +16,15 @@ library(reshape2)
 library(gmodels)
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/") 
+setwd("~/Documents/Github/Cayo-Maria/") 
 source("cleaned_code/Functions/CalcSubsampledScans.R")
 load("R.Data/SocialCapital.RData")
 
 #Load data
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
+setwd("~/Desktop/Desktop-Cayo-Maria/") 
 dominance = read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt", header = T); 
-Demographics = read.csv("Behavioral_Data/CPRCdemographicfile_acquired_03.2020.csv"); names(Demographics)[1]="id"
-Demographics_v2 = read.csv("Behavioral_Data/Dead_missing_LDS.csv"); names(Demographics_v2)[1]="id"
+Demographics = read.csv("Behavioral_Data/CPRCdemographicfile_acquired_03.2020.csv"); names(Demographics)[1]="id" #This document is owned by CPRC and has restricted access.
+Demographics_v2 = read.csv("Behavioral_Data/Dead_missing_LDS.csv"); names(Demographics_v2)[1]="id"#This document is owned by CPRC and has restricted access.
 Demographics_v3 = merge(Demographics,Demographics_v2, by="id")
 allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt"); 
 

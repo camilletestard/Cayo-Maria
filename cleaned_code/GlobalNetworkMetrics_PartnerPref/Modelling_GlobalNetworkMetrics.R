@@ -12,7 +12,7 @@ library(gridExtra)
 library(graphics)
 
 
-load("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
+load("~/Documents/GitHub/Cayo-Maria/R.Data/AllStats.RData")
 
 ##########################################################
 #Pooling all data together
@@ -54,7 +54,8 @@ for (gy in 1:length(groupyear)){
 }
 # pref.stats.ALL[[3]]
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/") 
+#save
+setwd("~/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/") #Set results folder
 
 for (gy in 1:length(groupyear)){
 write.csv(pref.stats.ALL[[gy]],paste("Groom.density.diff",groupyear[gy],"minObs.csv",sep="_"))
@@ -77,7 +78,8 @@ for (gy in 1:length(groupyear)){
   pref.stats.ALL[[gy]] = Estimates
 }
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/") 
+#save
+setwd("~/Desktop/Desktop-Cayo-Maria/Results/GlobalNetworkMetrics/") #Set results folder
 
 for (gy in 1:length(groupyear)){
   write.csv(pref.stats.ALL[[gy]],paste("Prox.density.diff",groupyear[gy],"csv",sep="."))

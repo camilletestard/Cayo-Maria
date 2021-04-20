@@ -6,11 +6,11 @@
 #Camille Testard - 2020
 
 #load local functions
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
+setwd("~/Documents/GitHub/Cayo-Maria/cleaned_code") 
 source("Functions/functions_GlobalNetworkMetrics.R")
 
 #Load scan data, population and dominance info
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
+setwd("~/Desktop/Desktop-Cayo-Maria/") 
 dominance_info =read.table("Behavioral_Data/Database Complete/Data All Raw/DOMINANCE.txt",header = T)
 
 #Set parameters
@@ -32,7 +32,7 @@ for (gy in 1:length(groupyears)){ #For each group
   #####################################################
   
   #Load data
-  setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
+  setwd("~/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
   meta_data=read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt",sep=""))
   data = data=read.csv(paste("Group",groupyears[gy],"_GroomingEvents.txt",sep=""))
   
@@ -70,5 +70,5 @@ for (gy in 1:length(groupyears)){ #For each group
   ID.list[[gy]]=as.character(meta_data$id)
   
 }
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data")
+setwd("~/Documents/GitHub/Cayo-Maria/R.Data")
 save(allEL.Focal,ID.list, file=paste(network_weighted,"allEL.Focal.RData",sep="."))

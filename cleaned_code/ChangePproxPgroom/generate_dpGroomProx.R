@@ -6,7 +6,7 @@
 
 
 #Load functions and data
-setwd("/Users/camilletestard/Documents/Github/Cayo-Maria/")
+setwd("~/Documents/Github/Cayo-Maria/")
 source("cleaned_code/Functions/CalcSubsampledScans.R")
 allScans = read.csv("Data All Cleaned/allScans.txt")
 
@@ -32,7 +32,7 @@ for (iter in 1:num_iter){
     
     rscans = randomScans[which(randomScans$year == years[gy] & randomScans$group == group[gy]),]
     #Load data
-    setwd("/Users/camilletestard/Documents/Github/Cayo-Maria/Data All Cleaned")
+    setwd("~/Documents/Github/Cayo-Maria/Data All Cleaned")
     meta_data = read.csv(paste("Group",groupyears[gy],"_GroupByYear.txt", sep = ""))
     
     unqIDs = as.character(meta_data$id)
@@ -43,14 +43,17 @@ for (iter in 1:num_iter){
       isSocial.pre = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 0)] #get all pre-hurricane data for that individuals
       isSocial.post = rscans$isSocial[which(as.character(rscans$focalID) == unqIDs[id] & rscans$isPost == 1)]#get all post-re-hurricane data for that individuals
       dpAcc=NA; dpSocial=NA; num_obs = length(isProx.pre)
-      if (length(isProx.pre)>=20) { #If there are more than 20 observations for that individual pre hurricane
+      #if (length(isProx.pre)>=20) { #If there are more than 20 observations for that individual pre hurricane
+        # This if clause was added as a response to reviewer who worried our results were driven by individuals
+        # with few observations. If we only include individuals with at least 40 observations(20 pre-hurricane, 
+        # 20 post-hurricane), our results hold. 
         pACC.pre = sum(isProx.pre)/length(isProx.pre)
         pACC.post = sum(isProx.post)/length(isProx.post)
         dpAcc = pACC.post - pACC.pre
         pSocial.pre = sum(isSocial.pre)/length(isSocial.pre)
         pSocial.post = sum(isSocial.post)/length(isSocial.post)
         dpSocial = pSocial.post - pSocial.pre
-      } #end of min obs clause
+      #} #end of min obs clause
       dprob[id,]=c(unqIDs[id],dpAcc,dpSocial,pACC.pre, pACC.post, pSocial.pre, pSocial.post, num_obs)
     } #end of id for loop
     dprob$group = group[gy]; dprob$year = years[gy]; dprob$iter=iter
@@ -60,6 +63,6 @@ for (iter in 1:num_iter){
 
 dprob.ALL[,-c(1,9,10,11)]=as.numeric(dprob.ALL[,-c(1,9,10,11)]); 
 if (length(which(is.na(dprob.ALL$dpAcc)))!=0) {dprob.ALL = dprob.ALL[-which(is.na(dprob.ALL$dpAcc)),]} #remove NA
-setwd("/Users/camilletestard/Documents/Github/Cayo-Maria/R.Data")
+setwd("~/Documents/Github/Cayo-Maria/R.Data")
 save(dprob.ALL,file="ChangeP_min20.RData")
 

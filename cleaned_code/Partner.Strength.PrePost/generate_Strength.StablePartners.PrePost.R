@@ -10,9 +10,8 @@
 library(stringr)
 library(igraph)
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
-allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt")
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/")
+setwd("~/Documents/GitHub/Cayo-Maria/") 
+allScans = read.csv("Data All Cleaned/allScans.txt")
 source("cleaned_code/Functions/CalcSubsampledScans.R")
 source("cleaned_code/Functions/functions_GlobalNetworkMetrics.R")
 
@@ -125,7 +124,7 @@ for (a in 1:length(actions)) { #for both proximity and grooming
         population.strength.All=rbind(population.strength.All, strength)
         
         #Save all
-        save(population.strength.All, ID.strength.stableP.All, ID.strength.newP.All, ID.strength.oldP.All, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Strength.Stable.New.Old.Partners.RData")
+        save(population.strength.All, ID.strength.stableP.All, ID.strength.newP.All, ID.strength.oldP.All, file ="~/Documents/GitHub/Cayo-Maria/R.Data/Strength.Stable.New.Old.Partners.RData")
         
         #IMPORTANT NOTE: strength give/get only makes sense for grooming, not for proximity. I am keeping it constant across both to keep is simple
         #and have data frames align. But you should NOT use "proximity strength give", since there is no directionaility to proximity.
@@ -135,5 +134,5 @@ for (a in 1:length(actions)) { #for both proximity and grooming
 } #End of action loop
 
 population.strength.All = population.strength.All[,c("iter","action", "group", "year","Pre.overall", "Post.overall","numStablePairs","Pre.stableP", "Post.stableP")]
-save(population.strength.All, ID.strength.stableP.All, ID.strength.newP.All, ID.strength.oldP.All, file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/Strength.StablePartners.RData")
+save(population.strength.All, ID.strength.stableP.All, ID.strength.newP.All, ID.strength.oldP.All, file ="~/Documents/GitHub/Cayo-Maria/R.Data/Strength.StablePartners.RData")
 

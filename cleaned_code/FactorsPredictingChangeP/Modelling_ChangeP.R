@@ -29,9 +29,9 @@ library(gridExtra)
 library(graphics)
 
 # Load required data
-load("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data/ChangeP_min20.RData")
-load("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data/SocialCapital.RData")
-load("C:/Users/Camille Testard/Documents/Github/Cayo-Maria/R.Data/strength.to.deceased.RData")
+load("~/Documents/Github/Cayo-Maria/R.Data/ChangeP.RData")
+load("~/Documents/Github/Cayo-Maria/R.Data/SocialCapital.RData")
+load("~/Documents/Github/Cayo-Maria/R.Data/strength.to.deceased.RData")
 
 #####################################################################
 # 1. Merge dprob, social Capital and strength to dead IDs data &clean
@@ -141,7 +141,7 @@ write.csv(Estimates,"PredictGroom.KK.csv")
 # 4. Visualizations
 #####################################################################
 
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Results/PreHurricaneFactors-BehavioralFlex/Plots")
+setwd("~/Desktop/Desktop-Cayo-Maria/Results/PreHurricaneFactors-BehavioralFlex/Plots")
 
 full.data.plot=full.data
 
@@ -250,6 +250,8 @@ cor.test(full.data.plot$dpSocial[full.data.plot$group=="KK"],full.data.plot$dpAc
 cor.test(full.data.plot$dpSocial[full.data.plot$group=="V"],full.data.plot$dpAcc[full.data.plot$group=="V"])
 ggsave("dpAcc.dpSoc.tiff",dAcc.dSoc)
 ggsave("dpAcc.dpSoc.eps",dAcc.dSoc)
+
+### OPTIONAL VISUALIZATIONS ###
 
 # #Visualize how age is related to post-disaster change in p(groom)
 # ggplot(full.data.plot, aes(x=age, y=dpSocial))+

@@ -24,7 +24,7 @@ library(ggplot2)
 
 #load local functions
 #setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
-setwd("/Users/camilletestard/Documents/GitHub/Cayo-Maria/cleaned_code") 
+setwd("~/Documents/GitHub/Cayo-Maria/cleaned_code") 
 source("Functions/CalcSubsampledScans.R")
 source("Functions/functions_GlobalNetworkMetrics.R")
 
@@ -37,7 +37,7 @@ sd_numScans_list = list()
 sd_numScans_list[[1]]= sd_numScans[1:3]; sd_numScans_list[[2]] = sd_numScans[4:5];
 
 # setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/") 
-setwd("/Users/camilletestard/Documents/GitHub/Cayo-Maria/Data All Cleaned/") 
+setwd("~/Documents/GitHub/Cayo-Maria/Data All Cleaned/") 
 allScans = read.csv("allScans.txt")
 # bigped <- read.delim("Behavioral_Data/SubjectInfo_2010-2017/PEDIGREE.txt", sep="\t")
 dominance_info =read.table("DOMINANCE.txt",header = T)

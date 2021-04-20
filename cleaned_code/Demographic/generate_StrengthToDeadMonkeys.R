@@ -9,10 +9,10 @@ library(lubridate)
 library(dplyr)
 
 #Load data
-setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/") 
-Demographics = read.csv("Behavioral_Data/CPRCdemographicfile_acquired_03.2020.csv"); names(Demographics)[1]="id"
+setwd("~/Desktop/Desktop-Cayo-Maria/") 
+Demographics = read.csv("Behavioral_Data/CPRCdemographicfile_acquired_03.2020.csv"); names(Demographics)[1]="id" #Document owned by CPRC, restricted access
 allScans = read.csv("Behavioral_Data/Data All Cleaned/allScans.txt"); 
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data")
+setwd("~/Documents/GitHub/Cayo-Maria/R.Data")
 load("allEL.Focal.RData")
 
 #Find study population
@@ -75,5 +75,5 @@ for (gy in 1:length(groupyears)){
 }
 strength.to.deceased$dead.all=strength.to.deceased$dead.give+strength.to.deceased$dead.get
 strength.to.deceased$std.dead.all=strength.to.deceased$std.dead.give+strength.to.deceased$std.dead.get
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data")
+setwd("~/Documents/GitHub/Cayo-Maria/R.Data")
 save(strength.to.deceased,file="strength.to.deceased.RData")

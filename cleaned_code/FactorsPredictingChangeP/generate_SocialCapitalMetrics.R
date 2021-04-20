@@ -32,7 +32,7 @@ library(stringr)
 library(igraph)
 
 #Load scan data and population info
-setwd("C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/cleaned_code") 
+setwd("~/Documents/GitHub/Cayo-Maria/cleaned_code") 
 source("Functions/functions_GlobalNetworkMetrics.R")
 
 group = c("KK","KK","V", "V", "V")
@@ -50,7 +50,7 @@ for (gy in 1:length(groupyears)){
   print(paste("%%%%%%%%%%%%%%%%%% ",groupyears[gy], "%%%%%%%%%%%%%%%%%%"))
   
   #Load data
-  setwd("C:/Users/Camille Testard/Desktop/Desktop-Cayo-Maria/Behavioral_Data/Data All Cleaned") 
+  setwd("~/Documents/GitHub/Cayo-Maria/Data All Cleaned") 
   groom_data = read.csv(paste("Group",groupyears[gy],"_GroomingEvents.txt", sep = ""))
   agg_data = read.csv(paste("Group",groupyears[gy],"_AgonisticActions.txt", sep = ""))
   focal_data = read.csv(paste("Group",groupyears[gy],"_FocalData.txt", sep = ""))
@@ -306,4 +306,4 @@ for (gy in 1:length(groupyears)){
   # Merge and save data
   SocialCapital.ALL = rbind(SocialCapital.ALL, SocialCapitalData)
 }
-save( SocialCapital.ALL,file ="C:/Users/Camille Testard/Documents/GitHub/Cayo-Maria/R.Data/SocialCapital.RData")
+save( SocialCapital.ALL,file ="~/Documents/GitHub/Cayo-Maria/R.Data/SocialCapital.RData")
