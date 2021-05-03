@@ -12,7 +12,6 @@ allScans = read.csv("Data All Cleaned/allScans.txt")
 
 #Set parameters:
 num_iter = 500; iter =1
-only2017=F; #if only considering 2017 (year just prior hurricane). Note: there is  no V2017 valid dp(groom) & dp(prox) because they all have less than 20 obs.
 group = c("KK","KK","V", "V", "V")
 years = c(2015,2017,2015,2016,2017)
 groupyears = c("KK2015", "KK2017","V2015", "V2016", "V2017")
